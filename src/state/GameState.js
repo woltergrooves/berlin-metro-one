@@ -1,4 +1,4 @@
-// Berlin Life — Game State 2.0, stap 1 (roadmap fase 1)
+// Berlin Life — Game State 2.0 (roadmap fase 1): stap 1 lezen, stap 2 saves, stap 3 portemonnee
 //
 // Eén centrale plek om de toestand van het spel te LEZEN. Deze eerste versie verandert niets aan
 // de gameplay: ze leest de bestaande, verspreide bronnen uit en laat zien waar die van elkaar
@@ -14,6 +14,8 @@
 //   contacten, woning     'metro-economy-v2'
 //   ontdekkingen          'berlin-discovery-v4@<slot>' · BerlinLife.state.discovered
 //   saves                 BerlinSaveSlots
+
+import { wallet } from './Wallet.js';
 
 const DAYS = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
 
@@ -41,7 +43,9 @@ function readMoney() {
     economyV2: num(v2?.balanceCents),
     economyV4: v4 && (num(v4.cash) !== null || num(v4.bank) !== null) ? (num(v4.cash) || 0) + (num(v4.bank) || 0) : null,
   };
-  const primary = sources.game ?? sources.economyV4 ?? sources.economyV2;
+  // Sinds stap 3 is de portemonnee de enige echte bron; de andere waarden zijn afgeleid.
+  const primary = wallet.cents ?? sources.game ?? sources.economyV4 ?? sources.economyV2;
+  sources.wallet = wallet.cents;
   return {
     cents: primary,
     euro: primary === null ? null : primary / 100,
@@ -99,9 +103,9 @@ function readLife() {
 /** Volledige momentopname van de spelstatus (alleen lezen). */
 export function snapshot() {
   return {
-    schema: 'berlin-state/1',
+    schema: 'berlin-state/2',
     takenAt: new Date().toISOString(),
-    save: { activeSlot: activeSlot() },
+    save: { activeSlot: activeSlot(), format: globalThis.BerlinSaveSlots?.format ?? null },
     money: readMoney(),
     time: readTime(),
     location: readLocation(),
@@ -137,6 +141,13 @@ export function subscribe(fn, intervalMs = 1000) {
   return () => { listeners.delete(fn); if (!listeners.size) { clearInterval(timer); timer = null; last = ''; } };
 }
 
-export const BerlinState = { version: 'Game State 2.0 · stap 1 (alleen lezen)', snapshot, consistency, subscribe };
+export const BerlinState = {
+  version: 'Game State 2.0 · stap 3 (één save-formaat, één portemonnee)',
+  snapshot, consistency, subscribe,
+  /** De enige portemonnee (stap 3). */
+  wallet,
+  /** Savegames in één formaat (stap 2): list(), saveNow(), exportSlot(id). */
+  get saves() { return globalThis.BerlinSaveSlots ?? null; },
+};
 globalThis.BerlinState = BerlinState;
-console.info('[Berlin Life] Game State 2.0 stap 1: centrale state (alleen lezen) beschikbaar als BerlinState');
+console.info('[Berlin Life] Game State 2.0: centrale state beschikbaar als BerlinState (stap 1–3)');
