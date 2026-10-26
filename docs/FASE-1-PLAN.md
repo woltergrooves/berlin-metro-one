@@ -98,3 +98,19 @@ Lokaal, headless Chromium met iPad-emulatie, oude versie (commit `96d4f9e`) naas
 - `tools/consolidation/clock-probe.mjs` — stap 4: tijdbronnen, middernacht, slapen, herladen.
   Oud: zichtbare klok maandag 08:15, spelregels vrijdag 18:21, na herladen terug naar 08:15.
   Nieuw: overal dezelfde tijd en dag, ook na herladen.
+
+## Stap 5 deel 1 — Contacts, Guide, Phone (26 oktober 2026)
+
+Wat er in het live spel echt gebeurde (gemeten met `tools/consolidation/contacts-probe.mjs`):
+
+- **Phone**: V2 verborg V1 volledig. V1 verwijderd; V2 heet nu `src/systems/Phone.js`
+  (DOM-ids `#phoneBtnV2` e.d. ongewijzigd, CityPhone bouwt erop voort).
+- **Gids**: V1 en V2 pasten dezelfde knop aan, die door Phone V2 én Phase16UXFix altijd verborgen
+  werd. Nooit zichtbaar → beide verwijderd. Alles uit de gids staat ook in de telefoon.
+- **Contacten**: beide praatkaartjes werden elke 90 ms weggehaald door Phase16StabilityV2 (die heeft
+  de echte praatknop). V1 en V2 vervangen door `src/systems/Contacts.js`, dat alleen nog de
+  dagelijkse berichtjes van ontmoete contacten verstuurt, op de centrale klok (nieuwe dag) in plaats
+  van een timer van 1,2 s. In de oude versie kwamen die berichtjes in de praktijk niet aan
+  (V1 werkte op een losse kopie van de save); nu wel.
+- Resultaat: 5 bestanden weg, 33 → 29 `setInterval`-timers bij een nieuwe save, geen fouten.
+  `probe3.mjs`: gelijk aan de oude versie.
