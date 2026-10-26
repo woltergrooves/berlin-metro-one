@@ -52,6 +52,8 @@ public/assets/
   trains/               ← BVG-treinen (HK voor U2, H voor U8)
   actors/, props/       ← NPC's en stationsmeubilair
 docs/
+  ROADMAP.md            ← roadmap met per fase wat er al in de code zit
+  FASE-1-PLAN.md        ← inventarisatie en stappenplan voor fase 1
   provenance.json       ← herkomst van élk bestand: oorspronkelijke deployment-URL + hash
   localize-report.json  ← rapport van de consolidatie
   TESTRAPPORT.md        ← wat is getest, en wat (nog) niet
@@ -83,7 +85,12 @@ draaiden het afzonderlijke modules met eigen toestand.
 | nominatim.openstreetmap.org | locatie-opzoekingen |
 | Wikimedia Commons, freesound.org | enkele geluiden/afbeeldingen |
 
-Er zit geen API-sleutel in de code.
+**Google Maps API-sleutel.** `src/systems/ProgrammableStreetViewV2.js` bevat een browsersleutel voor
+Google Maps (Street View 2.0). Zo’n sleutel is altijd zichtbaar voor iedereen die de game opent; dat is
+normaal, maar hij moet in Google Cloud Console beperkt zijn tot de eigen domeinen
+(*Application restrictions → HTTP referrers*: `berlin-metro-one.vercel.app/*` en
+`berlin-metro-*-wolter1.vercel.app/*`) en tot de Maps JavaScript API. Anders kan iemand anders hem
+gebruiken op jouw kosten.
 
 ## Bekende punten (overgenomen uit de live game, níet veroorzaakt door de consolidatie)
 
