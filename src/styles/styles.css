@@ -1,0 +1,89 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  background: #050505;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #050505; }
+body { position: fixed; inset: 0; overscroll-behavior: none; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+button { font: inherit; }
+.hidden { display: none !important; }
+.boot {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+  background: radial-gradient(circle at 50% 35%, #262626 0, #101010 38%, #040404 100%);
+}
+.boot-card { width: min(420px, 92vw); text-align: center; padding: 28px; border: 1px solid rgba(255,255,255,.14); border-radius: 24px; background: rgba(18,18,18,.78); backdrop-filter: blur(18px); box-shadow: 0 22px 70px rgba(0,0,0,.45); }
+.boot-card h1 { margin: 12px 0 6px; font-size: clamp(30px, 8vw, 46px); line-height: 1; }
+.boot-card p { margin: 0 0 20px; color: #c8c8c8; }
+.boot-card small { display: block; margin-top: 14px; color: #9a9a9a; line-height: 1.4; }
+#startButton { border: 0; border-radius: 999px; padding: 14px 26px; min-width: 150px; background: #f3d326; color: #111; font-weight: 800; font-size: 17px; }
+.u-badge { display: inline-grid; place-items: center; min-width: 56px; height: 38px; border-radius: 8px; padding: 0 10px; background: #e32636; color: white; font-weight: 900; letter-spacing: .03em; }
+.u-badge.small { min-width: 42px; height: 30px; border-radius: 6px; font-size: 14px; }
+.hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+.topbar { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.station-chip, .status { display: flex; align-items: center; gap: 8px; min-height: 38px; border: 1px solid rgba(255,255,255,.13); background: rgba(8,8,8,.58); backdrop-filter: blur(10px); border-radius: 14px; padding: 4px 9px; font-size: 14px; }
+.status { padding: 9px 12px; color: #e8e8e8; }
+
+.route-progress {
+  position: absolute;
+  left: 50%;
+  top: max(58px, calc(env(safe-area-inset-top) + 48px));
+  transform: translateX(-50%);
+  width: min(460px, 64vw);
+  padding: 7px 11px 10px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 13px;
+  background: rgba(8,8,8,.58);
+  backdrop-filter: blur(10px);
+}
+.route-progress-labels { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: rgba(255,255,255,.82); font-size: 10px; font-weight: 700; }
+.route-progress-track { position: relative; height: 5px; margin: 0 5px; border-radius: 999px; background: rgba(255,255,255,.2); }
+.route-progress-fill { position: absolute; inset: 0 auto 0 0; width: 0%; border-radius: inherit; background: #f3d326; }
+.route-progress-stop { position: absolute; top: 50%; width: 11px; height: 11px; border: 2px solid #161616; border-radius: 50%; background: #fff; transform: translate(-50%, -50%); box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+.route-progress-stop.start { left: 0; }
+.route-progress-stop.end { left: 100%; }
+.route-progress-dot { position: absolute; z-index: 2; left: 0%; top: 50%; width: 15px; height: 15px; border: 3px solid #151515; border-radius: 50%; background: #f3d326; transform: translate(-50%, -50%); box-shadow: 0 0 0 1px rgba(255,255,255,.8), 0 2px 7px rgba(0,0,0,.55); }
+.hint { position: absolute; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(520px, 76vw); text-align: center; color: #eee; font-size: 13px; background: rgba(0,0,0,.48); border: 1px solid rgba(255,255,255,.1); border-radius: 999px; padding: 8px 14px; backdrop-filter: blur(8px); }
+.crosshair { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.78); transform: translate(-50%, -50%); box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+.touch-zone { pointer-events: auto; position: absolute; bottom: 0; width: 50%; height: 72%; touch-action: none; }
+.left-zone { left: 0; }
+.right-zone { right: 0; }
+.stick-base { position: absolute; left: max(30px, calc(env(safe-area-inset-left) + 18px)); bottom: max(34px, calc(env(safe-area-inset-bottom) + 20px)); width: 116px; height: 116px; border-radius: 50%; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.055); backdrop-filter: blur(3px); }
+.stick-knob { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; border-radius: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.24); }
+.look-label { position: absolute; right: max(30px, calc(env(safe-area-inset-right) + 18px)); bottom: max(46px, calc(env(safe-area-inset-bottom) + 30px)); font-size: 11px; letter-spacing: .14em; color: rgba(255,255,255,.26); }
+.rotate-hint { display: none; position: fixed; z-index: 30; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%); padding: 8px 12px; border-radius: 999px; background: rgba(0,0,0,.72); font-size: 12px; color: #ddd; pointer-events: none; }
+@media (orientation: portrait) and (max-width: 900px) { .rotate-hint { display: block; } .hint { bottom: 150px; } .touch-zone { height: 64%; } }
+@media (min-width: 1000px) { .stick-base { width: 132px; height: 132px; } }
+
+@media (max-width: 700px) { .route-progress { width: min(430px, 58vw); top: max(56px, calc(env(safe-area-inset-top) + 44px)); } .route-progress-labels { font-size: 9px; } }
+
+/* Phase 2: compact economy + touch interaction UI */
+.topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.wallet-chip {
+  display: flex; align-items: center; gap: 7px; min-height: 38px;
+  border: 1px solid rgba(255,255,255,.13); background: rgba(8,8,8,.58);
+  backdrop-filter: blur(10px); border-radius: 14px; padding: 5px 10px; font-size: 12px;
+}
+.wallet-chip strong { color: #f3d326; font-size: 14px; }
+.wallet-chip span { color: rgba(255,255,255,.72); white-space: nowrap; }
+.interaction-button {
+  pointer-events: auto; position: absolute; z-index: 12; left: 50%; bottom: max(60px, calc(env(safe-area-inset-bottom) + 52px));
+  transform: translateX(-50%); min-width: 164px; min-height: 46px; border: 0; border-radius: 999px;
+  padding: 12px 18px; background: #f3d326; color: #111; font-size: 13px; font-weight: 900;
+  letter-spacing: .02em; box-shadow: 0 8px 24px rgba(0,0,0,.35); touch-action: manipulation;
+}
+.toast {
+  position: absolute; z-index: 13; left: 50%; top: 31%; transform: translateX(-50%);
+  padding: 10px 15px; border-radius: 999px; background: rgba(10,10,10,.78); color: #f3d326;
+  border: 1px solid rgba(255,255,255,.14); font-weight: 800; font-size: 13px; backdrop-filter: blur(10px);
+}
+@media (max-width: 720px) {
+  .wallet-chip span { display: none; }
+  .station-chip, .status { font-size: 12px; }
+  .status { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .interaction-button { min-width: 150px; min-height: 44px; bottom: max(56px, calc(env(safe-area-inset-bottom) + 48px)); }
+}

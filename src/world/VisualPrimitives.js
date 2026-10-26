@@ -1,0 +1,1 @@
+import*as e from"three";const t=new Map,o=new Map;export function mat(t,n=!1){const s=(n?"b":"l")+t;if(!o.has(s)){const a=n?e.MeshBasicMaterial:e.MeshLambertMaterial;o.set(s,new a({color:t}))}return o.get(s)}export function box(o,n,s,a){const r=n.join("x");t.has(r)||t.set(r,new e.BoxGeometry(...n));const i=new e.Mesh(t.get(r),a);i.position.set(...s),o.add(i)}

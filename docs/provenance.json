@@ -1,0 +1,1657 @@
+{
+  "entry": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/",
+  "generatedAt": "2026-10-26T19:49:36.670Z",
+  "importMap": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "https://berlin-metro-core-wolter1.vercel.app/src/systems/U8FullLineRuntime.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8ParityRuntime.js",
+    "https://berlin-metro-ebg4m41wy-wolter1.vercel.app/src/systems/U8RideFeelV5.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8LegacyTimingDisabled.js",
+    "https://berlin-metro-51ob9j3tv-wolter1.vercel.app/src/systems/U8ExitFixV4.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8StartBridge.js",
+    "https://berlin-metro-k2j5g568z-wolter1.vercel.app/src/systems/Phase11V1.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/Phase11V1.js",
+    "https://berlin-metro-euqr6g23c-wolter1.vercel.app/src/systems/U8DepartureBoards.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8DepartureBoards.js",
+    "https://berlin-metro-core-wolter1.vercel.app/src/systems/U8FullLineSafe.js": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8FullLineSafe.js",
+    "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/HasselhoffNpc.js": "https://berlin-metro-5kajxoy2v-wolter1.vercel.app/src/systems/HasselhoffNpcV2.js",
+    "https://berlin-metro-4hlt7wiue-wolter1.vercel.app/src/systems/StreetOverlayReliableV1.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-75jhoi1x8-wolter1.vercel.app/src/systems/StreetViewUnifiedOverlayV1.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-5fbdia3si-wolter1.vercel.app/src/systems/GoogleStreetViewExteriorV31.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-1a01uo1n6-wolter1.vercel.app/src/systems/DiscoveryGameplayV4.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-e79bgjrk7-wolter1.vercel.app/src/systems/DiscoveryStableActivitiesV2.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/DiscoveryStableLocationsV4.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/Phase56LocationHintV3.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-4csdejjhv-wolter1.vercel.app/src/systems/AllStationActivityTravelV2.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-72de6rvus-wolter1.vercel.app/src/systems/AllStationActivityTravelV1.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-oi5v1wbus-wolter1.vercel.app/src/systems/Phase16IntegrityV3.js": "/src/systems/LegacyStreetDisabled.js",
+    "https://berlin-metro-iyuiiez1o-wolter1.vercel.app/src/systems/AllStationStreetViewV41.js": "/src/systems/StreetCoreClean.js",
+    "https://berlin-metro-kuhx3jjh6-wolter1.vercel.app/src/systems/StationDiscoveryV2.js": "/src/systems/RegistryClean.js",
+    "https://berlin-metro-dpsjiz57u-wolter1.vercel.app/src/systems/WorldBridgeV1.js": "/src/systems/BridgeClean.js"
+  },
+  "files": [
+    {
+      "file": "src/main.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/main.js",
+      "bytes": 206,
+      "sha1": "b6427399e9e2",
+      "queryVariants": [
+        "v=phase7-refined-v3"
+      ]
+    },
+    {
+      "file": "src/boot/main.bqh848uhh.js",
+      "original": "https://berlin-metro-bqh848uhh-wolter1.vercel.app/src/main.js",
+      "bytes": 162,
+      "sha1": "dc63d2e2d07d"
+    },
+    {
+      "file": "src/boot/main.j3aez44ch.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/main.js",
+      "bytes": 2211,
+      "sha1": "85f071d74f51"
+    },
+    {
+      "file": "src/systems/BlenderTrainsV1.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/BlenderTrainsV1.js",
+      "bytes": 10483,
+      "sha1": "4f3d986b1311"
+    },
+    {
+      "file": "src/systems/BlenderStationsV1.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/BlenderStationsV1.js",
+      "bytes": 16668,
+      "sha1": "a4df40cd6aab"
+    },
+    {
+      "file": "src/systems/BlenderNPCsV1.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/BlenderNPCsV1.js",
+      "bytes": 6026,
+      "sha1": "6c7d9e2057ec"
+    },
+    {
+      "file": "src/core/Game.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/core/Game.js",
+      "bytes": 6306,
+      "sha1": "70a2dcfd5fea"
+    },
+    {
+      "file": "src/vendor/loaders/GLTFLoader.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/loaders/GLTFLoader.js",
+      "bytes": 117570,
+      "sha1": "969381711716"
+    },
+    {
+      "file": "src/systems/NpcSystem.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/NpcSystem.js",
+      "bytes": 7138,
+      "sha1": "2db6ed1c677e"
+    },
+    {
+      "file": "src/systems/EconomySystem.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/EconomySystem.js",
+      "bytes": 1309,
+      "sha1": "31d5472b0354"
+    },
+    {
+      "file": "src/config.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/config.js",
+      "bytes": 802,
+      "sha1": "86261b501dd1"
+    },
+    {
+      "file": "src/core/PlayerController.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/core/PlayerController.js",
+      "bytes": 4769,
+      "sha1": "e4bb6754a0a2"
+    },
+    {
+      "file": "src/core/InputController.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/core/InputController.js",
+      "bytes": 3644,
+      "sha1": "7febd392c1c2"
+    },
+    {
+      "file": "src/world/Train.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/Train.js",
+      "bytes": 8922,
+      "sha1": "012238a14cbb"
+    },
+    {
+      "file": "src/data/u2.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/data/u2.js",
+      "bytes": 1590,
+      "sha1": "49d7273f5042"
+    },
+    {
+      "file": "src/systems/InteractionSystem.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/InteractionSystem.js",
+      "bytes": 1424,
+      "sha1": "62b4725fb040"
+    },
+    {
+      "file": "src/world/WorldStreamer.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/WorldStreamer.js",
+      "bytes": 3109,
+      "sha1": "d362cfdf006b"
+    },
+    {
+      "file": "src/systems/TrainTimeline.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/TrainTimeline.js",
+      "bytes": 9506,
+      "sha1": "209da0162425"
+    },
+    {
+      "file": "src/world/DepartureBoard.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/DepartureBoard.js",
+      "bytes": 3816,
+      "sha1": "7afe0c76d6f5"
+    },
+    {
+      "file": "src/world/materials.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/materials.js",
+      "bytes": 671,
+      "sha1": "52b75b09e94f"
+    },
+    {
+      "file": "src/core/motion.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/core/motion.js",
+      "bytes": 695,
+      "sha1": "436ba2053781"
+    },
+    {
+      "file": "src/world/Station.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/Station.js",
+      "bytes": 5445,
+      "sha1": "591ef68c0222"
+    },
+    {
+      "file": "src/vendor/utils/SkeletonUtils.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/SkeletonUtils.js",
+      "bytes": 11535,
+      "sha1": "a4c7861cc81c"
+    },
+    {
+      "file": "src/world/GameplayObjects.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/GameplayObjects.js",
+      "bytes": 4083,
+      "sha1": "e565bc393498"
+    },
+    {
+      "file": "src/vendor/utils/BufferGeometryUtils.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/BufferGeometryUtils.js",
+      "bytes": 37712,
+      "sha1": "c31175bf8a8b"
+    },
+    {
+      "file": "src/world/StationBaseOld.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/StationBaseOld.js",
+      "bytes": 5118,
+      "sha1": "232d78993388"
+    },
+    {
+      "file": "src/systems/BlenderPropsV1.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/BlenderPropsV1.js",
+      "bytes": 2304,
+      "sha1": "73d228313c8e"
+    },
+    {
+      "file": "src/systems/SafeSaveBootstrapV1.js",
+      "original": "https://berlin-metro-oi5v1wbus-wolter1.vercel.app/src/systems/SafeSaveBootstrapV1.js",
+      "bytes": 3228,
+      "sha1": "1c43a3fb1d02"
+    },
+    {
+      "file": "src/boot/main.75jhoi1x8.js",
+      "original": "https://berlin-metro-75jhoi1x8-wolter1.vercel.app/src/main.js",
+      "bytes": 457,
+      "sha1": "8e5b4ee550b8"
+    },
+    {
+      "file": "src/boot/main.q1ib777cs.js",
+      "original": "https://berlin-metro-q1ib777cs-wolter1.vercel.app/src/main.js",
+      "bytes": 233,
+      "sha1": "d188ce95b994"
+    },
+    {
+      "file": "src/boot/main.7y23lpr6k.js",
+      "original": "https://berlin-metro-7y23lpr6k-wolter1.vercel.app/src/main.js",
+      "bytes": 221,
+      "sha1": "38d12ec03ada"
+    },
+    {
+      "file": "src/boot/main.dpsjiz57u.js",
+      "original": "https://berlin-metro-dpsjiz57u-wolter1.vercel.app/src/main.js",
+      "bytes": 437,
+      "sha1": "dac4a95a9453"
+    },
+    {
+      "file": "src/boot/main.i5sfnq551.js",
+      "original": "https://berlin-metro-i5sfnq551-wolter1.vercel.app/src/main.js",
+      "bytes": 174,
+      "sha1": "4bc432485229"
+    },
+    {
+      "file": "src/boot/main.kuhx3jjh6.js",
+      "original": "https://berlin-metro-kuhx3jjh6-wolter1.vercel.app/src/main.js",
+      "bytes": 147,
+      "sha1": "51d7390a5bba"
+    },
+    {
+      "file": "src/boot/main.gr9bxdxm6.js",
+      "original": "https://berlin-metro-gr9bxdxm6-wolter1.vercel.app/src/main.js",
+      "bytes": 169,
+      "sha1": "5312564257b5"
+    },
+    {
+      "file": "src/boot/main.e8zde0xzg.js",
+      "original": "https://berlin-metro-e8zde0xzg-wolter1.vercel.app/src/main.js",
+      "bytes": 263,
+      "sha1": "a4f875ca81ff"
+    },
+    {
+      "file": "src/boot/main.mlhos0ty3.js",
+      "original": "https://berlin-metro-mlhos0ty3-wolter1.vercel.app/src/main.js",
+      "bytes": 161,
+      "sha1": "042857b933bb"
+    },
+    {
+      "file": "src/boot/main.k7rz8yqfu.js",
+      "original": "https://berlin-metro-k7rz8yqfu-wolter1.vercel.app/src/main.js",
+      "bytes": 445,
+      "sha1": "9330752408fc"
+    },
+    {
+      "file": "src/systems/SaveSlotBootV1.js",
+      "original": "https://berlin-metro-9h5k5lvtj-wolter1.vercel.app/src/systems/SaveSlotBootV1.js",
+      "bytes": 5250,
+      "sha1": "3d9c30a7c051"
+    },
+    {
+      "file": "src/boot/main.5kajxoy2v.js",
+      "original": "https://berlin-metro-5kajxoy2v-wolter1.vercel.app/src/main.js",
+      "bytes": 91,
+      "sha1": "19c594a4641c"
+    },
+    {
+      "file": "src/boot/main.k9p8va29c.js",
+      "original": "https://berlin-metro-k9p8va29c-wolter1.vercel.app/src/main.js",
+      "bytes": 88,
+      "sha1": "5637580f37e4"
+    },
+    {
+      "file": "src/boot/main.hx189pgly.js",
+      "original": "https://berlin-metro-hx189pgly-wolter1.vercel.app/src/main.js",
+      "bytes": 84,
+      "sha1": "eb0405754242"
+    },
+    {
+      "file": "src/boot/main.1pqe1mlbu.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/main.js",
+      "bytes": 461,
+      "sha1": "96c5c32e06c2"
+    },
+    {
+      "file": "src/systems/SurfaceTransport.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/SurfaceTransport.js",
+      "bytes": 5217,
+      "sha1": "5c6973837cb8"
+    },
+    {
+      "file": "src/systems/LivingCityActions.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/LivingCityActions.js",
+      "bytes": 307,
+      "sha1": "161268b40938"
+    },
+    {
+      "file": "src/systems/ConversationCoreV4.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/ConversationCoreV4.js",
+      "bytes": 3767,
+      "sha1": "080b4555e454"
+    },
+    {
+      "file": "src/systems/U8Bootstrap.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8Bootstrap.js",
+      "bytes": 981,
+      "sha1": "e8f4afafec39"
+    },
+    {
+      "file": "src/systems/CityMissions.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/CityMissions.js",
+      "bytes": 3595,
+      "sha1": "2d163191c029"
+    },
+    {
+      "file": "src/systems/AlexanderStairFoot.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/AlexanderStairFoot.js",
+      "bytes": 206,
+      "sha1": "68202a1443f4"
+    },
+    {
+      "file": "src/systems/HasselhoffNpcV2.js",
+      "original": "https://berlin-metro-5kajxoy2v-wolter1.vercel.app/src/systems/HasselhoffNpcV2.js",
+      "bytes": 5912,
+      "sha1": "7e1d2562c47b"
+    },
+    {
+      "file": "src/ui/Hud.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/ui/Hud.js",
+      "bytes": 4435,
+      "sha1": "8e8f378f0f50"
+    },
+    {
+      "file": "src/systems/SurfaceModel.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/SurfaceModel.js",
+      "bytes": 2553,
+      "sha1": "4f94f6db088f"
+    },
+    {
+      "file": "src/systems/BusTransition.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/BusTransition.js",
+      "bytes": 2477,
+      "sha1": "59dd05a342a4"
+    },
+    {
+      "file": "src/systems/ConversationModelV1.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/ConversationModelV1.js",
+      "bytes": 3972,
+      "sha1": "b17d2bee9665"
+    },
+    {
+      "file": "src/systems/U8FullLineSafe.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8FullLineSafe.js",
+      "bytes": 666,
+      "sha1": "58671f5d0a01"
+    },
+    {
+      "file": "src/systems/CityPhone.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/CityPhone.js",
+      "bytes": 4585,
+      "sha1": "071715967d6f"
+    },
+    {
+      "file": "src/systems/ConversationTrigger.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/ConversationTrigger.js",
+      "bytes": 973,
+      "sha1": "ea236af1c138"
+    },
+    {
+      "file": "src/systems/CityEvents.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/CityEvents.js",
+      "bytes": 1548,
+      "sha1": "c87388790976"
+    },
+    {
+      "file": "src/systems/CityMissionModel.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/CityMissionModel.js",
+      "bytes": 2661,
+      "sha1": "31146f5f5bc6"
+    },
+    {
+      "file": "src/systems/HoffPatrol.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/HoffPatrol.js",
+      "bytes": 825,
+      "sha1": "1ef4e03e5585"
+    },
+    {
+      "file": "src/systems/U8FullLineVisual.js",
+      "original": "https://berlin-metro-8fg359ibe-wolter1.vercel.app/src/systems/U8FullLineVisual.js",
+      "bytes": 8111,
+      "sha1": "32ce301ac58d"
+    },
+    {
+      "file": "src/systems/DialoguesMiroV1.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/DialoguesMiroV1.js",
+      "bytes": 2395,
+      "sha1": "4b1945cf751b"
+    },
+    {
+      "file": "src/systems/DialoguesLeaV1.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/DialoguesLeaV1.js",
+      "bytes": 1707,
+      "sha1": "c38558fde4c9"
+    },
+    {
+      "file": "src/systems/DailyWorldModel.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/DailyWorldModel.js",
+      "bytes": 1916,
+      "sha1": "e59719f3141f"
+    },
+    {
+      "file": "src/systems/BaselineJobs.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/BaselineJobs.js",
+      "bytes": 961,
+      "sha1": "46923b094a13"
+    },
+    {
+      "file": "src/systems/ContactWork.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/ContactWork.js",
+      "bytes": 3309,
+      "sha1": "d17c7a491323"
+    },
+    {
+      "file": "src/systems/DialoguesDenizV2.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/DialoguesDenizV2.js",
+      "bytes": 3261,
+      "sha1": "f5c960288512"
+    },
+    {
+      "file": "src/systems/U8ParityRuntime.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8ParityRuntime.js",
+      "bytes": 7925,
+      "sha1": "fb972c59116f"
+    },
+    {
+      "file": "src/boot/main.4hlt7wiue.js",
+      "original": "https://berlin-metro-4hlt7wiue-wolter1.vercel.app/src/main.js",
+      "bytes": 154,
+      "sha1": "0d824e99b7d3"
+    },
+    {
+      "file": "src/systems/StairSeamGuard.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/StairSeamGuard.js",
+      "bytes": 2290,
+      "sha1": "0dc588423653"
+    },
+    {
+      "file": "src/systems/U8Service.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8Service.js",
+      "bytes": 2652,
+      "sha1": "ed48577ece34"
+    },
+    {
+      "file": "src/systems/U8Movement.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8Movement.js",
+      "bytes": 2968,
+      "sha1": "02aa49e12988"
+    },
+    {
+      "file": "src/boot/main.ej5lkfsom.js",
+      "original": "https://berlin-metro-ej5lkfsom-wolter1.vercel.app/src/main.js",
+      "bytes": 98,
+      "sha1": "18a4dd15ec31"
+    },
+    {
+      "file": "src/boot/main.2ag7a9sh0.js",
+      "original": "https://berlin-metro-2ag7a9sh0-wolter1.vercel.app/src/main.js",
+      "bytes": 149,
+      "sha1": "3f0d9dc891ca"
+    },
+    {
+      "file": "src/boot/main.6b2olg53o.js",
+      "original": "https://berlin-metro-6b2olg53o-wolter1.vercel.app/src/main.js",
+      "bytes": 321,
+      "sha1": "00c78ea4a191"
+    },
+    {
+      "file": "src/boot/main.3nwgpo9ua.js",
+      "original": "https://berlin-metro-3nwgpo9ua-wolter1.vercel.app/src/main.js",
+      "bytes": 323,
+      "sha1": "3f0061f80f7e"
+    },
+    {
+      "file": "src/boot/main.r7202tei2.js",
+      "original": "https://berlin-metro-r7202tei2-wolter1.vercel.app/src/main.js",
+      "bytes": 253,
+      "sha1": "96a595da303d"
+    },
+    {
+      "file": "src/boot/main.ndq0ojsm8.js",
+      "original": "https://berlin-metro-ndq0ojsm8-wolter1.vercel.app/src/main.js",
+      "bytes": 312,
+      "sha1": "f69fe70b5982"
+    },
+    {
+      "file": "src/boot/main.hu7c5smtf.js",
+      "original": "https://berlin-metro-hu7c5smtf-wolter1.vercel.app/src/main.js",
+      "bytes": 233,
+      "sha1": "e5708bb71495"
+    },
+    {
+      "file": "src/boot/main.k29l5ks2w.js",
+      "original": "https://berlin-metro-k29l5ks2w-wolter1.vercel.app/src/main.js",
+      "bytes": 463,
+      "sha1": "2143a1c83504"
+    },
+    {
+      "file": "src/boot/main.xl9emw01j.js",
+      "original": "https://berlin-metro-xl9emw01j-wolter1.vercel.app/src/main.js",
+      "bytes": 138,
+      "sha1": "cfe5534dbe5b"
+    },
+    {
+      "file": "src/boot/main.80wwbn4do.js",
+      "original": "https://berlin-metro-80wwbn4do-wolter1.vercel.app/src/main.js",
+      "bytes": 235,
+      "sha1": "4d3e2d56409b"
+    },
+    {
+      "file": "src/boot/main.dbfqoj76f.js",
+      "original": "https://berlin-metro-dbfqoj76f-wolter1.vercel.app/src/main.js",
+      "bytes": 313,
+      "sha1": "5e8f1189c218"
+    },
+    {
+      "file": "src/boot/main.4g0o5gxh3.js",
+      "original": "https://berlin-metro-4g0o5gxh3-wolter1.vercel.app/src/main.js",
+      "bytes": 242,
+      "sha1": "b8843854098c"
+    },
+    {
+      "file": "src/boot/main.pwanwxj7e.js",
+      "original": "https://berlin-metro-pwanwxj7e-wolter1.vercel.app/src/main.js",
+      "bytes": 139,
+      "sha1": "9a5ee165e323"
+    },
+    {
+      "file": "src/boot/main.dc1yo16pm.js",
+      "original": "https://berlin-metro-dc1yo16pm-wolter1.vercel.app/src/main.js",
+      "bytes": 226,
+      "sha1": "bbdf48afa71f"
+    },
+    {
+      "file": "src/boot/main.k2j5g568z.js",
+      "original": "https://berlin-metro-k2j5g568z-wolter1.vercel.app/src/main.js",
+      "bytes": 311,
+      "sha1": "a3b5704dc2d4"
+    },
+    {
+      "file": "src/boot/main.3ee26fufc.js",
+      "original": "https://berlin-metro-3ee26fufc-wolter1.vercel.app/src/main.js",
+      "bytes": 139,
+      "sha1": "0bdcac66a949"
+    },
+    {
+      "file": "src/boot/main.easa0ncsd.js",
+      "original": "https://berlin-metro-easa0ncsd-wolter1.vercel.app/src/main.js",
+      "bytes": 134,
+      "sha1": "446450483cb0"
+    },
+    {
+      "file": "src/boot/main.m93m0ycyh.js",
+      "original": "https://berlin-metro-m93m0ycyh-wolter1.vercel.app/src/main.js",
+      "bytes": 149,
+      "sha1": "9c7a0edbfa5b"
+    },
+    {
+      "file": "src/boot/main.9d8v0iuba.js",
+      "original": "https://berlin-metro-9d8v0iuba-wolter1.vercel.app/src/main.js",
+      "bytes": 134,
+      "sha1": "45c88803e702"
+    },
+    {
+      "file": "src/boot/main.7hkq0xl5j.js",
+      "original": "https://berlin-metro-7hkq0xl5j-wolter1.vercel.app/src/main.js",
+      "bytes": 138,
+      "sha1": "9ccab1ad65f1"
+    },
+    {
+      "file": "src/boot/main.8bsuawju5.js",
+      "original": "https://berlin-metro-8bsuawju5-wolter1.vercel.app/src/main.js",
+      "bytes": 144,
+      "sha1": "e19584234f30"
+    },
+    {
+      "file": "src/boot/main.gnu1jemur.js",
+      "original": "https://berlin-metro-gnu1jemur-wolter1.vercel.app/src/main.js",
+      "bytes": 150,
+      "sha1": "9dbb5398d58f"
+    },
+    {
+      "file": "src/boot/main.96xn5s7u4.js",
+      "original": "https://berlin-metro-96xn5s7u4-wolter1.vercel.app/src/main.js",
+      "bytes": 159,
+      "sha1": "03780fbc35a9"
+    },
+    {
+      "file": "src/boot/main.iyuiiez1o.js",
+      "original": "https://berlin-metro-iyuiiez1o-wolter1.vercel.app/src/main.js",
+      "bytes": 269,
+      "sha1": "4c3c682ea6bd"
+    },
+    {
+      "file": "src/boot/main.5fbdia3si.js",
+      "original": "https://berlin-metro-5fbdia3si-wolter1.vercel.app/src/main.js",
+      "bytes": 163,
+      "sha1": "81f863c206ce"
+    },
+    {
+      "file": "src/boot/main.drrsth0cd.js",
+      "original": "https://berlin-metro-drrsth0cd-wolter1.vercel.app/src/main.js",
+      "bytes": 246,
+      "sha1": "c70e35e629bb"
+    },
+    {
+      "file": "src/boot/main.ebg4m41wy.js",
+      "original": "https://berlin-metro-ebg4m41wy-wolter1.vercel.app/src/main.js",
+      "bytes": 148,
+      "sha1": "24f279f61b25"
+    },
+    {
+      "file": "src/boot/main.51ob9j3tv.js",
+      "original": "https://berlin-metro-51ob9j3tv-wolter1.vercel.app/src/main.js",
+      "bytes": 243,
+      "sha1": "536104fcee7a"
+    },
+    {
+      "file": "src/boot/main.euqr6g23c.js",
+      "original": "https://berlin-metro-euqr6g23c-wolter1.vercel.app/src/main.js",
+      "bytes": 351,
+      "sha1": "e08982e0e5cf"
+    },
+    {
+      "file": "src/boot/main.5uza0oda3.js",
+      "original": "https://berlin-metro-5uza0oda3-wolter1.vercel.app/src/main.js",
+      "bytes": 542,
+      "sha1": "27eb5ff1c951"
+    },
+    {
+      "file": "src/boot/main.4ho61sbpn.js",
+      "original": "https://berlin-metro-4ho61sbpn-wolter1.vercel.app/src/main.js",
+      "bytes": 232,
+      "sha1": "0f8da8f0b6a6"
+    },
+    {
+      "file": "src/boot/main.core.js",
+      "original": "https://berlin-metro-core-wolter1.vercel.app/src/main.js",
+      "bytes": 1968,
+      "sha1": "3c021d0d2850"
+    },
+    {
+      "file": "src/world/StationVisualPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/StationVisualPatch.js",
+      "bytes": 516,
+      "sha1": "303a2b70d590"
+    },
+    {
+      "file": "src/world/StationVisualC.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/StationVisualC.js",
+      "bytes": 609,
+      "sha1": "a18e5bf4e29c"
+    },
+    {
+      "file": "src/world/StationVisualB.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/StationVisualB.js",
+      "bytes": 587,
+      "sha1": "00746614066e"
+    },
+    {
+      "file": "src/world/VisualPrimitives.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/VisualPrimitives.js",
+      "bytes": 361,
+      "sha1": "1a9a41887929"
+    },
+    {
+      "file": "src/world/StationVisualA.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/StationVisualA.js",
+      "bytes": 573,
+      "sha1": "e7eeb867b9f3"
+    },
+    {
+      "file": "src/world/KlosterSignPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/KlosterSignPatch.js",
+      "bytes": 992,
+      "sha1": "6f1e8457145a"
+    },
+    {
+      "file": "src/world/TrainVisualPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/TrainVisualPatch.js",
+      "bytes": 1200,
+      "sha1": "eee2b23008e9"
+    },
+    {
+      "file": "src/systems/TrainRidePatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/TrainRidePatch.js",
+      "bytes": 5700,
+      "sha1": "f1e4abd9069f"
+    },
+    {
+      "file": "src/systems/MobilePerfPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/MobilePerfPatch.js",
+      "bytes": 3504,
+      "sha1": "72bbe81c46f5"
+    },
+    {
+      "file": "src/systems/AudioSystem.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/AudioSystem.js",
+      "bytes": 3518,
+      "sha1": "b5c92783ed8c"
+    },
+    {
+      "file": "src/systems/NpcPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/NpcPatch.js",
+      "bytes": 276,
+      "sha1": "8e053a14d250"
+    },
+    {
+      "file": "src/systems/AudioPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/AudioPatch.js",
+      "bytes": 390,
+      "sha1": "2dc1b5c5cb06"
+    },
+    {
+      "file": "src/systems/AtmospherePatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/AtmospherePatch.js",
+      "bytes": 5762,
+      "sha1": "871945e789cf"
+    },
+    {
+      "file": "src/systems/TrainPolishV2.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/TrainPolishV2.js",
+      "bytes": 5701,
+      "sha1": "a0212b102370"
+    },
+    {
+      "file": "src/systems/AudioQuietPatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/AudioQuietPatch.js",
+      "bytes": 1738,
+      "sha1": "6015f61069ee"
+    },
+    {
+      "file": "src/world/AlexanderplatzUpgrade.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/AlexanderplatzUpgrade.js",
+      "bytes": 3958,
+      "sha1": "39701a7c52e4"
+    },
+    {
+      "file": "src/world/AlexanderConcourse.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/AlexanderConcourse.js",
+      "bytes": 3026,
+      "sha1": "b8b31f079ad8"
+    },
+    {
+      "file": "src/world/U8Alexanderplatz.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/U8Alexanderplatz.js",
+      "bytes": 4688,
+      "sha1": "a16eee207ad2"
+    },
+    {
+      "file": "src/systems/PlayerConcoursePatch.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/systems/PlayerConcoursePatch.js",
+      "bytes": 5315,
+      "sha1": "b169326901eb"
+    },
+    {
+      "file": "src/world/AlexanderTransitionFix.js",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/src/world/AlexanderTransitionFix.js",
+      "bytes": 4393,
+      "sha1": "a0356a0bca68"
+    },
+    {
+      "file": "src/systems/AlexanderTransferOverlay.js",
+      "original": "https://berlin-metro-husn3dlxh-wolter1.vercel.app/src/systems/AlexanderTransferOverlay.js",
+      "bytes": 6316,
+      "sha1": "3e000b40c430"
+    },
+    {
+      "file": "src/systems/U8CentralCrowd.js",
+      "original": "https://berlin-metro-4ho61sbpn-wolter1.vercel.app/src/systems/U8CentralCrowd.js",
+      "bytes": 1747,
+      "sha1": "cc07a43430e1"
+    },
+    {
+      "file": "src/systems/U8OuterVisuals.js",
+      "original": "https://berlin-metro-idr71b3br-wolter1.vercel.app/src/systems/U8OuterVisuals.js",
+      "bytes": 4281,
+      "sha1": "af7347179d0f"
+    },
+    {
+      "file": "src/systems/U8CentralVisual.js",
+      "original": "https://berlin-metro-4ho61sbpn-wolter1.vercel.app/src/systems/U8CentralVisual.js",
+      "bytes": 3216,
+      "sha1": "cb089ca115d1"
+    },
+    {
+      "file": "src/systems/U8PassengerFlowV2.js",
+      "original": "https://berlin-metro-pzwase4dd-wolter1.vercel.app/src/systems/U8PassengerFlowV2.js",
+      "bytes": 7603,
+      "sha1": "2fdd678d6d6d"
+    },
+    {
+      "file": "src/systems/U8InteriorV2.js",
+      "original": "https://berlin-metro-5uza0oda3-wolter1.vercel.app/src/systems/U8InteriorV2.js",
+      "bytes": 1623,
+      "sha1": "73a9191c5bdf"
+    },
+    {
+      "file": "src/systems/U8AudioV2.js",
+      "original": "https://berlin-metro-5uza0oda3-wolter1.vercel.app/src/systems/U8AudioV2.js",
+      "bytes": 4739,
+      "sha1": "9f9bfeb29da9"
+    },
+    {
+      "file": "src/systems/U8LegacyTimingDisabled.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8LegacyTimingDisabled.js",
+      "bytes": 157,
+      "sha1": "bb5d6d9e6c4f"
+    },
+    {
+      "file": "src/systems/U8DynamicInfo.js",
+      "original": "https://berlin-metro-5uza0oda3-wolter1.vercel.app/src/systems/U8DynamicInfo.js",
+      "bytes": 2480,
+      "sha1": "42fac5983b81"
+    },
+    {
+      "file": "src/systems/StreetCoreClean.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/StreetCoreClean.js",
+      "bytes": 10709,
+      "sha1": "ce74ac345631"
+    },
+    {
+      "file": "src/systems/U8DepartureBoards.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8DepartureBoards.js",
+      "bytes": 2888,
+      "sha1": "eb0735907c7c"
+    },
+    {
+      "file": "src/systems/LegacyStreetDisabled.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/LegacyStreetDisabled.js",
+      "bytes": 11,
+      "sha1": "b878c11a7712"
+    },
+    {
+      "file": "src/systems/U8SignageFixV3.js",
+      "original": "https://berlin-metro-euqr6g23c-wolter1.vercel.app/src/systems/U8SignageFixV3.js",
+      "bytes": 3995,
+      "sha1": "bf036afca16b"
+    },
+    {
+      "file": "src/systems/U8TunnelDetailV1.js",
+      "original": "https://berlin-metro-drrsth0cd-wolter1.vercel.app/src/systems/U8TunnelDetailV1.js",
+      "bytes": 1924,
+      "sha1": "76555ad4fd34"
+    },
+    {
+      "file": "src/systems/U8LineOfSightV6.js",
+      "original": "https://berlin-metro-drrsth0cd-wolter1.vercel.app/src/systems/U8LineOfSightV6.js",
+      "bytes": 2221,
+      "sha1": "682cb2185fbf"
+    },
+    {
+      "file": "src/systems/U8DoorFlowPolish.js",
+      "original": "https://berlin-metro-51ob9j3tv-wolter1.vercel.app/src/systems/U8DoorFlowPolish.js",
+      "bytes": 2488,
+      "sha1": "d553917887d9"
+    },
+    {
+      "file": "src/systems/U8StartBridge.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/U8StartBridge.js",
+      "bytes": 251,
+      "sha1": "a3979461f565"
+    },
+    {
+      "file": "src/systems/UniversalStationExitV5.js",
+      "original": "https://berlin-metro-96xn5s7u4-wolter1.vercel.app/src/systems/UniversalStationExitV5.js",
+      "bytes": 3280,
+      "sha1": "38b58376e27e"
+    },
+    {
+      "file": "src/systems/Phase8ArchetypesV1.js",
+      "original": "https://berlin-metro-7hkq0xl5j-wolter1.vercel.app/src/systems/Phase8ArchetypesV1.js",
+      "bytes": 6025,
+      "sha1": "f7d8d6d8a249"
+    },
+    {
+      "file": "src/systems/U8AlexanderDetailV1.js",
+      "original": "https://berlin-metro-m93m0ycyh-wolter1.vercel.app/src/systems/U8AlexanderDetailV1.js",
+      "bytes": 8473,
+      "sha1": "4ef0d798f536"
+    },
+    {
+      "file": "src/systems/AlexanderStairSeamFixV2.js",
+      "original": "https://berlin-metro-lssqb42aq-wolter1.vercel.app/src/systems/AlexanderStairSeamFixV2.js",
+      "bytes": 2214,
+      "sha1": "9bab64aa07b9"
+    },
+    {
+      "file": "src/systems/Phase67RestoreV2.js",
+      "original": "https://berlin-metro-8bsuawju5-wolter1.vercel.app/src/systems/Phase67RestoreV2.js",
+      "bytes": 5454,
+      "sha1": "aec10c75b225"
+    },
+    {
+      "file": "src/systems/Phase125GraphicsV1.js",
+      "original": "https://berlin-metro-pwanwxj7e-wolter1.vercel.app/src/systems/Phase125GraphicsV1.js",
+      "bytes": 5037,
+      "sha1": "42a409a121cd"
+    },
+    {
+      "file": "src/systems/InspectorGodV3.js",
+      "original": "https://berlin-metro-dbfqoj76f-wolter1.vercel.app/src/systems/InspectorGodV3.js",
+      "bytes": 7985,
+      "sha1": "7680dfc90eb6"
+    },
+    {
+      "file": "src/systems/GodMenuV2.js",
+      "original": "https://berlin-metro-dc1yo16pm-wolter1.vercel.app/src/systems/GodMenuV2.js",
+      "bytes": 5011,
+      "sha1": "e550b9754a86"
+    },
+    {
+      "file": "src/systems/Phase1315V1.js",
+      "original": "https://berlin-metro-4g0o5gxh3-wolter1.vercel.app/src/systems/Phase1315V1.js",
+      "bytes": 11808,
+      "sha1": "ade1217ca7cc"
+    },
+    {
+      "file": "src/systems/Phase16V2.js",
+      "original": "https://berlin-metro-80wwbn4do-wolter1.vercel.app/src/systems/Phase16V2.js",
+      "bytes": 6950,
+      "sha1": "dbd91022d131"
+    },
+    {
+      "file": "src/systems/Phase851FixV1.js",
+      "original": "https://berlin-metro-3ee26fufc-wolter1.vercel.app/src/systems/Phase851FixV1.js",
+      "bytes": 4084,
+      "sha1": "a47fcbbcdc59"
+    },
+    {
+      "file": "src/systems/Phase125TexturesV2.js",
+      "original": "https://berlin-metro-4g0o5gxh3-wolter1.vercel.app/src/systems/Phase125TexturesV2.js",
+      "bytes": 7400,
+      "sha1": "77bcdbe65531"
+    },
+    {
+      "file": "src/systems/Phase910V1.js",
+      "original": "https://berlin-metro-k2j5g568z-wolter1.vercel.app/src/systems/Phase910V1.js",
+      "bytes": 6736,
+      "sha1": "bab900c511bb"
+    },
+    {
+      "file": "src/systems/Phase11V1.js",
+      "original": "https://berlin-metro-1pqe1mlbu-wolter1.vercel.app/src/systems/Phase11V1.js",
+      "bytes": 4084,
+      "sha1": "939015c87f1e"
+    },
+    {
+      "file": "src/systems/Phase161JobsV1.js",
+      "original": "https://berlin-metro-k29l5ks2w-wolter1.vercel.app/src/systems/Phase161JobsV1.js",
+      "bytes": 4999,
+      "sha1": "910e42df57d5"
+    },
+    {
+      "file": "src/systems/InspectorSpawnFixV4.js",
+      "original": "https://berlin-metro-k29l5ks2w-wolter1.vercel.app/src/systems/InspectorSpawnFixV4.js",
+      "bytes": 2465,
+      "sha1": "2fb1ef1ad20e"
+    },
+    {
+      "file": "src/systems/HomeUpgradesV1.js",
+      "original": "https://berlin-metro-3nwgpo9ua-wolter1.vercel.app/src/systems/HomeUpgradesV1.js",
+      "bytes": 6117,
+      "sha1": "f1fbb70ec4f8"
+    },
+    {
+      "file": "src/systems/ContactsV1.js",
+      "original": "https://berlin-metro-3nwgpo9ua-wolter1.vercel.app/src/systems/ContactsV1.js",
+      "bytes": 5130,
+      "sha1": "49fecacbc7e2"
+    },
+    {
+      "file": "src/systems/Phase16UXFixV1.js",
+      "original": "https://berlin-metro-6b2olg53o-wolter1.vercel.app/src/systems/Phase16UXFixV1.js",
+      "bytes": 3579,
+      "sha1": "1ebe894431a7"
+    },
+    {
+      "file": "src/systems/CleanHudV1.js",
+      "original": "https://berlin-metro-ndq0ojsm8-wolter1.vercel.app/src/systems/CleanHudV1.js",
+      "bytes": 5900,
+      "sha1": "0e4db00109c3"
+    },
+    {
+      "file": "src/systems/PhoneV2.js",
+      "original": "https://berlin-metro-6b2olg53o-wolter1.vercel.app/src/systems/PhoneV2.js",
+      "bytes": 12417,
+      "sha1": "9abf26cf5296"
+    },
+    {
+      "file": "src/systems/Phase161JobsV2.js",
+      "original": "https://berlin-metro-ndq0ojsm8-wolter1.vercel.app/src/systems/Phase161JobsV2.js",
+      "bytes": 8664,
+      "sha1": "9687dd335223"
+    },
+    {
+      "file": "src/systems/GuideV2.js",
+      "original": "https://berlin-metro-ndq0ojsm8-wolter1.vercel.app/src/systems/GuideV2.js",
+      "bytes": 3684,
+      "sha1": "00f149fe1c04"
+    },
+    {
+      "file": "src/systems/PhoneV1.js",
+      "original": "https://berlin-metro-3nwgpo9ua-wolter1.vercel.app/src/systems/PhoneV1.js",
+      "bytes": 8769,
+      "sha1": "6bab946dce7f"
+    },
+    {
+      "file": "src/systems/GodMenuMobileFixV4.js",
+      "original": "https://berlin-metro-80wwbn4do-wolter1.vercel.app/src/systems/GodMenuMobileFixV4.js",
+      "bytes": 3271,
+      "sha1": "d558225dad64"
+    },
+    {
+      "file": "src/systems/GodMenuV1.js",
+      "original": "https://berlin-metro-k2j5g568z-wolter1.vercel.app/src/systems/GodMenuV1.js",
+      "bytes": 3053,
+      "sha1": "e49ea638dcf1"
+    },
+    {
+      "file": "src/systems/Phase823V1.js",
+      "original": "https://berlin-metro-9d8v0iuba-wolter1.vercel.app/src/systems/Phase823V1.js",
+      "bytes": 9905,
+      "sha1": "09adff218ed5"
+    },
+    {
+      "file": "src/systems/Phase12FixV2.js",
+      "original": "https://berlin-metro-dc1yo16pm-wolter1.vercel.app/src/systems/Phase12FixV2.js",
+      "bytes": 4919,
+      "sha1": "6539a18cd7d1"
+    },
+    {
+      "file": "src/systems/StationLifeVisualV72.js",
+      "original": "https://berlin-metro-gnu1jemur-wolter1.vercel.app/src/systems/StationLifeVisualV72.js",
+      "bytes": 9185,
+      "sha1": "ec8857ccba45"
+    },
+    {
+      "file": "src/systems/LegacyJobMigrationV1.js",
+      "original": "https://berlin-metro-r7202tei2-wolter1.vercel.app/src/systems/LegacyJobMigrationV1.js",
+      "bytes": 659,
+      "sha1": "eb708ed92224"
+    },
+    {
+      "file": "src/systems/Phase16StationLifeV5.js",
+      "original": "https://berlin-metro-hu7c5smtf-wolter1.vercel.app/src/systems/Phase16StationLifeV5.js",
+      "bytes": 7946,
+      "sha1": "b054e364b3b6"
+    },
+    {
+      "file": "src/systems/Phase16GeoCommerceV4.js",
+      "original": "https://berlin-metro-k29l5ks2w-wolter1.vercel.app/src/systems/Phase16GeoCommerceV4.js",
+      "bytes": 8314,
+      "sha1": "a7498b47b090"
+    },
+    {
+      "file": "src/systems/GuideV1.js",
+      "original": "https://berlin-metro-hu7c5smtf-wolter1.vercel.app/src/systems/GuideV1.js",
+      "bytes": 4671,
+      "sha1": "edc7ae023077"
+    },
+    {
+      "file": "src/systems/VisualPolishV3.js",
+      "original": "https://berlin-metro-hx189pgly-wolter1.vercel.app/src/systems/VisualPolishV3.js",
+      "bytes": 4371,
+      "sha1": "ad11071513c4"
+    },
+    {
+      "file": "src/systems/Phase162HomeV1.js",
+      "original": "https://berlin-metro-k29l5ks2w-wolter1.vercel.app/src/systems/Phase162HomeV1.js",
+      "bytes": 6020,
+      "sha1": "6e88d35113ac"
+    },
+    {
+      "file": "src/systems/Phase16StabilityV2.js",
+      "original": "https://berlin-metro-2ag7a9sh0-wolter1.vercel.app/src/systems/Phase16StabilityV2.js",
+      "bytes": 8963,
+      "sha1": "c3276e0c1280"
+    },
+    {
+      "file": "src/systems/GfxV3.js",
+      "original": "https://berlin-metro-dbfqoj76f-wolter1.vercel.app/src/systems/GfxV3.js",
+      "bytes": 5020,
+      "sha1": "81886acf88d4"
+    },
+    {
+      "file": "src/systems/Phase845V1.js",
+      "original": "https://berlin-metro-easa0ncsd-wolter1.vercel.app/src/systems/Phase845V1.js",
+      "bytes": 9832,
+      "sha1": "2cc974c1f7d9"
+    },
+    {
+      "file": "src/systems/ContactsV2.js",
+      "original": "https://berlin-metro-6b2olg53o-wolter1.vercel.app/src/systems/ContactsV2.js",
+      "bytes": 4397,
+      "sha1": "0cc0852513f8"
+    },
+    {
+      "file": "src/systems/MissionResultV1.js",
+      "original": "https://berlin-metro-r7202tei2-wolter1.vercel.app/src/systems/MissionResultV1.js",
+      "bytes": 4058,
+      "sha1": "e90775371928"
+    },
+    {
+      "file": "src/systems/Phase16V3Hotspots.js",
+      "original": "https://berlin-metro-xl9emw01j-wolter1.vercel.app/src/systems/Phase16V3Hotspots.js",
+      "bytes": 8663,
+      "sha1": "9dfc6f61df26"
+    },
+    {
+      "file": "src/systems/U8DynamicInfoV3.js",
+      "original": "https://berlin-metro-euqr6g23c-wolter1.vercel.app/src/systems/U8DynamicInfoV3.js",
+      "bytes": 2517,
+      "sha1": "310868b98718"
+    },
+    {
+      "file": "src/systems/BerlinHighlightsV1.js",
+      "original": "https://berlin-metro-k9p8va29c-wolter1.vercel.app/src/systems/BerlinHighlightsV1.js",
+      "bytes": 13558,
+      "sha1": "72c54e48d222"
+    },
+    {
+      "file": "src/systems/Phase16V1.js",
+      "original": "https://berlin-metro-dbfqoj76f-wolter1.vercel.app/src/systems/Phase16V1.js",
+      "bytes": 3842,
+      "sha1": "e53cb69b01ce"
+    },
+    {
+      "file": "src/systems/HighlightExperienceV2.js",
+      "original": "https://berlin-metro-5kajxoy2v-wolter1.vercel.app/src/systems/HighlightExperienceV2.js",
+      "bytes": 9619,
+      "sha1": "63db5085b044"
+    },
+    {
+      "file": "src/systems/NpcVisualUpgradeV1.js",
+      "original": "https://berlin-metro-7bcp3swv1-wolter1.vercel.app/src/systems/NpcVisualUpgradeV1.js",
+      "bytes": 6561,
+      "sha1": "d3576edc6c13"
+    },
+    {
+      "file": "src/systems/BerlinLifeCoreV1.js",
+      "original": "https://berlin-metro-ormasdfm5-wolter1.vercel.app/src/systems/BerlinLifeCoreV1.js",
+      "bytes": 14206,
+      "sha1": "f6efadd88c58"
+    },
+    {
+      "file": "src/systems/BouncerCareerV1.js",
+      "original": "https://berlin-metro-71e84y7ne-wolter1.vercel.app/src/systems/BouncerCareerV1.js",
+      "bytes": 17519,
+      "sha1": "ba2d27fcacdc"
+    },
+    {
+      "file": "src/systems/Phase34CoreV1.js",
+      "original": "https://berlin-metro-e8zde0xzg-wolter1.vercel.app/src/systems/Phase34CoreV1.js",
+      "bytes": 19783,
+      "sha1": "e501985fd372"
+    },
+    {
+      "file": "src/systems/CareerEntryGuardV1.js",
+      "original": "https://berlin-metro-gr9bxdxm6-wolter1.vercel.app/src/systems/CareerEntryGuardV1.js",
+      "bytes": 230,
+      "sha1": "c6c3ddd5a277"
+    },
+    {
+      "file": "src/systems/RegistryClean.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/RegistryClean.js",
+      "bytes": 16960,
+      "sha1": "8ceeaadb48b4"
+    },
+    {
+      "file": "src/systems/DiscoveryCouplingFixV1.js",
+      "original": "https://berlin-metro-i5sfnq551-wolter1.vercel.app/src/systems/DiscoveryCouplingFixV1.js",
+      "bytes": 2618,
+      "sha1": "fc83d380c959"
+    },
+    {
+      "file": "src/systems/HudMenuGuardV1.js",
+      "original": "https://berlin-metro-dpsjiz57u-wolter1.vercel.app/src/systems/HudMenuGuardV1.js",
+      "bytes": 1204,
+      "sha1": "4063248d3d8c"
+    },
+    {
+      "file": "src/systems/CrossSystemStationConsistencyV1.js",
+      "original": "https://berlin-metro-dpsjiz57u-wolter1.vercel.app/src/systems/CrossSystemStationConsistencyV1.js",
+      "bytes": 972,
+      "sha1": "dd451ca3791c"
+    },
+    {
+      "file": "src/systems/BridgeClean.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/BridgeClean.js",
+      "bytes": 4392,
+      "sha1": "230e5464311c"
+    },
+    {
+      "file": "src/systems/HinterhofMoritzplatzV1.js",
+      "original": "https://berlin-metro-7y23lpr6k-wolter1.vercel.app/src/systems/HinterhofMoritzplatzV1.js",
+      "bytes": 3663,
+      "sha1": "eaab93d05d4e"
+    },
+    {
+      "file": "src/systems/ProgrammableStreetViewV2.js",
+      "original": "https://berlin-metro-q1ib777cs-wolter1.vercel.app/src/systems/ProgrammableStreetViewV2.js",
+      "bytes": 5985,
+      "sha1": "2c31fe2bef49"
+    },
+    {
+      "file": "src/systems/RuntimeCleanupV1.js",
+      "original": "https://berlin-metro-75jhoi1x8-wolter1.vercel.app/src/systems/RuntimeCleanupV1.js",
+      "bytes": 1823,
+      "sha1": "5f012c2767ae"
+    },
+    {
+      "file": "src/systems/U8CarriagePolishV3.js",
+      "original": "https://berlin-metro-6y757l3qw-wolter1.vercel.app/src/systems/U8CarriagePolishV3.js",
+      "bytes": 4042,
+      "sha1": "45cfbabab71e"
+    },
+    {
+      "file": "src/systems/Phase7HybridActivitiesV6.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/systems/Phase7HybridActivitiesV6.js",
+      "bytes": 39062,
+      "sha1": "849c702044b7"
+    },
+    {
+      "file": "src/systems/Phase16Foundations.js",
+      "original": "https://berlin-metro-bqh848uhh-wolter1.vercel.app/src/systems/Phase16Foundations.js",
+      "bytes": 10991,
+      "sha1": "3af51206c345"
+    },
+    {
+      "file": "src/systems/CityClean.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/CityClean.js",
+      "bytes": 5433,
+      "sha1": "781da78c3b4e"
+    },
+    {
+      "file": "src/systems/UiClean.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/UiClean.js",
+      "bytes": 9309,
+      "sha1": "b4b95b67e92b"
+    },
+    {
+      "file": "src/systems/CityEpisodesV1.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/CityEpisodesV1.js",
+      "bytes": 15586,
+      "sha1": "f32feecb43c3"
+    },
+    {
+      "file": "src/systems/CityFlowV3.js",
+      "original": "https://berlin-metro-ph8mgb20b-wolter1.vercel.app/src/systems/CityFlowV3.js",
+      "bytes": 28947,
+      "sha1": "a14fa8d0c4a7"
+    },
+    {
+      "file": "src/styles/styles.css",
+      "original": "https://berlin-metro-hwabi9n6s-wolter1.vercel.app/styles.css",
+      "bytes": 7437,
+      "sha1": "4b90d9e99582"
+    },
+    {
+      "file": "public/assets/stations/stations.json",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/stations.json",
+      "bytes": 51983,
+      "sha1": "2c880e86aef9"
+    },
+    {
+      "file": "public/assets/actors/metro-npcs.glb",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/actors/metro-npcs.glb",
+      "bytes": 21236,
+      "sha1": "d7dffdc62008"
+    },
+    {
+      "file": "public/assets/trains/bvg-hk.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/trains/bvg-hk.glb.gz",
+      "bytes": 380066,
+      "sha1": "5e752e8890ba"
+    },
+    {
+      "file": "public/assets/trains/bvg-h.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/trains/bvg-h.glb.gz",
+      "bytes": 400729,
+      "sha1": "a34f013a669a"
+    },
+    {
+      "file": "public/assets/props/metro-props.glb",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/props/metro-props.glb",
+      "bytes": 10436,
+      "sha1": "1ae03a376934"
+    },
+    {
+      "file": "public/assets/stations/u2-alexanderplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-alexanderplatz.glb.gz",
+      "bytes": 125922,
+      "sha1": "2bbe6a6cb908"
+    },
+    {
+      "file": "public/assets/stations/u2-anton-wilhelm-amo-strasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-anton-wilhelm-amo-strasse.glb.gz",
+      "bytes": 195213,
+      "sha1": "7ae6163bd70f"
+    },
+    {
+      "file": "public/assets/stations/u2-bismarckstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-bismarckstrasse.glb.gz",
+      "bytes": 136408,
+      "sha1": "a1745bc12b9e"
+    },
+    {
+      "file": "public/assets/stations/u2-buelowstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-buelowstrasse.glb.gz",
+      "bytes": 201116,
+      "sha1": "3fcbff11eb53"
+    },
+    {
+      "file": "public/assets/stations/u2-deutsche-oper.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-deutsche-oper.glb.gz",
+      "bytes": 133457,
+      "sha1": "961527ffc982"
+    },
+    {
+      "file": "public/assets/stations/u2-eberswalder-strasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-eberswalder-strasse.glb.gz",
+      "bytes": 197249,
+      "sha1": "ba74c12cd73e"
+    },
+    {
+      "file": "public/assets/stations/u2-ernst-reuter-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-ernst-reuter-platz.glb.gz",
+      "bytes": 133871,
+      "sha1": "c3fa6fb9b8df"
+    },
+    {
+      "file": "public/assets/stations/u2-gleisdreieck.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-gleisdreieck.glb.gz",
+      "bytes": 194671,
+      "sha1": "ca63e096c877"
+    },
+    {
+      "file": "public/assets/stations/u2-hausvogteiplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-hausvogteiplatz.glb.gz",
+      "bytes": 126418,
+      "sha1": "fec155531bff"
+    },
+    {
+      "file": "public/assets/stations/u2-kaiserdamm.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-kaiserdamm.glb.gz",
+      "bytes": 133095,
+      "sha1": "7d3d473d79d2"
+    },
+    {
+      "file": "public/assets/stations/u2-klosterstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-klosterstrasse.glb.gz",
+      "bytes": 138542,
+      "sha1": "f565eeca4fc3"
+    },
+    {
+      "file": "public/assets/stations/u2-maerkisches-museum.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-maerkisches-museum.glb.gz",
+      "bytes": 217921,
+      "sha1": "2211ec207f48"
+    },
+    {
+      "file": "public/assets/stations/u2-mendelssohn-bartholdy-park.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-mendelssohn-bartholdy-park.glb.gz",
+      "bytes": 201362,
+      "sha1": "72ec9137d274"
+    },
+    {
+      "file": "public/assets/stations/u2-neu-westend.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-neu-westend.glb.gz",
+      "bytes": 130405,
+      "sha1": "3275475032e8"
+    },
+    {
+      "file": "public/assets/stations/u2-nollendorfplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-nollendorfplatz.glb.gz",
+      "bytes": 256291,
+      "sha1": "de790a338945"
+    },
+    {
+      "file": "public/assets/stations/u2-olympia-stadion.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-olympia-stadion.glb.gz",
+      "bytes": 184514,
+      "sha1": "d9865d28091a"
+    },
+    {
+      "file": "public/assets/stations/u2-pankow.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-pankow.glb.gz",
+      "bytes": 136976,
+      "sha1": "a4cc4775d1a1"
+    },
+    {
+      "file": "public/assets/stations/u2-potsdamer-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-potsdamer-platz.glb.gz",
+      "bytes": 126750,
+      "sha1": "9b900521e174"
+    },
+    {
+      "file": "public/assets/stations/u2-rosa-luxemburg-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-rosa-luxemburg-platz.glb.gz",
+      "bytes": 126785,
+      "sha1": "6139ab2f0d67"
+    },
+    {
+      "file": "public/assets/stations/u2-ruhleben.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-ruhleben.glb.gz",
+      "bytes": 184601,
+      "sha1": "786a64703f1a"
+    },
+    {
+      "file": "public/assets/stations/u2-schoenhauser-allee.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-schoenhauser-allee.glb.gz",
+      "bytes": 197044,
+      "sha1": "9f727e6f6fdf"
+    },
+    {
+      "file": "public/assets/stations/u2-senefelderplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-senefelderplatz.glb.gz",
+      "bytes": 126204,
+      "sha1": "4c3ab012e33c"
+    },
+    {
+      "file": "public/assets/stations/u2-sophie-charlotte-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-sophie-charlotte-platz.glb.gz",
+      "bytes": 140856,
+      "sha1": "78dc1c74f46c"
+    },
+    {
+      "file": "public/assets/stations/u2-spittelmarkt.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-spittelmarkt.glb.gz",
+      "bytes": 135553,
+      "sha1": "0313d4eaf1a2"
+    },
+    {
+      "file": "public/assets/stations/u2-stadtmitte.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-stadtmitte.glb.gz",
+      "bytes": 126533,
+      "sha1": "ae4d44b7078b"
+    },
+    {
+      "file": "public/assets/stations/u2-theodor-heuss-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-theodor-heuss-platz.glb.gz",
+      "bytes": 132931,
+      "sha1": "79bdfa0d4b7f"
+    },
+    {
+      "file": "public/assets/stations/u2-vinetastrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-vinetastrasse.glb.gz",
+      "bytes": 128751,
+      "sha1": "31a03025175d"
+    },
+    {
+      "file": "public/assets/stations/u2-wittenbergplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-wittenbergplatz.glb.gz",
+      "bytes": 133036,
+      "sha1": "0457f50e4a58"
+    },
+    {
+      "file": "public/assets/stations/u2-zoologischer-garten.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u2-zoologischer-garten.glb.gz",
+      "bytes": 133211,
+      "sha1": "fc906c840e13"
+    },
+    {
+      "file": "public/assets/stations/u8-alexanderplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-alexanderplatz.glb.gz",
+      "bytes": 127817,
+      "sha1": "db0fc32ddeb6"
+    },
+    {
+      "file": "public/assets/stations/u8-bernauer-strasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-bernauer-strasse.glb.gz",
+      "bytes": 127189,
+      "sha1": "697b9556f18e"
+    },
+    {
+      "file": "public/assets/stations/u8-boddinstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-boddinstrasse.glb.gz",
+      "bytes": 124077,
+      "sha1": "6b9caa671b86"
+    },
+    {
+      "file": "public/assets/stations/u8-franz-neumann-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-franz-neumann-platz.glb.gz",
+      "bytes": 134732,
+      "sha1": "c3e91dab4102"
+    },
+    {
+      "file": "public/assets/stations/u8-gesundbrunnen.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-gesundbrunnen.glb.gz",
+      "bytes": 124700,
+      "sha1": "833af178e206"
+    },
+    {
+      "file": "public/assets/stations/u8-heinrich-heine-strasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-heinrich-heine-strasse.glb.gz",
+      "bytes": 120055,
+      "sha1": "66226a009bbd"
+    },
+    {
+      "file": "public/assets/stations/u8-hermannplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-hermannplatz.glb.gz",
+      "bytes": 123884,
+      "sha1": "9c5487b20e06"
+    },
+    {
+      "file": "public/assets/stations/u8-hermannstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-hermannstrasse.glb.gz",
+      "bytes": 119524,
+      "sha1": "893273353509"
+    },
+    {
+      "file": "public/assets/stations/u8-jannowitzbrucke.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-jannowitzbrucke.glb.gz",
+      "bytes": 120914,
+      "sha1": "8516cb3fe64d"
+    },
+    {
+      "file": "public/assets/stations/u8-karl-bonhoeffer-nervenklinik.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-karl-bonhoeffer-nervenklinik.glb.gz",
+      "bytes": 120620,
+      "sha1": "a7f50c0f9d95"
+    },
+    {
+      "file": "public/assets/stations/u8-kottbusser-tor.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-kottbusser-tor.glb.gz",
+      "bytes": 123650,
+      "sha1": "48d19d60d7f4"
+    },
+    {
+      "file": "public/assets/stations/u8-leinestrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-leinestrasse.glb.gz",
+      "bytes": 119873,
+      "sha1": "bed8d391ed3d"
+    },
+    {
+      "file": "public/assets/stations/u8-lindauer-allee.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-lindauer-allee.glb.gz",
+      "bytes": 129639,
+      "sha1": "589eaed51af5"
+    },
+    {
+      "file": "public/assets/stations/u8-moritzplatz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-moritzplatz.glb.gz",
+      "bytes": 119458,
+      "sha1": "773752bda606"
+    },
+    {
+      "file": "public/assets/stations/u8-osloer-strasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-osloer-strasse.glb.gz",
+      "bytes": 122272,
+      "sha1": "1ed6bebe3f6f"
+    },
+    {
+      "file": "public/assets/stations/u8-pankstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-pankstrasse.glb.gz",
+      "bytes": 121338,
+      "sha1": "e51a419f0f7c"
+    },
+    {
+      "file": "public/assets/stations/u8-paracelsus-bad.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-paracelsus-bad.glb.gz",
+      "bytes": 124060,
+      "sha1": "758d30ace3eb"
+    },
+    {
+      "file": "public/assets/stations/u8-rathaus-reinickendorf.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-rathaus-reinickendorf.glb.gz",
+      "bytes": 122613,
+      "sha1": "7193451900a9"
+    },
+    {
+      "file": "public/assets/stations/u8-residenzstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-residenzstrasse.glb.gz",
+      "bytes": 127088,
+      "sha1": "034ce0b0ece5"
+    },
+    {
+      "file": "public/assets/stations/u8-rosenthaler-platz.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-rosenthaler-platz.glb.gz",
+      "bytes": 119639,
+      "sha1": "b1f84c2040ac"
+    },
+    {
+      "file": "public/assets/stations/u8-schonleinstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-schonleinstrasse.glb.gz",
+      "bytes": 119846,
+      "sha1": "8d25aa3e6a6c"
+    },
+    {
+      "file": "public/assets/stations/u8-voltastrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-voltastrasse.glb.gz",
+      "bytes": 126492,
+      "sha1": "b93b84de91e7"
+    },
+    {
+      "file": "public/assets/stations/u8-weinmeisterstrasse.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-weinmeisterstrasse.glb.gz",
+      "bytes": 119493,
+      "sha1": "3be351270826"
+    },
+    {
+      "file": "public/assets/stations/u8-wittenau.glb.gz",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/assets/stations/u8-wittenau.glb.gz",
+      "bytes": 122321,
+      "sha1": "9ee9f441e2e3"
+    },
+    {
+      "file": "src/missing/kdhwzvudx-NpcVisualUpgradeV1.js",
+      "original": "https://berlin-metro-kdhwzvudx-wolter1.vercel.app/src/systems/NpcVisualUpgradeV1.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/7bcp3swv1-NpcVisualUpgradeV2.js",
+      "original": "https://berlin-metro-7bcp3swv1-wolter1.vercel.app/src/systems/NpcVisualUpgradeV2.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/1o6c5vqu2-BerlinLifeCoreV1.js",
+      "original": "https://berlin-metro-1o6c5vqu2-wolter1.vercel.app/src/systems/BerlinLifeCoreV1.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/ormasdfm5-BouncerCareerV1.js",
+      "original": "https://berlin-metro-ormasdfm5-wolter1.vercel.app/src/systems/BouncerCareerV1.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/j3aez44ch-GLTFLoader.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/loaders/three/addons/loaders/GLTFLoader.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/j3aez44ch-SkeletonUtils.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/three/addons/utils/SkeletonUtils.js",
+      "status": "missing-in-live-game (stub)"
+    },
+    {
+      "file": "src/missing/j3aez44ch-BufferGeometryUtils.js",
+      "original": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/three/addons/utils/BufferGeometryUtils.js",
+      "status": "missing-in-live-game (stub)"
+    }
+  ]
+}

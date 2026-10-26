@@ -1,0 +1,69 @@
+{
+  "files": 272,
+  "js": 206,
+  "missingStubs": 7,
+  "rewritten": 317,
+  "bare": [],
+  "unresolvedDynamic": [],
+  "leftoversInImports": [
+    {
+      "file": "src/systems/Phase845V1.js",
+      "why": "lexer parse error, regex fallback used: Parse error @:23:1871"
+    }
+  ],
+  "deploymentUrlsLeftInText": 7,
+  "assetCollisions": [],
+  "queryVariantFiles": 11,
+  "stubbedImports": [
+    {
+      "file": "src/boot/main.k7rz8yqfu.js",
+      "spec": "https://berlin-metro-kdhwzvudx-wolter1.vercel.app/src/systems/NpcVisualUpgradeV1.js",
+      "dynamic": true
+    },
+    {
+      "file": "src/boot/main.k7rz8yqfu.js",
+      "spec": "https://berlin-metro-7bcp3swv1-wolter1.vercel.app/src/systems/NpcVisualUpgradeV2.js",
+      "dynamic": true
+    },
+    {
+      "file": "src/boot/main.k7rz8yqfu.js",
+      "spec": "https://berlin-metro-1o6c5vqu2-wolter1.vercel.app/src/systems/BerlinLifeCoreV1.js",
+      "dynamic": true
+    },
+    {
+      "file": "src/boot/main.k7rz8yqfu.js",
+      "spec": "https://berlin-metro-ormasdfm5-wolter1.vercel.app/src/systems/BouncerCareerV1.js",
+      "dynamic": true
+    }
+  ],
+  "leftInText": [
+    {
+      "file": "src/missing/1o6c5vqu2-BerlinLifeCoreV1.js",
+      "url": "https://berlin-metro-1o6c5vqu2-wolter1.vercel.app/src/systems/BerlinLifeCoreV1.js"
+    },
+    {
+      "file": "src/missing/7bcp3swv1-NpcVisualUpgradeV2.js",
+      "url": "https://berlin-metro-7bcp3swv1-wolter1.vercel.app/src/systems/NpcVisualUpgradeV2.js"
+    },
+    {
+      "file": "src/missing/j3aez44ch-BufferGeometryUtils.js",
+      "url": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/three/addons/utils/BufferGeometryUtils.js"
+    },
+    {
+      "file": "src/missing/j3aez44ch-GLTFLoader.js",
+      "url": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/loaders/three/addons/loaders/GLTFLoader.js"
+    },
+    {
+      "file": "src/missing/j3aez44ch-SkeletonUtils.js",
+      "url": "https://berlin-metro-j3aez44ch-wolter1.vercel.app/src/vendor/utils/three/addons/utils/SkeletonUtils.js"
+    },
+    {
+      "file": "src/missing/kdhwzvudx-NpcVisualUpgradeV1.js",
+      "url": "https://berlin-metro-kdhwzvudx-wolter1.vercel.app/src/systems/NpcVisualUpgradeV1.js"
+    },
+    {
+      "file": "src/missing/ormasdfm5-BouncerCareerV1.js",
+      "url": "https://berlin-metro-ormasdfm5-wolter1.vercel.app/src/systems/BouncerCareerV1.js"
+    }
+  ]
+}

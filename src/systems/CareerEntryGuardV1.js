@@ -1,0 +1,1 @@
+const s=document.createElement('style');s.id='career-entry-guard-v1';s.textContent='#bc-invite{display:none!important}';document.head.appendChild(s);console.info('[Berlin Life] direct bouncer invite disabled; use Discovery only');

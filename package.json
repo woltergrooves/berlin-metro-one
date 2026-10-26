@@ -1,0 +1,19 @@
+{
+  "name": "berlin-life",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Berlin Life (formerly Berlin Metro) – first-person U-Bahn / Street View life simulation",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "check:no-legacy-urls": "node scripts/check-no-legacy-urls.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
