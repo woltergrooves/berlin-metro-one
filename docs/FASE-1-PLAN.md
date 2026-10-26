@@ -136,3 +136,22 @@ Gemeten met `tools/consolidation/jobs-god-probe.mjs` (oude en nieuwe versie naas
   Phase16StabilityV2 (echte contact-praatknop) blijft.
 - Resultaat: 5 bestanden weg, 3 minder lagen om de game-loop, `setInterval`-timers bij een nieuwe save
   gelijk (29). `probe3.mjs`: geen fouten, zelfde stappen als de basislijn.
+
+## Stap 6 — opstartketen platgeslagen (27 oktober 2026)
+
+- De 49 `src/boot/main.<hash>.js`-bestanden (een keten waarin elk bestand eerst het volgende inlaadde)
+  zijn vervangen door één lijst: `src/boot/BootSequence.js`, ingedeeld in 10 genummerde blokken.
+  `src/main.js` laadt alleen nog die lijst; ook de laatste regels van `main.js` (CityClean … GameState)
+  staan nu in de lijst.
+- Volgorde mechanisch uitgevouwen en vergeleken: 106 imports, exact dezelfde volgorde, en per regel
+  hetzelfde soort laden (wachten / wachten met foutopvang / alleen starten).
+- Weggelaten omdat ze niets deden: `LegacyStreetDisabled.js` (leeg bestand, 6× geïmporteerd) en de
+  4 stubs in `src/missing/` (gooiden alleen een fout die direct werd genegeerd; ook in het originele
+  spel bestonden die modules niet). Zes opeenvolgende `BerlinBuildStatus`-toewijzingen samengevoegd
+  tot één (zelfde eindwaarde).
+- Getest met `tools/consolidation/boot-probe.mjs` (oud en nieuw naast elkaar, warme run): zelfde
+  152 geladen spelmodules, zelfde console-meldingen, zelfde `BerlinBuildStatus`, HUD, station en saldo.
+  Opstart na de save-keuze ~0,8 s (oud 0,9 s warm; 49 bestanden minder om op te halen).
+  Let op: de systemen die tot 60 s op de game wachten ("… timed out") zijn ook in de oude versie
+  timing-afhankelijk; bij een koude eerste run van de oude versie vielen er 6 af, warm 1
+  (Phase 8.5.1 fix, in beide versies). `probe3.mjs`: 0 fouten, zelfde 4 "no button"-stappen als de basislijn.
