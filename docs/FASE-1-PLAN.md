@@ -57,7 +57,7 @@ Geen stap verandert de gameplay, behalve waar dat hieronder expliciet staat.
 7. **Eén game-tick** — losse `setInterval`-timers vervangen door één centrale update per frame of
    per seconde. Beter voor batterij en prestaties op iPhone/iPad.
 
-## Open beslissing
+## Beslissing klok (26 oktober 2026)
 
-**Welke klok is leidend?** Bij een nieuwe save gaf in onze test de ene klok 18:24 (dag 4, donderdag) en de andere
-08:16. Voor fase 2 ("de telefoon toont bijvoorbeeld Vrijdag 18:47") moet er één tijd zijn.
+Gekozen: **één klok, en een nieuwe save begint 's ochtends.** `BerlinLife.state.clock` (dag +
+minuut) wordt de leidende tijd; `__berlinMetroTime` wordt daarvan afgeleid. Uitwerking in stap 4.
