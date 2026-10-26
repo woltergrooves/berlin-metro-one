@@ -36,18 +36,7 @@ function returnButton(){
   document.body.appendChild(b);
   return b;
 }
-function cleanupLegacy(){
-  for(const sel of ['#guideBtnV1','#guidePanelV1','#guideModalV1','#guideV2','#guideBtnV2','#surfaceGameplayV2','#surfacePanelV1','#phase16SurfacePanel']){
-    for(const el of document.querySelectorAll(sel)) el.style.setProperty('display','none','important');
-  }
-  // Extra safety: any fixed GIDS button from older overlays.
-  for(const el of document.querySelectorAll('button')){
-    const t=(el.innerText||'').trim();
-    if(/^📖?\s*gids$/i.test(t)||/^gids$/i.test(t)) el.style.setProperty('display','none','important');
-  }
-}
 function apply(game){
-  cleanupLegacy();
   const b=returnButton();
   const panel=findSurfacePanel();
   if(panel){
@@ -59,10 +48,6 @@ function apply(game){
 function install(game){
   if(game.__phase16UXFixV1) return;
   game.__phase16UXFixV1=true;
-  const style=document.createElement('style');
-  style.id='phase16UXFixStyles';
-  style.textContent='#guideBtnV1,#guidePanelV1,#guideModalV1,#guideBtnV2{display:none!important}';
-  document.head.appendChild(style);
   setInterval(()=>apply(game),350);
   document.addEventListener('metro-street-cell',()=>setTimeout(()=>apply(game),0));
   game.phase16UXFixVersion='V1';

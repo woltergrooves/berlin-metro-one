@@ -18,7 +18,7 @@ Legenda: ✅ staat · 🟡 begin aanwezig · ⬜ nog niet gestart · 🔜/🆕/�
 | 7 | 🆕 **Hybride activiteiten.** Menu/minigame → 2D/360 → volledige 3D-interieurs, achter dezelfde GA NAAR BINNEN-knop. | 🟡 activiteitenregister (`Phase7HybridActivitiesV6`) |
 | 8 | 🆕 **First Weeks in Berlin.** Lichte verhaallijn als tutorial: WG → geld nodig → Späti → delivery → Miro/Deniz/Lea → eerste job → eerste avond uit. | 🟡 hoofdstuk "Eerste week in Berlijn" (`BerlinLifeCoreV1`), koeriersroute en gesprekken (`CityEpisodesV1`, `CityFlowV3`) |
 | 9 | 🆕 **Narrative Bible.** Vaste achtergrond, taal, kring, eigenaardigheden en geheimen per personage vóór verdere dialogen. | ⬜ (dialogen Miro, Lea, Deniz bestaan al) |
-| 10 | 🔜 **Career Core.** Werkgevers, shifts, loon, XP, levels, performance, ontslag/promotie, skills. | 🟡 carrièrevelden en jobs (`BerlinLifeCoreV1`, `Phase161JobsV1/V2`, `BaselineJobs`) |
+| 10 | 🔜 **Career Core.** Werkgevers, shifts, loon, XP, levels, performance, ontslag/promotie, skills. | 🟡 carrièrevelden en jobs (`BerlinLifeCoreV1`, `DeliveryJobs`, `BaselineJobs`) |
 | 11 | 🔥 **Bouncer Career.** ID, dronkenschap, agressie, guestlist, capaciteit; Trainee → Head Door. | 🟡 preview (`BouncerCareerV1`, "Bouncer Career v1.1-preview") |
 | 12 | 🔥 **Eerste volledige clubinterieur.** | ⬜ |
 | 13 | 🆕 **Club Life System.** Zelfde club als bezoeker, bouncer, bartender, promoter of DJ. | ⬜ |

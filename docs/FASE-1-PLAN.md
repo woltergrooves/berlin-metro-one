@@ -114,3 +114,25 @@ Wat er in het live spel echt gebeurde (gemeten met `tools/consolidation/contacts
   (V1 werkte op een losse kopie van de save); nu wel.
 - Resultaat: 5 bestanden weg, 33 → 29 `setInterval`-timers bij een nieuwe save, geen fouten.
   `probe3.mjs`: gelijk aan de oude versie.
+
+## Stap 5 deel 2 — Jobs, GodMenu, Phase16 (27 oktober 2026)
+
+Gemeten met `tools/consolidation/jobs-god-probe.mjs` (oude en nieuwe versie naast elkaar):
+
+- **Jobs**: V1 draaide nog mee, maar zijn knop en timer waren altijd verborgen (door V2 en CleanHud).
+  Bij een verlopen bezorging konden V1 en V2 allebei reageren; won V1, dan werd de mislukte job niet
+  geteld en zakte de reputatie niet (gezien in één van de testruns: melding "Bezorgjob verlopen" van V1).
+  V1 verwijderd; V2 heet nu `src/systems/DeliveryJobs.js` (DOM-ids `#acceptJobV2`, `#deliverJobV2`
+  ongewijzigd; BaselineJobs en de oude-job-migratie werken daarop). Aannemen, afleveren, loon en
+  verlopen: gelijk aan de oude versie.
+- **GOD-menu**: V1 en V2 bouwden elk een knop en paneel die InspectorGodV3 en Phase16V3Hotspots direct
+  weer weghaalden. V3 (InspectorGodV3 + GodMenuMobileFixV4) heeft dezelfde teleport- en tijdknoppen.
+  V1 en V2 verwijderd; de opruimcode voor hun knoppen ook.
+- **Phase16**: het straatpaneel van V1 werd door Phase16UXFix verborgen, dat van V2 door
+  Phase16V3Hotspots verwijderd. Beide verwijderd. *Gemeten fout die hiermee verdwijnt:* een
+  straatbezoek werd dubbel geteld (V2 én V3 telden `surfaceVisited`); nu één keer.
+  Uit Phase16UXFix zijn de selectors voor de gidsen (weg sinds deel 1) en de oude straatpanelen gehaald,
+  inclusief de controle die elke 350 ms alle knoppen op de tekst "Gids" doorzocht.
+  Phase16StabilityV2 (echte contact-praatknop) blijft.
+- Resultaat: 5 bestanden weg, 3 minder lagen om de game-loop, `setInterval`-timers bij een nieuwe save
+  gelijk (29). `probe3.mjs`: geen fouten, zelfde stappen als de basislijn.
