@@ -62,7 +62,16 @@ Geen stap verandert de gameplay, behalve waar dat hieronder expliciet staat.
    aankoop in de andere economie overschreven. In de test: €85 + €10 loon − €2 aankoop + €5 fooi gaf
    €83 in plaats van €98; na herladen bleef €83 staan. Nu overal €98, ook na herladen.
    Bestaande saves houden het saldo dat de game tot nu toe toonde.
-4. **Eén klok** — basis voor roadmap fase 2. *Hiervoor is een keuze nodig* (zie onder).
+4. ✅ **Eén klok** — `src/state/Clock.js` (`BerlinState.clock`, ook `BerlinClock`), opgeslagen in
+   `berlin-state-v2`. Speldag (`dayNumber`), minuut en weekdag staan op één plek. De zichtbare klok en
+   dag/nacht (`__berlinMetroTime`, `phase12State`), de Berlin Life-klok (`BerlinLife.state.clock`) en de
+   woningdag (`home.day`) lezen en schrijven via die klok. Slapen = `nextMorning(8)`.
+   Tempo: 1 spelminuut per echte seconde (een speldag = 24 minuten), het tempo van de zichtbare klok.
+   *Gedragswijzigingen:* de tijd wordt nu opgeslagen (voorheen stond de zichtbare klok na elke start op
+   08:15); openingstijden en weekdagen volgen nu de tijd die je ziet (voorheen liep die verborgen
+   Berlin Life-klok apart, 0,4 minuut per seconde, en stond die bij een nieuwe save op vrijdag 18:20).
+   Een nieuwe save begint op dag 1, maandag 08:15. Bestaande saves gaan verder op de weekdag en tijd
+   van hun Berlin Life-klok en houden hun woningdag.
 5. **Dubbele systemen opruimen** — V1-versies verwijderen waar V2 ze volledig vervangt
    (Contacts, Guide, Phone, Jobs, GodMenu, Phase16), na controle per systeem.
 6. **Opstartketen platslaan** — de 49 `main.*.js`-bestanden vervangen door één overzichtelijke,
@@ -73,7 +82,8 @@ Geen stap verandert de gameplay, behalve waar dat hieronder expliciet staat.
 ## Beslissing klok (26 oktober 2026)
 
 Gekozen: **één klok, en een nieuwe save begint 's ochtends.** `BerlinLife.state.clock` (dag +
-minuut) wordt de leidende tijd; `__berlinMetroTime` wordt daarvan afgeleid. Uitwerking in stap 4.
+minuut) wordt de leidende tijd; `__berlinMetroTime` wordt daarvan afgeleid. Uitgewerkt in stap 4.
+Het tempo (`MINUTES_PER_SECOND` in `Clock.js`) is één getal en eenvoudig aan te passen.
 
 ## Tests stap 2 en 3 (26 oktober 2026)
 
@@ -85,3 +95,6 @@ Lokaal, headless Chromium met iPad-emulatie, oude versie (commit `96d4f9e`) naas
 - `tools/consolidation/migration-probe.mjs` — save van de oude versie openen in de nieuwe.
 - `probe3.mjs` — opstartmeldingen, HUD, telefoon: vergeleken met de oude versie.
 - `devserve.mjs` — draait de game zonder Vite-build (alleen voor tests).
+- `tools/consolidation/clock-probe.mjs` — stap 4: tijdbronnen, middernacht, slapen, herladen.
+  Oud: zichtbare klok maandag 08:15, spelregels vrijdag 18:21, na herladen terug naar 08:15.
+  Nieuw: overal dezelfde tijd en dag, ook na herladen.

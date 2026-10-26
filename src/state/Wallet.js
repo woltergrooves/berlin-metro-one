@@ -13,7 +13,8 @@
 //
 // Moet geladen worden direct na de save-keuze (SaveSlotBootV1) en vóór de Berlin Life-kern.
 import { EconomySystem } from '../systems/EconomySystem.js';
-import { STATE_KEY, safeParse, legacyBalance } from './SaveFormat.js';
+import { safeParse, legacyBalance } from './SaveFormat.js';
+import { readSection, writeSection } from './Store.js';
 
 const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const getItem = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -24,7 +25,7 @@ const slot = () => globalThis.BerlinSaveSlots?.active || 'main';
 // 1. de portemonnee uit de save; 2. anders (bestaande save van vóór stap 3) het saldo dat de game
 // tot nu toe toonde; 3. anders (nieuwe save) het startbedrag dat de game zelf instelt.
 function initialCents() {
-  const own = num(safeParse(getItem(STATE_KEY))?.wallet?.cents);
+  const own = num(readSection('wallet')?.cents);
   if (own !== null) return { cents: own, source: 'save' };
   const data = {};
   for (const k of ['metro-economy-v2', 'berlinLifeCoreV1', `berlin-economy-v4@${slot()}`]) data[k] = getItem(k);
@@ -40,7 +41,7 @@ const history = [];
 
 function persist() {
   if (cents === null) return;
-  setItem(STATE_KEY, JSON.stringify({ schema: 2, wallet: { cents }, updatedAt: Date.now() }));
+  writeSection('wallet', { cents });
   // Spiegels bijwerken, zodat oudere code die het saldo nog rechtstreeks uit localStorage leest
   // (en terugdraaien naar een vorige versie) hetzelfde bedrag ziet.
   const v2 = safeParse(getItem('metro-economy-v2'));

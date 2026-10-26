@@ -19,7 +19,7 @@ async function boot(page, choice) {
 }
 const money = page => page.evaluate(() => {
   const g = globalThis.__berlinMetroGame, E = globalThis.BerlinPhase34?.economy, j = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
-  return { hud: document.querySelector('#hudMoneyV1')?.textContent || document.querySelector('#balance')?.textContent, game: g.economy.balanceCents, v2: g.metroEconomy.balanceCents, v4: (E.cash || 0) + (E.bank || 0), wallet: globalThis.BerlinState?.wallet?.cents ?? null,
+  return { hud: document.querySelector('#hudMoneyV1')?.textContent || document.querySelector('#balance')?.textContent, game: g.economy.balanceCents, v2: g.metroEconomy.balanceCents, v4: (E.cash || 0) + (E.bank || 0), wallet: globalThis.BerlinState?.wallet?.cents ?? null, klok: globalThis.BerlinClock ? globalThis.BerlinClock.dayNumber+' '+globalThis.BerlinClock.weekdayName+' '+globalThis.BerlinClock.hhmm+' ('+globalThis.BerlinClock.source+')' : 'life '+JSON.stringify(globalThis.BerlinLife?.state?.clock),
     registryFormat: j('berlin-save-slots-v1')?.format ?? null, backup: !!localStorage.getItem('berlin-save-slots-v1.before-format-2'), consistency: globalThis.BerlinState?.consistency?.() };
 });
 

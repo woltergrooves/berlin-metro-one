@@ -98,7 +98,7 @@ export function describe(slot) {
   const econ = safeParse(d['metro-economy-v2'], {}) || {};
   const life = safeParse(d.berlinLifeCoreV1, {}) || {};
   const st = safeParse(d[STATE_KEY], {}) || {};
-  const day = econ?.home?.day || ((life?.clock?.day ?? 0) + 1) || 1;
+  const day = num(st?.clock?.dayNumber) ?? (econ?.home?.day || ((life?.clock?.day ?? 0) + 1) || 1);
   const cents = num(st?.wallet?.cents) ?? num(econ?.balanceCents) ?? num(life?.economy?.balanceCents) ?? 0;
   const done = econ?.jobStats?.done || 0;
   return { day, cents, done };

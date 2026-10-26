@@ -16,8 +16,7 @@
 //   saves                 BerlinSaveSlots
 
 import { wallet } from './Wallet.js';
-
-const DAYS = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
+import { clock } from './Clock.js';
 
 function readJson(key) {
   try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; } catch { return null; }
@@ -56,16 +55,15 @@ function readMoney() {
 }
 
 function readTime() {
-  const life = globalThis.BerlinLife?.state?.clock;
+  // Sinds stap 4 is er één klok; de oude plekken zijn ervan afgeleid.
   const metroMinutes = num(globalThis.__berlinMetroTime?.minutes);
-  const day = num(life?.day);
-  const minute = num(life?.minute);
+  const life = globalThis.BerlinLife?.state?.clock;
   return {
-    day,
-    weekday: day === null ? null : DAYS[((day - 1) % 7 + 7) % 7],
-    minute,
-    clock: hhmm(minute),
-    sources: { berlinLife: hhmm(minute), metroTime: hhmm(metroMinutes), homeDay: num(readJson('metro-economy-v2')?.home?.day) },
+    day: clock.dayNumber,
+    weekday: clock.weekdayName,
+    minute: clock.minute,
+    clock: clock.hhmm,
+    sources: { clock: clock.hhmm, berlinLife: hhmm(num(life?.minute)), metroTime: hhmm(metroMinutes), homeDay: num(readJson('metro-economy-v2')?.home?.day) },
   };
 }
 
@@ -119,7 +117,7 @@ export function consistency(snap = snapshot()) {
   const m = Object.entries(snap.money.sources).filter(([, v]) => v !== null);
   if (new Set(m.map(([, v]) => v)).size > 1) issues.push({ area: 'geld', detail: Object.fromEntries(m) });
   const t = snap.time.sources;
-  if (t.berlinLife && t.metroTime && t.berlinLife !== t.metroTime) issues.push({ area: 'tijd', detail: { berlinLife: t.berlinLife, metroTime: t.metroTime } });
+  if ((t.berlinLife && t.berlinLife !== t.clock) || (t.metroTime && t.metroTime !== t.clock)) issues.push({ area: 'tijd', detail: { klok: t.clock, berlinLife: t.berlinLife, metroTime: t.metroTime } });
   if (snap.time.day !== null && t.homeDay !== null && snap.time.day !== t.homeDay) issues.push({ area: 'dag', detail: { berlinLife: snap.time.day, woning: t.homeDay } });
   return issues;
 }
@@ -142,12 +140,14 @@ export function subscribe(fn, intervalMs = 1000) {
 }
 
 export const BerlinState = {
-  version: 'Game State 2.0 · stap 3 (één save-formaat, één portemonnee)',
+  version: 'Game State 2.0 · stap 4 (één save-formaat, één portemonnee, één klok)',
   snapshot, consistency, subscribe,
   /** De enige portemonnee (stap 3). */
   wallet,
+  /** De enige klok (stap 4). */
+  clock,
   /** Savegames in één formaat (stap 2): list(), saveNow(), exportSlot(id). */
   get saves() { return globalThis.BerlinSaveSlots ?? null; },
 };
 globalThis.BerlinState = BerlinState;
-console.info('[Berlin Life] Game State 2.0: centrale state beschikbaar als BerlinState (stap 1–3)');
+console.info('[Berlin Life] Game State 2.0: centrale state beschikbaar als BerlinState (stap 1–4)');
