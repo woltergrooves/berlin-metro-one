@@ -54,6 +54,7 @@ public/assets/
 docs/
   provenance.json       ← herkomst van élk bestand: oorspronkelijke deployment-URL + hash
   localize-report.json  ← rapport van de consolidatie
+  TESTRAPPORT.md        ← wat is getest, en wat (nog) niet
   inactive-in-live-game/← originele bronbestanden die in de live game niet actief waren
 reference/              ← bevroren referentie: de originele, ongewijzigde JS uit de deployments
 tools/consolidation/    ← scripts waarmee de consolidatie en de tests zijn uitgevoerd
