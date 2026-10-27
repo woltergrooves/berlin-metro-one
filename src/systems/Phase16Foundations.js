@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 (function(){
 "use strict";
 if(window.BerlinPhase16Foundations)return;
@@ -117,7 +118,7 @@ function phone(){
 }
 window.BerlinPhase16Foundations={version:1,open,close,inspect:snapshot};
 window.BerlinBuildStatus={...(window.BerlinBuildStatus||{}),phase16Integration:1,glbUnchanged:true};
-setInterval(()=>{try{update();phone();if(panel?.classList.contains("open"))render()}catch(e){console.warn("[Berlin Life] Phase 1–6",e)}},3600);
+Tick.every("phase16.foundations",3600,()=>{try{update();phone();if(panel?.classList.contains("open"))render()}catch(e){console.warn("[Berlin Life] Phase 1–6",e)}});
 phone();
 console.info("[Berlin Life] Phase 1–6 integration V1 active; existing models and gameplay untouched");
 })();

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/loaders/GLTFLoader.js';
 import {NpcSystem} from './NpcSystem.js';
@@ -118,7 +119,7 @@ Game.prototype.start=function(...args){
 
 // The legacy game patches start/update more than once. Observe the LIVE
 // renderer instead of assuming that our prototype wrapper remains last.
-setInterval(()=>{
+Tick.every('npc.glb-render-hook',500,()=>{
  const game=window.BerlinLife?.game||window.__berlinMetroGame||window.__berlinGame;
  if(!game?.renderer||!game?.npcSystem)return;
  const original=game.renderer.render;
@@ -129,6 +130,6 @@ setInterval(()=>{
  };
  finalRender.__berlinNPCGLBLastPass=true;
  game.renderer.render=finalRender;
-},500);
+});
 void ready;
 window.BerlinBlenderActors={get status(){return {...status,active:current?.n?.length||0}},check:()=>({...status,active:current?.n?.length||0})};

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const game=()=>globalThis.__berlinMetroGame;
 const GEO_KEY='metro-highlight-geo-v2',VISIT_KEY='metro-highlight-visits-v2';
 let current=null,route=null,patchedHoff=false;
@@ -19,4 +20,4 @@ function patchCard(){document.querySelector('#metroHighlightPin')?.remove();cons
 function patchHoff(){if(patchedHoff)return;const npc=game()?.scene?.getObjectByName?.('DavidHasselhoff');const interaction=npc?.userData?.interaction;if(!npc||!interaction||!interaction.__berlinV2)return;patchedHoff=true;const old=interaction.action;interaction.action=()=>{npc.userData.pausePatrol=true;old();const watch=()=>{const open=document.querySelector('#hoffConversationV2')||document.querySelector('#hoffConversation');if(open){setTimeout(watch,120)}else npc.userData.pausePatrol=false};setTimeout(watch,100)};}
 function css(){if(document.querySelector('#highlightV2Css'))return;const s=document.createElement('style');s.id='highlightV2Css';s.textContent='@keyframes photoMoveV2{from{left:2%}to{left:94%}}';document.head.appendChild(s)}
 document.addEventListener('metro-street-cell',e=>{current=e.detail?.ctx||null;route=null;setTimeout(patchCard,60);setTimeout(patchCard,260);renderHud()});
-css();setInterval(()=>{patchCard();patchHoff();renderHud();if(!game()?.player?.__streetMode){route=null;document.querySelector('#highlightRouteHudV2')?.style.setProperty('display','none')}},400);
+css();Tick.every('highlights.route-hud',400,()=>{patchCard();patchHoff();renderHud();if(!game()?.player?.__streetMode){route=null;document.querySelector('#highlightRouteHudV2')?.style.setProperty('display','none')}});

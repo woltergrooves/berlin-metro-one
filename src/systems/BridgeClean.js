@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const listeners=new Set();let panoListeners=[];let lastSig='';
 const state={version:1,phase:5,mode:'station',stationId:null,stationName:null,line:null,streetView:{open:false,source:'legacy-embed',positionMode:'station-anchor',lat:null,lng:null,heading:null,pitch:null,panoId:null,frameUrl:null},updatedAt:Date.now()};
 function clone(){return JSON.parse(JSON.stringify(state))}
@@ -11,4 +12,4 @@ function attachPanorama(pano){clearPano();if(!pano||typeof pano.getPosition!=='f
 function subscribe(fn){if(typeof fn!=='function')return()=>{};listeners.add(fn);try{fn(clone())}catch{}return()=>listeners.delete(fn)}
 function position(){const s=state.streetView;return Number.isFinite(s.lat)&&Number.isFinite(s.lng)?{lat:s.lat,lng:s.lng,mode:s.positionMode,stationId:state.stationId}:null}
 window.BerlinWorldBridge={version:1,phase:5,snapshot:clone,subscribe,getVirtualPosition:position,attachPanorama,detachPanorama:clearPano,sync};
-const t=setInterval(sync,500);window.addEventListener('berlin:stationchange',sync);window.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});setTimeout(sync,0);console.info('[Berlin Life] Phase 5 World Bridge active · legacy embed safe mode');
+const t=Tick.every('bridge.sync',500,sync);window.addEventListener('berlin:stationchange',sync);window.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});setTimeout(sync,0);console.info('[Berlin Life] Phase 5 World Bridge active · legacy embed safe mode');

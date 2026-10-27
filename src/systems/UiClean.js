@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 (function(){
 "use strict";
 if(window.BerlinCleanStreet)return;
@@ -90,5 +91,5 @@ document.documentElement.classList.toggle("street-clean-active",active);root.cla
 const name=window.BerlinCityDiscovery?.where?.()?.name||o.context?.name||"Berlijn";if(name!==prev){root.querySelector(".label").textContent=name;prev=name}
 const a=window.BerlinCityDiscovery?.readyActivity?.(),id=a?.id||"";if(id!==prevAct){play.style.display=a?"inline-block":"none";play.title=a?"Speel bij "+a.name:"";prevAct=id}}
 window.BerlinCleanStreet={version:1,openActivities,closeActivities,inspect:()=>({active:root.classList.contains("open"),oldPresent:oldIds.filter(id=>document.getElementById(id))})};
-setInterval(tick,500);tick();
+Tick.every('ui.clean',500,tick);tick();
 })();

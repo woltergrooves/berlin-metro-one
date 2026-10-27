@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 (function trainPolish(THREE){
  const made=new WeakSet(),geoCache=new Map();
@@ -36,5 +37,5 @@ import * as THREE from 'three';
  }
  function tick(){const trains=window.__berlinMetroU8Trains||window.BerlinLife?.game?.u8Trains||[];if(Array.isArray(trains))for(const t of trains)install(t)}
  window.BerlinU8CarriagePolish={version:3,check:()=>{tick();return(window.__berlinMetroU8Trains||[]).map(t=>t.userData.u8CarriagePolish||null)}};
- tick();setInterval(tick,1200);console.info("[Berlin Life] U8 modular U2-style carriage, doors & service preserved");
+ tick();Tick.every('u8.carriage-polish',1200,tick);console.info("[Berlin Life] U8 modular U2-style carriage, doors & service preserved");
 })(THREE);

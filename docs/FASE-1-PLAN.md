@@ -155,3 +155,35 @@ Gemeten met `tools/consolidation/jobs-god-probe.mjs` (oude en nieuwe versie naas
   Let op: de systemen die tot 60 s op de game wachten ("… timed out") zijn ook in de oude versie
   timing-afhankelijk; bij een koude eerste run van de oude versie vielen er 6 af, warm 1
   (Phase 8.5.1 fix, in beide versies). `probe3.mjs`: 0 fouten, zelfde 4 "no button"-stappen als de basislijn.
+
+## Stap 7 deel 1 — één planner voor alle timers (28 oktober 2026)
+
+Stap 7 bleek drie soorten losse timers te hebben. Daarom in drie delen:
+1. **herhalende `setInterval`-timers** (dit deel);
+2. **opstart-wachtlussen**: 48 systemen die tot 60 s, 10× per seconde, op `__berlinMetroGame` wachten;
+3. **`game.loop`-wrappers**: 25 systemen die zich om de game-loop heen wikkelen.
+
+Deel 1:
+- Nieuw: `src/state/Tick.js` (`BerlinTick`, ook als `BerlinState.tick`). Eén timer voor alles:
+  taken die binnen 16 ms van elkaar aan de beurt zijn draaien in dezelfde wekbeurt, herhalende taken
+  pauzeren als het tabblad verborgen is, wacht-taken (`until`) stoppen zelf bij succes of time-out,
+  en een fout in één taak stopt de andere niet. `Tick.list()` toont per taak naam, interval,
+  aantal keer gedraaid, fouten en gemiddelde duur.
+- Alle 31 `setInterval`-aanroepen in 29 bestanden omgezet (zelfde intervallen, zelfde volgorde van
+  werk, eerste aanroep na het interval zoals bij `setInterval`). Er staat geen `setInterval` meer in `src/`.
+- Unit-test zonder browser: `tools/consolidation/tick-test.mjs` (8/8).
+- `tools/consolidation/tick-probe.mjs` (nieuwe save, iPad-emulatie, warme run, oud naast nieuw):
+
+  | | oud | nieuw |
+  |---|---|---|
+  | lopende `setInterval`-timers na start | 21 | 0 |
+  | timer-wekbeurten per 10 s | 454 | 205 |
+  | wekbeurten in 5 s verborgen tabblad | 189 | 18 (alleen wacht-taken) |
+  | taken | 21 losse timers | dezelfde 21 als `BerlinTick`-taken |
+
+  HUD, klok, saldo en console-meldingen gelijk. `probe3.mjs`: 0 fouten, zelfde 4 "no button"-stappen.
+- Gevonden, niet aangepast: de Phase 8.5.1-fix kan nooit starten. Hij wacht op
+  `stationArchitectureVersion === 'V8.5'`, maar Phase 8.4/8.5 staat bewust uit (syntaxfout in het
+  origineel). Dat is 60 s nutteloos pollen; aanzetten is een gameplay-wijziging. Hoort bij deel 2.
+- Ook gezien: `stations.consistency` (CrossSystemStationConsistencyV1) slaagt nooit en pollt dus
+  25 s lang elke 150 ms; de Hinterhof-validatie meldt `ok: false`. Beide ook in de oude versie.

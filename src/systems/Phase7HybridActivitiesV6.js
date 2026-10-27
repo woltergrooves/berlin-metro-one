@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 (function phase7HybridV6() {
   "use strict";
   const SHOP_ID = "alexanderplatz:spaeti";
@@ -426,13 +427,13 @@
     open(b.dataset.p7Entry);
   },true);
   // Some old modules rebuild Discovery asynchronously. Decorate only the current nodes.
-  const timer=setInterval(()=>{
+  const timer=Tick.every('phase7.discovery-decorate',550,()=>{
     decorateDiscovery();
     if(!wired&&window.BerlinCityDiscovery&&window.BerlinDiscoveryV2?.data){
       wired=true;
       console.info("[Berlin Life] Fase 7 activity registry connected");
     }
-  },550);
+  });
   window.BerlinPhase7={version:6,openCityActivity:(type,id)=>open(type,id),openShop:()=>open("shop"),openWeltzeituhr:()=>open("clock"),openGendarmenmarkt:()=>open("square"),openBerlinerMauer:()=>open("wall"),close,
     snapshot:()=>{const p=ensure();return p?JSON.parse(JSON.stringify(p)):null},isOpen,shopItemIds:ITEMS.map(x=>x.id),get discovered(){return !!window.BerlinDiscoveryV2?.data?.alexanderplatz?.some(a=>a.id===SHOP_ID)}};
   console.info("[Berlin Life] Fase 7 V6 – scenario questions, variable keys and reasoned answers ready");

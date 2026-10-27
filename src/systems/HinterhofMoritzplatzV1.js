@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const TARGET_ID='moritzplatz',TARGET_NAME='Moritzplatz',JOB_ID='job-hinterhof';
 const style=document.createElement('style');style.id='hinterhof-moritz-v1';style.textContent='#bc-invite{display:none!important}';document.head.appendChild(style);
 function currentId(){return window.BerlinStationRegistry?.current?.()?.id||null}
@@ -12,4 +13,4 @@ function hideWrongMessage(){const el=document.querySelector('#bc-msg');if(!el)re
 function validate(){const api=window.BerlinDiscoveryV2,bridge=window.BerlinClubBridgeV2,career=window.BerlinCareerV2,bouncer=window.BouncerCareerPreview;const refs={discovery:api?.jobs?.[TARGET_ID]?.id===JOB_ID&&!(api?.jobs?.['kottbusser-tor']?.name==='Hinterhof'),bridge:bridge?.clubs?.find?.(x=>x.name==='Hinterhof')?.station===TARGET_NAME,career:career?.clubs?.find?.(x=>x.name==='Hinterhof')?.station===TARGET_NAME,bouncer:bouncer?.clubs?.find?.(x=>x.name==='Hinterhof')?.area===TARGET_NAME};return{ok:Object.values(refs).every(Boolean),target:TARGET_ID,jobId:JOB_ID,refs}}
 function sync(){syncDiscovery();syncCareer();syncLegacyDiscovery();wrapBouncer();hideWrongMessage();const v=validate();window.BerlinHinterhofLocation={version:1,targetId:TARGET_ID,targetName:TARGET_NAME,jobId:JOB_ID,validate};return v}
 const obs=new MutationObserver(()=>{hideWrongMessage();});obs.observe(document.documentElement,{subtree:true,childList:true,characterData:true});
-const t=setInterval(()=>{const v=sync();if(v.ok)console.info('[Berlin Life] Hinterhof canonical location OK',v)},500);setTimeout(()=>{const v=sync();console[v.ok?'info':'error']('[Berlin Life] Hinterhof relocation validation',v);clearInterval(t)},25000);window.addEventListener('berlinlife:career-v2-ready',sync);setTimeout(sync,0);
+const t=Tick.every('hinterhof.sync',500,()=>{const v=sync();if(v.ok)console.info('[Berlin Life] Hinterhof canonical location OK',v)});setTimeout(()=>{const v=sync();console[v.ok?'info':'error']('[Berlin Life] Hinterhof relocation validation',v);Tick.cancel(t)},25000);window.addEventListener('berlinlife:career-v2-ready',sync);setTimeout(sync,0);

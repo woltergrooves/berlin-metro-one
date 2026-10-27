@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 (function(){
 "use strict";
 if(window.BerlinCityFlowV3)return;
@@ -343,6 +344,6 @@ const combined=Object.create(old);
 Object.assign(combined,{version:3,has:id=>known.has(id)||id.endsWith(":city-status")||old.has(id),view,choose,open:view});
 window.BerlinCityEpisodes=combined;
 window.BerlinCityFlowV3={version:3,register:install,inspect:foundation,view,choose,remainingFor:id=>id==="alexanderplatz:express-courier"||missionSteps.some(x=>x.id===id)?elapsed(state()?.mission):null,get current(){return state()}};
-const timer=setInterval(()=>{if(install())clearInterval(timer)},750);setTimeout(()=>clearInterval(timer),20000);install();
+Tick.until('cityflow.install',750,install,20000);install();
 console.info("[Berlin Life] Phase 7.1–7.4: 3-stop courier, relations, distinctive locations, persistent progression");
 })();

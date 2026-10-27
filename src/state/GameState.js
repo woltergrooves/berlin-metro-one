@@ -1,3 +1,4 @@
+import { Tick } from './Tick.js';
 // Berlin Life — Game State 2.0 (roadmap fase 1): stap 1 lezen, stap 2 saves, stap 3 portemonnee
 //
 // Eén centrale plek om de toestand van het spel te LEZEN. Deze eerste versie verandert niets aan
@@ -135,8 +136,8 @@ function tick() {
 /** Roep fn aan bij elke wijziging van de spelstatus. Geeft een functie terug om af te melden. */
 export function subscribe(fn, intervalMs = 1000) {
   listeners.add(fn);
-  if (!timer) timer = setInterval(tick, intervalMs);
-  return () => { listeners.delete(fn); if (!listeners.size) { clearInterval(timer); timer = null; last = ''; } };
+  if (!timer) timer = Tick.every('state.subscribe', intervalMs, tick);
+  return () => { listeners.delete(fn); if (!listeners.size) { Tick.cancel(timer); timer = null; last = ''; } };
 }
 
 export const BerlinState = {
@@ -146,6 +147,8 @@ export const BerlinState = {
   wallet,
   /** De enige klok (stap 4). */
   clock,
+  /** De centrale planner voor herhalende taken (stap 7). */
+  tick: Tick,
   /** Savegames in één formaat (stap 2): list(), saveNow(), exportSlot(id). */
   get saves() { return globalThis.BerlinSaveSlots ?? null; },
 };

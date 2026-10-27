@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/loaders/GLTFLoader.js';
 import {Game} from '../core/Game.js';
@@ -228,6 +229,6 @@ function attach(value){
  void manifestReady.then(()=>scan());
 }
 const start=Game.prototype.start;Game.prototype.start=function(...args){const result=start.apply(this,args);attach(this);return result};
-const discovery=setInterval(()=>{if(game){clearInterval(discovery);return}const candidate=window.__berlinMetroGame||window.BerlinLife?.game;if(candidate?.renderer&&candidate?.world)attach(candidate)},700);
+const discovery=Tick.every('stations.glb-discover',700,()=>{if(game){Tick.cancel(discovery);return}const candidate=window.__berlinMetroGame||window.BerlinLife?.game;if(candidate?.renderer&&candidate?.world)attach(candidate)});
 window.BerlinBlenderStations={version:2,get status(){return JSON.parse(JSON.stringify(status))},check:()=>({ ...JSON.parse(JSON.stringify(status)),queued:queue.length,loading:busy,cached:assets.size,disabledLegacyLayers:disabledVisualRoots.size,stations:[...records.values()].map(r=>({line:r.line,id:r.profile.id,name:r.profile.name,family:r.profile.family,visible:r.parent.visible,connected:connected(r.parent)}))})};
 console.info('[Berlin Life] 53-platform Blender station pipeline ready');

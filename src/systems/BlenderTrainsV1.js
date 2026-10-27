@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 import { Game } from '../core/Game.js';
@@ -184,11 +185,11 @@ function attach(game) {
 
 const baseStart = Game.prototype.start;
 Game.prototype.start = function(...args) { const result = baseStart.apply(this, args); attach(this); return result; };
-const discoverGame = setInterval(() => {
- if (activeGame) { clearInterval(discoverGame); return; }
+const discoverGame = Tick.every('trains.glb-discover', 750, () => {
+ if (activeGame) { Tick.cancel(discoverGame); return; }
  const game = window.BerlinLife?.game || window.__berlinMetroGame || window.__berlinGame;
  if (game?.renderer && game?.trains) attach(game);
-}, 750);
+});
 // Starts fetching while the normal game boot and save picker load.
 load('U2'); load('U8');
 window.BerlinBlenderTrains = {

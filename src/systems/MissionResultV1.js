@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const KEY='metro-economy-v2';
 const euro=c=>`€${((c||0)/100).toFixed(2).replace('.',',')}`;
 const fmt=ms=>{const s=Math.max(0,Math.ceil((ms||0)/1000)),m=Math.floor(s/60),ss=String(s%60).padStart(2,'0');return `${m}:${ss}`};
@@ -35,7 +36,7 @@ function install(game){
   }
   document.addEventListener('metro-job-changed',()=>setTimeout(maybeShow,0));
   let lastStatus=null;
-  setInterval(()=>{const s=read(),st=s?.activeDelivery?.status;if(st==='done'&&lastStatus!=='done')maybeShow();lastStatus=st},700);
+  Tick.every('mission.result',700,()=>{const s=read(),st=s?.activeDelivery?.status;if(st==='done'&&lastStatus!=='done')maybeShow();lastStatus=st});
   game.missionResultVersion='V1';
 }
 (async()=>{for(let i=0;i<500;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.ui){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Mission result failed',e));

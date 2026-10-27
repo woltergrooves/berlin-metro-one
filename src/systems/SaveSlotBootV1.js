@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 // Savegame-keuze bij het opstarten. Sinds Game State 2.0 stap 2 bewaart elk slot een volledige save
 // in één formaat (zie src/state/SaveFormat.js). Het keuzescherm zelf is ongewijzigd.
 import {
@@ -85,7 +86,7 @@ await new Promise(resolve=>{
   }
 });
 
-setInterval(syncActive,1500);
+Tick.every('saves.sync-active',1500,syncActive);
 addEventListener('pagehide',syncActive);
 addEventListener('beforeunload',syncActive);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)syncActive();});

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import { U8_STOPS,U8_ALEX_INDEX,stopX } from './U8FullLineVisual.js';
 
 const KEY='metro-economy-v2';
@@ -61,7 +62,7 @@ function failSafeExits(game){
 function install(game){if(game.__phase16StabilityV2)return;game.__phase16StabilityV2=true;prefillStreetCache();
   const style=document.createElement('style');style.id='phase16StabilityV2Css';style.textContent='[data-phase16-legacy="1"],[data-street-legacy-control="1"],#contactTalkV1,#contactTalkV2,#streetReturnOnlyV1{display:none!important}';document.head.appendChild(style);
   document.addEventListener('metro-street-cell',e=>{currentStreet=e.detail?.ctx||null;setTimeout(()=>{cleanupStreetUI(game);addTalkButton(game)},0)});
-  setInterval(()=>{cleanupStreetUI(game);failSafeExits(game);if(game.player.__streetMode)addTalkButton(game)},90);
+  Tick.every('phase16.street-stability',90,()=>{cleanupStreetUI(game);failSafeExits(game);if(game.player.__streetMode)addTalkButton(game)});
   game.phase16StabilityVersion='V2-streetview-all-stations-talk-inline';game.ui?.notify?.('Phase 16 stabiliteit · Street View + praten gefixt');
 }
 (async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.stations&&g?.__allStreetOverlay){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Phase16 stability V2 failed',e));

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const RETURN_RE=/terug\s+naar\s+u[ -]?bahn|↓\s*u[ -]?bahn|u-bahn/i;
 const SURFACE_RE=/ausgang\s*a|ausgang\s*b|andere\s+straatpositie|volgende\s+positie|open\s+in\s+google|buitenpositie/i;
 let originalReturn=null;
@@ -48,7 +49,7 @@ function apply(game){
 function install(game){
   if(game.__phase16UXFixV1) return;
   game.__phase16UXFixV1=true;
-  setInterval(()=>apply(game),350);
+  Tick.every('phase16.ux',350,()=>apply(game));
   document.addEventListener('metro-street-cell',()=>setTimeout(()=>apply(game),0));
   game.phase16UXFixVersion='V1';
 }
