@@ -1,6 +1,6 @@
 # Roadmap Berlin Life
 
-De roadmap zoals opgesteld tijdens de ontwikkeling, aangevuld met **wat er op 26 oktober 2026
+De roadmap zoals opgesteld tijdens de ontwikkeling, aangevuld met **wat er op 28 oktober 2026
 al in de code zit**. "Begin aanwezig" betekent: er draait al een eerste versie, maar die is nog niet
 af en moet bij fase 1 worden opgeschoond. Modulenamen verwijzen naar `src/systems/`.
 
@@ -9,9 +9,9 @@ Legenda: ✅ staat · 🟡 begin aanwezig · ⬜ nog niet gestart · 🔜/🆕/�
 | # | Fase | Status in de code |
 |---|------|-------------------|
 | 0 | ✅ **Fundament — Berlin Metro Core.** U2, U8, treinen in beide richtingen, overstappen, stations, NPC's, uitgangen, Street View, Bus 200, telefoon, eerste shops/jobs/contacts, highlights, Berlin Stamps, Hasselhoff, mobiele performancebasis. | ✅ aanwezig |
-| 1 | 🔜 **Technische cleanup & Game State 2.0.** Eén centrale state voor tijd, geld, locatie, actieve job, contacten, inventory, reputatie, activity state en saves. | 🟡 bezig — zie [FASE-1-PLAN.md](FASE-1-PLAN.md) |
-| 2 | 🔜 **Tijd, dagen en kalender.** Telefoon toont bijv. *Vrijdag 18:47*; tijd stuurt spits, NPC's, winkels, shifts, nightlife, events en nachtvervoer. Gamedag ≈ 45–60 echte minuten. | 🟡 er is een dag/tijd-klok (`BerlinLifeCoreV1`), maar ook een tweede klok die afwijkt |
-| 3 | 🔜 **Economy Core.** Cash/bank, salaris, fooien, Pfand, huur, boodschappen, OV, kleding, uitgaan, boetes. | 🟡 economie met cash, bank, achterstand en uitgavencategorieën (`Phase34CoreV1`), naast twee oudere geldsystemen |
+| 1 | 🔜 **Technische cleanup & Game State 2.0.** Eén centrale state voor tijd, geld, locatie, actieve job, contacten, inventory, reputatie, activity state en saves. | 🟡 bezig — stap 1–6 af, stap 7 (één game-tick) deel 1 van 3 af; zie [FASE-1-PLAN.md](FASE-1-PLAN.md) |
+| 2 | 🔜 **Tijd, dagen en kalender.** Telefoon toont bijv. *Vrijdag 18:47*; tijd stuurt spits, NPC's, winkels, shifts, nightlife, events en nachtvervoer. Gamedag ≈ 45–60 echte minuten. | 🟡 één klok sinds fase 1 stap 4 (`src/state/Clock.js`, 1 spelminuut/s = speldag 24 min, nieuwe save ma 08:15); tempo van 45–60 min per dag nog niet gekozen |
+| 3 | 🔜 **Economy Core.** Cash/bank, salaris, fooien, Pfand, huur, boodschappen, OV, kleding, uitgaan, boetes. | 🟡 economie met cash, bank, achterstand en uitgavencategorieën (`Phase34CoreV1`); sinds fase 1 stap 3 één portemonnee (`src/state/Wallet.js`) voor alle geldsystemen |
 | 4 | 🆕 **Activity Discovery System.** "IN DE BUURT: Späti · 42 m, Clubnacht vanavond …"; onontdekte dingen blijven verborgen. | 🟡 Discovery-knop en stationgebonden ontdekkingen (`Phase34CoreV1`, `DiscoveryV2`, `CityClean`) |
 | 5 | 🆕 **Street View 2.0 / World Bridge.** Programmeerbare `StreetViewPanorama` i.p.v. alleen iframes; positie via `getPosition()`. | 🟡 `ProgrammableStreetViewV2`, `BridgeClean` (World Bridge) |
 | 6 | 🆕 **Virtuele proximity.** Binnen ~40 m van een activiteit verschijnt GA NAAR BINNEN / BEKIJK / PRAAT / WERK HIER. | 🟡 `BerlinProximity` in `CityClean` |
