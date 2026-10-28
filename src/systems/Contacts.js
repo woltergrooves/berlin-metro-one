@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 // Contacten (Miro, Lea, Deniz) — fase 1 stap 5: vervangt ContactsV1 + ContactsV2.
 //
 // Wat hiervan overbleef in het live spel:
@@ -72,6 +73,6 @@ function install(game) {
   for (let i = 0; i < 500; i++) {
     const g = globalThis.__berlinMetroGame;
     if (g?.player && g?.ui) { install(g); return; }
-    await new Promise(r => setTimeout(r, 100));
+    await Tick.sleep(100,'boot.Contacts');
   }
 })().catch(e => console.error('[Metro] Contacts failed', e));

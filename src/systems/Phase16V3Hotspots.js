@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const KEY='metro-economy-v2';
 const PRODUCTS=[
   {id:'mate',name:'Club-Mate',price:220,emoji:'🧉'},
@@ -28,4 +29,4 @@ function install(game){if(game.__phase16v3)return;const o=game.__allStreetOverla
   o.close=function(){spot.style.display='none';ctx=null;return oldClose()};
   spot.querySelector('#spatiEnter').onclick=()=>ctx&&openSpati(game,ctx);spot.querySelector('#streetPfand3').onclick=()=>ctx&&streetSearch(game,ctx);spot.querySelector('#streetBag3').onclick=()=>openBag(game);
   const base=game.loop;let ticks=0;game.loop=function(){const r=base();if((ticks++%90)===0)cleanupGod();if(game.player.__streetMode&&ctx){spot.style.display='block';spot.querySelector('#spatiHotStatus').textContent=isOpen(game)?'OPEN · snacks & drankjes':'GESLOTEN · 06:00–02:00'}else spot.style.display='none';return r};game.renderer.setAnimationLoop(game.loop);game.phase16Version='V3-street-hotspots';game.ui?.notify?.('Phase 16 V3 · Späti in Street View + GOD singleton fix')}
-(async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.__allStreetOverlay&&g?.renderer&&g?.player){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Phase16V3 failed',e));
+(async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.__allStreetOverlay&&g?.renderer&&g?.player){install(g);return}await Tick.sleep(100,'boot.Phase16V3Hotspots')}})().catch(e=>console.error('[Metro] Phase16V3 failed',e));

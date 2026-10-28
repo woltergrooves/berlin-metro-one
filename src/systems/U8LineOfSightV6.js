@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 const ALEX=14;
 const U8_MIN_Z=40.2,U8_MAX_Z=57.8;
 function activeTrain(game){const p=game.player;if(!p?.__u8Active)return null;return game.u8Trains?.find(t=>t.userData?.u8?.fullId===p.__u8ActiveTrainId)||null}
@@ -28,6 +29,6 @@ async function install(){for(let i=0;i<600;i++){
     const base=game.loop;game.loop=function(){const r=base();apply(game,line);return r};game.renderer.setAnimationLoop(game.loop);
     apply(game,line);console.info('[Metro] U8 sightline V6 ready');return;
   }
-  await new Promise(r=>setTimeout(r,100));
+  await Tick.sleep(100,'boot.U8LineOfSightV6');
 }}
 install().catch(e=>console.error('[Metro] U8 sightline V6 failed',e));

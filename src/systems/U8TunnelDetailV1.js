@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 const DARK=new THREE.MeshLambertMaterial({color:0x1a1d1f});
 const METAL=new THREE.MeshLambertMaterial({color:0x555b5d});
@@ -19,6 +20,6 @@ async function install(){for(let i=0;i<600;i++){
   const chunk=game?[...game.world.chunks.values()].find(c=>c.station?.id==='alexanderplatz'):null;
   const line=chunk?.structure?.userData?.u8FullLine;
   if(line){line.segments?.forEach((s,i)=>decorate(s,i,line.zc));console.info('[Metro] U8 tunnel detail V1 ready');return}
-  await new Promise(r=>setTimeout(r,100));
+  await Tick.sleep(100,'boot.U8TunnelDetailV1');
 }}
 install().catch(e=>console.error('[Metro] U8 tunnel detail failed',e));

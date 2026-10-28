@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import { CONFIG } from '../config.js';
 import { computeMoveDelta } from '../core/motion.js';
 
@@ -102,7 +103,7 @@ async function boot(){
       game.ui?.notify?.('Alexander trap V4 + vaker U2 richting Pankow');
       return;
     }
-    await new Promise(r=>setTimeout(r,100));
+    await Tick.sleep(100,'boot.Phase851FixV1');
   }
   console.warn('[Metro] Phase 8.5.1 fix timed out');
 }

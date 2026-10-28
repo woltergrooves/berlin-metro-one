@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import { U8_STOPS,U8_ALEX_INDEX,stopX } from './U8FullLineVisual.js';
 
@@ -86,4 +87,4 @@ function install(game){
   game.u8PlatformFixVersion='V3';
   game.ui?.notify?.('Graphics 12.5 · PBR perrons + neutrale U8-materialen actief');
 }
-async function boot(){for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.scene&&g?.renderer&&g?.player&&g?.stations){install(g);return}await new Promise(r=>setTimeout(r,100))}}boot().catch(e=>console.error('[Metro] Phase 12.5 failed',e));
+async function boot(){for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.scene&&g?.renderer&&g?.player&&g?.stations){install(g);return}await Tick.sleep(100,'boot.Phase125GraphicsV1')}}boot().catch(e=>console.error('[Metro] Phase 12.5 failed',e));

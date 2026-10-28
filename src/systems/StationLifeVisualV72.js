@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import { U8_STOPS,U8_ALEX_INDEX,stopX } from './U8FullLineVisual.js';
 
@@ -54,5 +55,5 @@ function install(game){if(game.__stationLifeVisualV72)return;const u2=new THREE.
   const show8=!street&&!p.__u8Active&&idx!==null&&idx!==U8_ALEX_INDEX&&U8_STOPS[idx];if(show8){if(String(idx)!==key8){buildU8(u8,U8_STOPS[idx],game);key8=String(idx)}u8.visible=true}else u8.visible=false;return base()};
  game.renderer.setAnimationLoop(game.loop);game.__stationLifeVisualV72={u2,u8};game.stationDetailVersion='V7.2';game.ui?.notify?.('Stations V7.2: inrichting van spoor af + zicht vanuit trein hersteld');console.info('[Metro] Station Life V7.2 active — real wall faces, inboard furniture');
 }
-async function boot(){for(let i=0;i<600;i++){const game=globalThis.__berlinMetroGame;if(game?.player&&game?.scene&&game?.renderer&&game?.exitGuaranteeVersion==='UniversalStationExitV5'){install(game);return}await new Promise(r=>setTimeout(r,100))}console.warn('[Metro] Station Life V7.2 timed out')}
+async function boot(){for(let i=0;i<600;i++){const game=globalThis.__berlinMetroGame;if(game?.player&&game?.scene&&game?.renderer&&game?.exitGuaranteeVersion==='UniversalStationExitV5'){install(game);return}await Tick.sleep(100,'boot.StationLifeVisualV72')}console.warn('[Metro] Station Life V7.2 timed out')}
 boot().catch(e=>console.error('[Metro] Station Life V7.2 failed',e));

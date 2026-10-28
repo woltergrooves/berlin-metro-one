@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 (function(){
 "use strict";
 const places={
@@ -25,7 +26,7 @@ let busy=false;
 async function travelTo(a){const pos=geoPoint(a),g=window.__berlinMetroGame,o=g?.__allStreetOverlay;if(!pos||!o||!g.player||g.player.activeTrain||g.player.__u8Active||busy)return false;busy=true;try{
 if(!g.player.__streetMode)await o.open(context(g));if(!g.player.__streetMode)return false;
 const api=window.BerlinStreetView2;let used=false;
-for(let i=0;i<80;i++){const pano=api?.getPanorama?.();if(api?.state?.mode==="programmable"&&pano?.setPosition){pano.setPosition(pos);used=true;break}if(api?.state?.mode==="legacy-fallback")break;await new Promise(r=>setTimeout(r,90))}
+for(let i=0;i<80;i++){const pano=api?.getPanorama?.();if(api?.state?.mode==="programmable"&&pano?.setPosition){pano.setPosition(pos);used=true;break}if(api?.state?.mode==="legacy-fallback")break;await Tick.sleep(90,'boot.CityClean')}
 if(!used){api?.forceFallback?.();const u=new URL("https://maps.google.com/maps");u.searchParams.set("layer","c");u.searchParams.set("cbll",pos.lat+","+pos.lng);u.searchParams.set("cbp","12,0,,0,0");u.searchParams.set("source","embed");u.searchParams.set("output","svembed");o.frame.style.display="block";o.frame.src=u.href;const canvas=o.root.querySelector("#berlin-programmable-streetview");if(canvas)canvas.style.display="none"}
 window.BerlinProximity.lastTravel={id:a.id,name:a.name,stationId:where()?.id,mode:used?"api":"fallback",at:Date.now()};return true
 }catch(e){console.warn("[Berlin] travel",e);return false}finally{busy=false}}

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 
 const G={
@@ -112,6 +113,6 @@ function beginExit(n,t,group){
       }
       requestAnimationFrame(loop);console.info('[Metro] U8 NPC V2 ready · U2 style + reserved slots');return;
     }
-    await new Promise(r=>setTimeout(r,100));
+    await Tick.sleep(100,'boot.U8PassengerFlowV2');
   }
 })().catch(e=>console.error('[Metro] U8 NPC V2 disabled',e));

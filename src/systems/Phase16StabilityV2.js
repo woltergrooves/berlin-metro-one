@@ -65,4 +65,4 @@ function install(game){if(game.__phase16StabilityV2)return;game.__phase16Stabili
   Tick.every('phase16.street-stability',90,()=>{cleanupStreetUI(game);failSafeExits(game);if(game.player.__streetMode)addTalkButton(game)});
   game.phase16StabilityVersion='V2-streetview-all-stations-talk-inline';game.ui?.notify?.('Phase 16 stabiliteit · Street View + praten gefixt');
 }
-(async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.stations&&g?.__allStreetOverlay){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Phase16 stability V2 failed',e));
+(async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.stations&&g?.__allStreetOverlay){install(g);return}await Tick.sleep(100,'boot.Phase16StabilityV2')}})().catch(e=>console.error('[Metro] Phase16 stability V2 failed',e));

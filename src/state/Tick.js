@@ -13,13 +13,22 @@
 //
 //   Tick.every(name, ms, fn, { background })   herhaal fn elke ms; geeft een id terug
 //   Tick.until(name, ms, fn, timeoutMs)        roep fn elke ms aan tot die iets "waars" teruggeeft
+//   Tick.sleep(ms, name)                       wacht minstens ms (één keer); geeft een Promise terug
 //   Tick.cancel(id)                            stop een taak (null/undefined mag)
 //   Tick.list()                                overzicht voor de GOD/inspector en probes
 //
 // Gedrag per taak is verder gelijk aan setInterval: de eerste aanroep is na `ms`, niet direct.
+//
+// Deel 2: opstart-wachtlussen. 48 systemen wachtten bij het opstarten tot een minuut lang, elk
+// met een eigen `setTimeout(r,100)`, tot de game (of een ander systeem) klaar was. Die lussen
+// slapen nu via `Tick.sleep`: dezelfde lus, dezelfde voorwaarde en hetzelfde aantal pogingen,
+// maar alle slapers worden op een vast raster van SLEEP_GRID_MS samen gewekt (één wekbeurt in
+// plaats van één per systeem). Een slaap duurt daardoor `ms` tot `ms + SLEEP_GRID_MS`.
+// Slapers lopen ook door als het tabblad verborgen is (net als de oude setTimeout).
 
 const SLACK_MS = 16;      // taken die binnen één frame aan de beurt zijn, samen draaien
 const MAX_ERRORS_LOGGED = 3;
+const SLEEP_GRID_MS = 25; // raster waarop opstart-slapers samen wakker worden
 
 const tasks = new Map();  // id → taak
 let nextId = 1, handle = null, handleAt = Infinity, wakeups = 0;
@@ -59,6 +68,7 @@ function pump() {
     if (task.deadline !== null && t >= task.deadline) { finish(id, task, 'time-out'); continue; }
     const result = call(task);
     if (!tasks.has(id)) continue;                     // taak heeft zichzelf gestopt
+    if (task.kind === 'once') { tasks.delete(id); continue; }
     if (task.kind === 'until' && result) { finish(id, task, 'klaar'); continue; }
     // Vaste maat zoals setInterval, maar na een lange pauze niet "inhalen".
     task.next += task.every;
@@ -94,12 +104,23 @@ if (typeof document !== 'undefined') {
   });
 }
 
+function sleep(ms, name = 'slaap') {
+  return new Promise(resolve => {
+    const id = add('once', name, ms, resolve, { background: true });
+    const task = tasks.get(id);
+    task.next = Math.ceil(task.next / SLEEP_GRID_MS) * SLEEP_GRID_MS;  // op het gedeelde raster
+    arm();
+  });
+}
+
 export const Tick = {
-  version: 'Tick 1 · fase 1 stap 7 deel 1',
+  version: 'Tick 2 · fase 1 stap 7 deel 2',
   /** Herhaal fn elke ms (pauzeert bij verborgen tabblad, tenzij background). */
   every: (name, ms, fn, opts = {}) => add('every', name, ms, fn, { background: !!opts.background }),
   /** Roep fn elke ms aan tot die iets waars teruggeeft of timeoutMs verstrijkt. */
   until: (name, ms, fn, timeoutMs = null, onTimeout = null) => add('until', name, ms, fn, { background: true, timeoutMs, onTimeout }),
+  /** Wacht minstens ms (opstart-wachtlussen); alle slapers delen één raster en wekbeurt. */
+  sleep,
   /** Stop een taak. */
   cancel(id) { if (id != null && tasks.delete(id)) arm(); },
   /** Overzicht van de lopende taken. */

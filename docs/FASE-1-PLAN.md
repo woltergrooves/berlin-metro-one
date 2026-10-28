@@ -187,3 +187,39 @@ Deel 1:
   origineel). Dat is 60 s nutteloos pollen; aanzetten is een gameplay-wijziging. Hoort bij deel 2.
 - Ook gezien: `stations.consistency` (CrossSystemStationConsistencyV1) slaagt nooit en pollt dus
   25 s lang elke 150 ms; de Hinterhof-validatie meldt `ok: false`. Beide ook in de oude versie.
+
+## Stap 7 deel 2 — opstart-wachtlussen (28 oktober 2026)
+
+- `Tick.sleep(ms, naam)` toegevoegd aan `src/state/Tick.js` (versie "Tick 2"). Alle slapers worden op
+  een gedeeld raster van 25 ms samen gewekt: één wekbeurt voor alle wachtende systemen in plaats van
+  één timer per systeem. Een slaap duurt `ms` tot `ms + 25`; loopt ook door bij een verborgen tabblad
+  (zoals de oude `setTimeout`). Slapers staan in `Tick.list()` als `kind: 'once'`, naam `boot.<Bestand>`.
+- Omgezet: alle 48 opstart-wachtlussen (`for(i<N){…await new Promise(r=>setTimeout(r,M))}`) in 48
+  bestanden, plus de geneste wachtlus in Phase67RestoreV2 (wacht op StationLifeVisualV72) en de
+  opstartlus van ProgrammableStreetViewV2 (eigen `sleep`-helper). Alleen de slaap is vervangen:
+  voorwaarde, aantal pogingen, `return`/`break`, time-out-melding en alle code eromheen zijn gelijk.
+  Mechanisch gedaan met een script dat per lus precies de lus-slaap vervangt (bij AlexanderStairSeamFixV2
+  is de eenmalige 80 ms-pauze na "klaar" bewust gebleven).
+- Niet omgezet (geen opstartlus): `waitForFrame` in ProgrammableStreetViewV2 (Street View tijdens het spelen).
+- Bewust niet gekozen: één "game klaar"-gebeurtenis. De lussen wachten op verschillende dingen
+  (versievlaggen van andere systemen, `__berlinMetroU8Trains`, overlays); een gebeurtenis zou de
+  volgorde veranderen. De gedeelde slaap houdt de volgorde en haalt de losse timers weg.
+- Unit-test `tick-test.mjs`: 13/13 (5 nieuw: 40 slapers in 2 wekbeurten, 102 ms voor sleep(100),
+  opruimen, verborgen tabblad, volledige lus).
+- `tools/consolidation/bootwait-probe.mjs` (nieuwe save, iPad, oud naast nieuw, warme runs; headless is ruisig):
+
+  | eerste 10 s na Start | oud (3 runs) | nieuw (3 runs) |
+  |---|---|---|
+  | setTimeout-callbacks | 240–404 | 129–261 |
+  | daarvan 25–100 ms (wachtlussen) | 216–334 | 92–157 |
+  | wachtende systemen na 10 s | — | 2 |
+
+  Console-meldingen ("ready", "timed out", …) identiek, 0 fouten. Game-vlaggen gelijk aan oud; in één
+  oude run ontbraken `contactsVersion`, `homeUpgradesVersion` en Gfx V3 (race in de oude versie), in
+  alle nieuwe runs waren ze er.
+- Na 10 s wachten er nog maar twee: RuntimeCleanupV1 (loopt bewust de volle 600 beurten, doet werk per
+  beurt) en Phase851FixV1 (kan nooit starten, zie deel 1). Door het raster duren die nu ±60–75 s in
+  plaats van 60 s. Phase851Fix aanzetten of weghalen = gameplay-keuze, niet gedaan.
+- `probe3.mjs`: 0 fouten, zelfde stappen als oud (4 "no button"). Soms een `ERR_ABORTED` op een
+  `.glb` in de lijst mislukte verzoeken: komt ook bij de oude versie willekeurig voor (devserver/headless),
+  modellen laden wel ("pipeline ready").

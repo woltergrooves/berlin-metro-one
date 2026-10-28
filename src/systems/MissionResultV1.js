@@ -39,4 +39,4 @@ function install(game){
   Tick.every('mission.result',700,()=>{const s=read(),st=s?.activeDelivery?.status;if(st==='done'&&lastStatus!=='done')maybeShow();lastStatus=st});
   game.missionResultVersion='V1';
 }
-(async()=>{for(let i=0;i<500;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.ui){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Mission result failed',e));
+(async()=>{for(let i=0;i<500;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.ui){install(g);return}await Tick.sleep(100,'boot.MissionResultV1')}})().catch(e=>console.error('[Metro] Mission result failed',e));

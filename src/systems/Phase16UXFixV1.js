@@ -53,4 +53,4 @@ function install(game){
   document.addEventListener('metro-street-cell',()=>setTimeout(()=>apply(game),0));
   game.phase16UXFixVersion='V1';
 }
-(async()=>{for(let i=0;i<500;i++){const g=globalThis.__berlinMetroGame;if(g?.player){install(g);return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] Phase16 UX fix failed',e));
+(async()=>{for(let i=0;i<500;i++){const g=globalThis.__berlinMetroGame;if(g?.player){install(g);return}await Tick.sleep(100,'boot.Phase16UXFixV1')}})().catch(e=>console.error('[Metro] Phase16 UX fix failed',e));

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import { CONFIG } from '../config.js';
 import { computeMoveDelta } from '../core/motion.js';
 
@@ -50,7 +51,7 @@ async function boot(){
       install(game);
       return;
     }
-    await new Promise(r=>setTimeout(r,100));
+    await Tick.sleep(100,'boot.AlexanderStairSeamFixV2');
   }
   console.warn('[Metro] Alexander stair seam V2 timed out');
 }

@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 const GREEN=0x48d474, AMBER=0xf2b632, RED=0xb73732, OFF=0x242729;
 function lamp(train,dx,side){
@@ -26,5 +27,5 @@ function drawLabel(o,d,side){
     for(const t of ts){if(t.userData.__doorFlowPolish)continue;const d=t.userData.u8;t.userData.__doorFlowPolish={lamps:[],labels:[label(t,-1),label(t,1)]};for(const door of d.doors||[])for(const side of[-1,1])t.userData.__doorFlowPolish.lamps.push(lamp(t,door.dx,side));}
     function loop(){for(const t of ts){const d=t.userData.u8,p=t.userData.__doorFlowPolish;if(!d||!p)continue;const platform=d.platformSide||1;for(const L of p.lamps){let c=OFF;if(d.fullPhase==='close')c=L.side===platform?AMBER:RED;else if((d.fullPhase==='open'||d.fullPhase==='dwell')&&d.door>.72)c=L.side===platform?GREEN:RED;L.m.color.setHex(c)}drawLabel(p.labels[0],d,-1);drawLabel(p.labels[1],d,1)}requestAnimationFrame(loop)}loop();console.info('[Metro] U8 door flow polish ready');return;
   }
-  await new Promise(r=>setTimeout(r,100));
+  await Tick.sleep(100,'boot.U8DoorFlowPolish');
 }})().catch(e=>console.error('[Metro] door flow polish disabled',e));

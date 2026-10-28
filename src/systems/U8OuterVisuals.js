@@ -1,3 +1,4 @@
+import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 
 const PROFILES={
@@ -28,4 +29,4 @@ function decorate(g,name,a,zc){if(g.userData.__outerPolish)return;g.userData.__o
  if(name==='Osloer Straße'||name==='Gesundbrunnen'||name==='Hermannstraße'){const tr=sign(name==='Osloer Straße'?'Umsteigen U9':name==='Gesundbrunnen'?'S-Bahn · Regionalbahn':'S-Bahn · Ringbahn','#1973b9');tr.position.set(cx+12,-.76,zc);tr.rotation.y=Math.PI/2;g.add(tr)}
  if(name==='Karl-Bonhoeffer-Nervenklinik'||name==='Hermannstraße'){for(const x of[cx-17,cx+17]){box(g,[6,.25,2.8],[x,-4.02,zc+4.5],mat(0x505456));box(g,[.22,2.7,2.8],[x-2.85,-2.65,zc+4.5],mat(col))}}
 }
-(async()=>{for(let i=0;i<600;i++){const t=globalThis.__berlinMetroU8Trains;if(Array.isArray(t)&&t.length>1&&t[0]?.parent){const root=t[0].parent,zc=(t[0].position.z+t[1].position.z)/2;for(const [name,a] of Object.entries(PROFILES)){const g=root.children.find(c=>c.name===`U8:${name}`);if(g)decorate(g,name,a,zc)}console.info('[Metro] outer U8 visuals ready');return}await new Promise(r=>setTimeout(r,100))}})().catch(e=>console.error('[Metro] outer visuals disabled',e));
+(async()=>{for(let i=0;i<600;i++){const t=globalThis.__berlinMetroU8Trains;if(Array.isArray(t)&&t.length>1&&t[0]?.parent){const root=t[0].parent,zc=(t[0].position.z+t[1].position.z)/2;for(const [name,a] of Object.entries(PROFILES)){const g=root.children.find(c=>c.name===`U8:${name}`);if(g)decorate(g,name,a,zc)}console.info('[Metro] outer U8 visuals ready');return}await Tick.sleep(100,'boot.U8OuterVisuals')}})().catch(e=>console.error('[Metro] outer visuals disabled',e));
