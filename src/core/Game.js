@@ -7,6 +7,7 @@ import { EconomySystem } from '../systems/EconomySystem.js';
 import { InteractionSystem } from '../systems/InteractionSystem.js';
 import { WorldStreamer } from '../world/WorldStreamer.js';
 import { TrainSystem } from '../world/Train.js';
+import { Tick } from '../state/Tick.js';
 
 export class Game {
   constructor(root, ui) {
@@ -81,7 +82,11 @@ export class Game {
     this.ui.interactButton?.addEventListener('pointerdown', this.handleInteract);
 
     this.onResize = this.onResize.bind(this);
-    this.loop = this.loop.bind(this);
+    // Fase 1 stap 7 deel 3: één frame-update. De kern (incl. prototype-patches NpcPatch/AudioPatch)
+    // staat in frameCore; systemen haken in via Tick.frame i.p.v. game.loop te vervangen.
+    const core = this.loop.bind(this);
+    this.frameCore = core;
+    this.loop = () => Tick.runFrame(core);
     window.addEventListener('resize', this.onResize, { passive: true });
     window.addEventListener('orientationchange', () => setTimeout(this.onResize, 120), { passive: true });
     this.onResize();

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {Game} from '../core/Game.js';
+import { Tick } from '../state/Tick.js';
 
 const done=new WeakSet(), matCache=new Map();
 function texture(kind,renderer){
@@ -28,6 +29,6 @@ function install(game){
   const scan=()=>game.scene.traverse(polish);scan();for(const c of game.world?.chunks?.values?.()||[])addDetails(c);
   if(game.world&&!game.world.__polishLoad){game.world.__polishLoad=true;const load=game.world.load.bind(game.world);game.world.load=i=>{load(i);const c=game.world.chunks.get(i);if(c){addDetails(c);c.structure.traverse(polish);}};}
   const vignette=document.createElement('div');vignette.style.cssText='position:fixed;inset:0;z-index:9000;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 52%,rgba(0,0,0,.14));';document.body.appendChild(vignette);
-  let last=0;const loop=game.loop;game.loop=function(){const now=performance.now();if(now-last>1800){last=now;scan();}vignette.style.display=game.player?.__streetMode?'none':'';return loop();};game.renderer.setAnimationLoop(game.loop);game.visualPolishVersion='V3-modern-lite';
+  let last=0;Tick.frame('VisualPolishV3',{before(){const now=performance.now();if(now-last>1800){last=now;scan();}vignette.style.display=game.player?.__streetMode?'none':'';}});game.visualPolishVersion='V3-modern-lite';
 }
 const start=Game.prototype.start;Game.prototype.start=function(){const r=start.call(this);install(this);return r;};

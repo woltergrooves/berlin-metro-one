@@ -83,13 +83,10 @@ function installPankowFrequency(game){
       game.ui?.notify?.('U2 richting Pankow volgt snel');
     }
   };
-  const loop2=game.loop;
-  game.loop=function(){
-    const r=loop2();
+  
+  Tick.frame('Phase851FixV1',{after(){
     serviceTick();
-    return r;
-  };
-  game.renderer.setAnimationLoop(game.loop);
+    }});
   game.pankowServiceVersion='FastLocalV1';
   console.info('[Metro] Pankow local service frequency boosted');
 }

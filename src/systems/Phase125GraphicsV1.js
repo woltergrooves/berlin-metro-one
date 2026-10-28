@@ -67,9 +67,8 @@ function makeU2Floor(game,st){
 
 function install(game){
   if(game.__phase125)return;game.__phase125=true;
-  const local=ensureNeutralLight(game),base=game.loop;let n=0;
-  game.loop=function(){
-    const r=base();
+  const local=ensureNeutralLight(game);let n=0;
+  Tick.frame('Phase125GraphicsV1',{after(){
     const idx=u8Visibility(game);
     if((n++%40)===0)for(const s of U8_STOPS)addU8Shell(game,s);
     const p=game.player;
@@ -80,9 +79,7 @@ function install(game){
     }else if(!p.__streetMode&&p.currentStation){
       const g=makeU2Floor(game,p.currentStation);g.visible=true;local.position.set(2.7,3.4,p.currentStation.z);local.intensity=1.05;
     }else local.intensity=.45;
-    return r;
-  };
-  game.renderer.setAnimationLoop(game.loop);
+    }});
   game.graphicsFoundationVersion='12.5-V1';
   game.u8PlatformFixVersion='V3';
   game.ui?.notify?.('Graphics 12.5 · PBR perrons + neutrale U8-materialen actief');

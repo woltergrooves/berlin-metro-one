@@ -49,11 +49,10 @@ function buildU8(g,stop,game){clear(g);const [accent,dark]=theme(stop.name,'U8')
  benchX(g,-10,-2.4,D,A);benchX(g,9,2.4,D,A);bin(g,-4,3.2,D,A);bin(g,13,-3.2,D,A);machine(g,18,3.6,D,A,'x');machine(g,-18,-3.6,D,A,'x');
  wallAdU8(g,22,-11.74,0,h);wallAdU8(g,-22,11.74,Math.PI,h+1);
 }
-function install(game){if(game.__stationLifeVisualV72)return;const u2=new THREE.Group(),u8=new THREE.Group();u2.name='StationLifeV72:U2';u8.name='StationLifeV72:U8';game.scene.add(u2,u8);let key2='',key8='';const base=game.loop;
- game.loop=function(){const p=game.player,street=!!p.__streetMode,idx=Number.isInteger(p.__u8FullStation)?p.__u8FullStation:null;const st=p.currentStation;
+function install(game){if(game.__stationLifeVisualV72)return;const u2=new THREE.Group(),u8=new THREE.Group();u2.name='StationLifeV72:U2';u8.name='StationLifeV72:U8';game.scene.add(u2,u8);let key2='',key8='';
+ Tick.frame('StationLifeVisualV72',{before(){const p=game.player,street=!!p.__streetMode,idx=Number.isInteger(p.__u8FullStation)?p.__u8FullStation:null;const st=p.currentStation;
   const show2=!street&&!p.__u8Active&&idx===null&&st&&st.id!=='alexanderplatz';if(show2){const k=st.id||st.name;if(k!==key2){buildU2(u2,st);key2=k}u2.visible=true}else u2.visible=false;
-  const show8=!street&&!p.__u8Active&&idx!==null&&idx!==U8_ALEX_INDEX&&U8_STOPS[idx];if(show8){if(String(idx)!==key8){buildU8(u8,U8_STOPS[idx],game);key8=String(idx)}u8.visible=true}else u8.visible=false;return base()};
- game.renderer.setAnimationLoop(game.loop);game.__stationLifeVisualV72={u2,u8};game.stationDetailVersion='V7.2';game.ui?.notify?.('Stations V7.2: inrichting van spoor af + zicht vanuit trein hersteld');console.info('[Metro] Station Life V7.2 active — real wall faces, inboard furniture');
+  const show8=!street&&!p.__u8Active&&idx!==null&&idx!==U8_ALEX_INDEX&&U8_STOPS[idx];if(show8){if(String(idx)!==key8){buildU8(u8,U8_STOPS[idx],game);key8=String(idx)}u8.visible=true}else u8.visible=false;}});game.__stationLifeVisualV72={u2,u8};game.stationDetailVersion='V7.2';game.ui?.notify?.('Stations V7.2: inrichting van spoor af + zicht vanuit trein hersteld');console.info('[Metro] Station Life V7.2 active — real wall faces, inboard furniture');
 }
 async function boot(){for(let i=0;i<600;i++){const game=globalThis.__berlinMetroGame;if(game?.player&&game?.scene&&game?.renderer&&game?.exitGuaranteeVersion==='UniversalStationExitV5'){install(game);return}await Tick.sleep(100,'boot.StationLifeVisualV72')}console.warn('[Metro] Station Life V7.2 timed out')}
 boot().catch(e=>console.error('[Metro] Station Life V7.2 failed',e));

@@ -40,4 +40,29 @@ ok(slept, 'sleep loopt door bij verborgen tabblad');
 document.hidden = false; listeners.visibilitychange();
 let n = 0; for (let i = 0; i < 5; i++) { n++; await Tick.sleep(30, 'lus'); }
 ok(n === 5, 'wachtlus met Tick.sleep doet alle pogingen');
+// Deel 3: frame-hooks. Vergelijk met de oude manier (game.loop steeds opnieuw inwikkelen).
+{
+  const kinds = ['before', 'after', 'beide', 'after', 'before', 'beide', 'after', 'before'];
+  const oldLog = [], newLog = [];
+  let oldLoop = () => oldLog.push('kern');
+  kinds.forEach((k, i) => {
+    const base = oldLoop;
+    oldLoop = () => { if (k !== 'after') oldLog.push('v' + i); base(); if (k !== 'before') oldLog.push('n' + i); };
+    Tick.frame('h' + i, { before: k !== 'after' ? () => newLog.push('v' + i) : null, after: k !== 'before' ? () => newLog.push('n' + i) : null });
+  });
+  for (let f = 0; f < 3; f++) { oldLoop(); Tick.runFrame(() => newLog.push('kern')); }
+  ok(JSON.stringify(oldLog) === JSON.stringify(newLog), `frame-volgorde gelijk aan oude wrapperketen (${newLog.slice(0, 13).join(' ')} …)`);
+  let ran = 0, coreRan = 0;
+  const bad = Tick.frame('kapot', { before: () => { throw new Error('test'); } });
+  Tick.frame('na-kapot', { after: () => ran++ });
+  Tick.runFrame(() => coreRan++); Tick.runFrame(() => coreRan++);
+  const info = Tick.frames().find(h => h.name === 'kapot');
+  ok(info.errors === 2 && ran === 2 && coreRan === 2, 'fout in frame-hook telt, kern en andere hooks lopen door');
+  let late = 0;
+  const adder = Tick.frame('voegt-toe', { after: () => { if (!late) Tick.frame('laat', { before: () => late++, after: () => late++ }); } });
+  Tick.runFrame(() => {}); const l1 = late; Tick.runFrame(() => {});
+  ok(l1 === 0 && late === 2, 'hook die tijdens een frame bijkomt, loopt pas vanaf het volgende frame');
+  Tick.cancel(bad); Tick.cancel(adder); const nHooks = Tick.stats.frameHooks;
+  ok(!Tick.frames().some(h => h.name === 'kapot') && nHooks === kinds.length + 2, `cancel haalt frame-hook weg (${nHooks} over)`);
+}
 process.exit();

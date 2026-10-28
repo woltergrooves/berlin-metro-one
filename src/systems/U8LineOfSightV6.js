@@ -26,7 +26,7 @@ async function install(){for(let i=0;i<600;i++){
   const line=chunk?.structure?.userData?.u8FullLine;
   if(game&&line&&Array.isArray(game.u8Trains)){
     if(game.__u8SightlineV6)return;game.__u8SightlineV6=true;
-    const base=game.loop;game.loop=function(){const r=base();apply(game,line);return r};game.renderer.setAnimationLoop(game.loop);
+    Tick.frame('U8LineOfSightV6',{after(){apply(game,line);}});
     apply(game,line);console.info('[Metro] U8 sightline V6 ready');return;
   }
   await Tick.sleep(100,'boot.U8LineOfSightV6');

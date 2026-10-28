@@ -161,7 +161,7 @@ Gemeten met `tools/consolidation/jobs-god-probe.mjs` (oude en nieuwe versie naas
 Stap 7 bleek drie soorten losse timers te hebben. Daarom in drie delen:
 1. **herhalende `setInterval`-timers** (dit deel);
 2. **opstart-wachtlussen**: 48 systemen die tot 60 s, 10× per seconde, op `__berlinMetroGame` wachten;
-3. **`game.loop`-wrappers**: 25 systemen die zich om de game-loop heen wikkelen.
+3. **`game.loop`-wrappers** (✅ deel 3): 26 systemen die zich om de game-loop heen wikkelen.
 
 Deel 1:
 - Nieuw: `src/state/Tick.js` (`BerlinTick`, ook als `BerlinState.tick`). Eén timer voor alles:
@@ -223,3 +223,27 @@ Deel 1:
 - `probe3.mjs`: 0 fouten, zelfde stappen als oud (4 "no button"). Soms een `ERR_ABORTED` op een
   `.glb` in de lijst mislukte verzoeken: komt ook bij de oude versie willekeurig voor (devserver/headless),
   modellen laden wel ("pipeline ready").
+
+## Stap 7 deel 3 — één frame-update (28 oktober 2026)
+- Tick uitgebreid met een frame-lijst (`Tick 3`): `Tick.frame(naam, { before, after })`, `Tick.runFrame(kern)`,
+  `Tick.frames()` (per hook: volgorde, runs, fouten, gem. ms). `Game.loop` is nu `() => Tick.runFrame(kern)`;
+  de kern (`game.frameCore`) is de oude Game-loop inclusief de prototype-patches NpcPatch en AudioPatch (die
+  waren al onderdeel van de kern via `bind`, bewust zo gelaten).
+- Het waren 26 wrappers, niet 25: GfxV3 heette `g.loop` en viel buiten de eerdere telling (Phase823V1 heeft er 2).
+  Alle 26 omgezet met een script dat elke vervanging precies één keer controleert. Elke wrapper riep de vorige
+  loop precies één keer aan zonder vroege `return`, dus splitsen kon zonder gedragswijziging:
+  13 alleen `after`, 11 alleen `before`, 2 beide (Phase12FixV2, Phase1315V1: tijd/dt meten vóór de kern, werk erna).
+- Geen enkele `game.loop = function` of extra `setAnimationLoop` meer in `src/systems`; alleen `Game.start` zet de loop.
+- Volgorde: zoals de oude keten — `before` van laatst naar eerst geïnstalleerd, dan de kern, dan `after` van eerst
+  naar laatst. Hooks die tijdens een frame bijkomen lopen vanaf het volgende frame (zoals vroeger).
+- Bewust anders: een fout in één hook stopt het frame niet meer; hij wordt per hook geteld en (max. 3×) gelogd.
+  Een fout in de kern stopt het frame wel, zoals vroeger.
+- Tests: `tick-test.mjs` (4 nieuwe: volgorde identiek aan een oude wrapperketen van 8, fout-isolatie, laat
+  toegevoegde hook, cancel). `frame-probe.mjs` (nieuw, oud vs. nieuw, 3 runs elk): zelfde game-vlaggen, zelfde
+  zichtbare scene-objecten, spelklok en frames per 20 s gelijk binnen ruis, 25 hooks actief (Phase851FixV1
+  installeert nooit), 0 fouten in hooks. `streetOutdoorVersion` is soms V4.1-static en soms V4.2-static — in
+  beide versies: race tussen de opstartlussen van Phase67RestoreV2 en Phase823V1 (open punt, niet aangeraakt).
+  `probe3.mjs`: 0 fouten, zelfde 4 "no button"-stappen; "failed" = geblokkeerde externe geluiden/foto's +
+  willekeurige `ERR_ABORTED` op `.glb` (ook in oud).
+- Duurste hooks per frame (headless, swiftshader): Phase910V1 ±11 ms, Phase1315V1 ±4 ms, Phase125TexturesV2 ±3 ms,
+  GfxV3 ±3 ms — kandidaten voor later (deze draaien elk frame werk dat niet elk frame hoeft).

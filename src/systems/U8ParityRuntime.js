@@ -4,6 +4,7 @@ import {TrainTimeline} from './TrainTimeline.js';
 import {U8_STOPS,U8_ALEX_INDEX,stopX,addFullRouteMap} from './U8FullLineVisual.js';
 import {U8Service} from './U8Service.js';
 import {moveU8Player} from './U8Movement.js';
+import { Tick } from '../state/Tick.js';
 
 function cloneTrain(source){
   const clone=source.clone(true),before=[],after=[];
@@ -101,9 +102,8 @@ export function installU8FullRuntime(game,hud,train,line){
   const updateMachine=ticketMachine(game,line);
   game.u8Trains=trains;
   globalThis.__berlinMetroU8Trains=trains;globalThis.__berlinMetroU8Train=train;
-  const base=game.loop;let last=performance.now(),serviceTime=0;
-  game.loop=function(){
-    const now=performance.now(),delta=Math.min(.05,Math.max(0,(now-last)/1000));last=now;serviceTime+=delta;
+  let last=performance.now(),serviceTime=0;
+  Tick.frame('U8ParityRuntime',{before(){const now=performance.now(),delta=Math.min(.05,Math.max(0,(now-last)/1000));last=now;serviceTime+=delta;
     const p=game.player,index=stationIndex(p);
     updateMachine(index);
     for(const t of trains){
@@ -117,9 +117,7 @@ export function installU8FullRuntime(game,hud,train,line){
     const anchors=[p.position.x,...trains.map(t=>t.position.x)];
     for(const group of line.groups){if(group)group.visible=anchors.some(x=>Math.abs(group.userData.centerX-x)<190);}
     for(const group of line.segments){if(group)group.visible=anchors.some(x=>Math.abs(group.userData.centerX-x)<150);}
-    return base();
-  };
-  game.renderer.setAnimationLoop(game.loop);
+    }});
   game.u8ServiceVersion='U2-shared-timeline-v1';
   game.__u8Parity=true;
 }

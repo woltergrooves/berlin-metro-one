@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {Game} from '../core/Game.js';
 import {createHoffPatrol,stepHoffPatrol} from './HoffPatrol.js';
+import { Tick } from '../state/Tick.js';
 
 export function buildHasselhoff(){
   const root=new THREE.Group();root.name='DavidHasselhoff';
@@ -24,8 +25,8 @@ function install(game){
   function talk(){if(!visible||sheet)return;npc.root.userData.pausePatrol=true;sheet=document.createElement('div');sheet.id='hoffConversation';sheet.style.cssText='position:fixed;inset:0;z-index:22000;display:flex;align-items:flex-end;justify-content:center;background:#0007;color:#fff;font-family:Arial';const card=document.createElement('div');card.style.cssText='width:min(480px,100vw);padding:20px 20px max(20px,env(safe-area-inset-bottom));border-radius:20px 20px 0 0;background:#171c25;border-top:2px solid #e9bd22';card.innerHTML='<h2>David Hasselhoff</h2><p>Berlin has always been special to me.</p>';const button=document.createElement('button');button.textContent='Sluiten';button.style.cssText='display:block;width:100%;padding:13px;border:0;border-radius:10px;background:#303a49;color:#fff;font-weight:800';button.onclick=close;card.appendChild(button);sheet.onclick=e=>{if(e.target===sheet)close()};sheet.appendChild(card);document.body.appendChild(sheet);}
   npc.root.userData.interaction={kind:'npc',id:'david-hasselhoff',label:'Praat met David Hasselhoff',action:talk};
   const focus=game.ui.onInteractionFocus;game.ui.onInteractionFocus=function(interaction){if(interaction?.id==='david-hasselhoff'){const b=this.interactButton;b.textContent='PRAAT MET DAVID';b.classList.remove('hidden');return;}return focus.call(this,interaction);};
-  const base=game.loop;let last=performance.now();game.loop=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;const p=game.player,next=p.currentStation?.id==='alexanderplatz'&&!p.activeTrain&&!p.__u8Active&&!p.__u8Area&&!Number.isInteger(p.__u8FullStation)&&!p.__streetMode;if(next!==visible){visible=next;npc.root.visible=visible;if(visible)game.interaction.add(npc.root);else{game.interaction.remove(npc.root);close();}}
+  let last=performance.now();Tick.frame('HasselhoffNpcV2',{before(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;const p=game.player,next=p.currentStation?.id==='alexanderplatz'&&!p.activeTrain&&!p.__u8Active&&!p.__u8Area&&!Number.isInteger(p.__u8FullStation)&&!p.__streetMode;if(next!==visible){visible=next;npc.root.visible=visible;if(visible)game.interaction.add(npc.root);else{game.interaction.remove(npc.root);close();}}
     if(visible){patrol.paused=!!npc.root.userData.pausePatrol;stepHoffPatrol(patrol,dt);npc.root.position.set(patrol.x,0,alex.z+patrol.z);npc.root.rotation.y=patrol.yaw;const swing=patrol.moving&&!patrol.paused?Math.sin(patrol.walkTime*8)*.4:0;npc.legs[0].rotation.x=swing;npc.legs[1].rotation.x=-swing;npc.arms[0].rotation.x=-swing*.65;npc.arms[1].rotation.x=swing*.65;}
-    return base();};game.renderer.setAnimationLoop(game.loop);game.hasselhoffNpcVersion='V2-pauseable';
+    }});game.hasselhoffNpcVersion='V2-pauseable';
 }
 const start=Game.prototype.start;Game.prototype.start=function(){const r=start.call(this);install(this);return r;};

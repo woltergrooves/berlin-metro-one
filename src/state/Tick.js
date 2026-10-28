@@ -25,6 +25,19 @@
 // maar alle slapers worden op een vast raster van SLEEP_GRID_MS samen gewekt (één wekbeurt in
 // plaats van één per systeem). Een slaap duurt daardoor `ms` tot `ms + SLEEP_GRID_MS`.
 // Slapers lopen ook door als het tabblad verborgen is (net als de oude setTimeout).
+//
+// Deel 3: één frame-update. Vroeger "wikkelden" 26 systemen elk game.loop in een eigen functie
+// (wrapper rond wrapper rond de kern) en riepen ze elk opnieuw renderer.setAnimationLoop aan.
+// Nu registreert elk systeem een frame-hook met een `before`- en/of `after`-deel:
+//
+//   Tick.frame(name, { before, after })   per frame; geeft een id terug
+//   Tick.runFrame(core)                   één frame: before-hooks, kern, after-hooks
+//   Tick.frames()                         overzicht van de frame-hooks
+//
+// De volgorde is precies die van de oude wrappers: een wrapper die later werd geïnstalleerd zat
+// buitenom, dus `before` loopt van laatst naar eerst geregistreerd, dan de kern, dan `after` van
+// eerst naar laatst. Verschil met vroeger: een fout in één hook stopt het frame niet meer (de
+// andere hooks, de kern en de render lopen door); de fout wordt per hook geteld en gelogd.
 
 const SLACK_MS = 16;      // taken die binnen één frame aan de beurt zijn, samen draaien
 const MAX_ERRORS_LOGGED = 3;
@@ -104,6 +117,36 @@ if (typeof document !== 'undefined') {
   });
 }
 
+const frameHooks = [];    // in registratievolgorde (= oude installatievolgorde)
+let frameCount = 0, frameDirty = false;
+
+function frame(name, { before = null, after = null } = {}) {
+  if (before !== null && typeof before !== 'function') throw new TypeError(`[Berlin Tick] ${name}: before is geen functie`);
+  if (after !== null && typeof after !== 'function') throw new TypeError(`[Berlin Tick] ${name}: after is geen functie`);
+  const id = nextId++;
+  frameHooks.push({ id, name: String(name || 'naamloos'), before, after, dead: false, runs: 0, errors: 0, busyMs: 0 });
+  return id;
+}
+
+function hook(h, fn) {
+  const t0 = now();
+  try { fn(); } catch (e) {
+    h.errors++;
+    if (h.errors <= MAX_ERRORS_LOGGED) console.error(`[Berlin Tick] frame ${h.name}`, e);
+  }
+  h.busyMs += now() - t0;
+}
+
+function runFrame(core) {
+  frameCount++;
+  const n = frameHooks.length;                       // hooks die tijdens dit frame bijkomen: pas volgend frame
+  for (let i = n - 1; i >= 0; i--) { const h = frameHooks[i]; if (!h.dead && h.before) hook(h, h.before); }
+  const r = core();                                  // fout in de kern: zoals vroeger, frame stopt
+  for (let i = 0; i < n; i++) { const h = frameHooks[i]; if (!h.dead) { if (h.after) hook(h, h.after); h.runs++; } }
+  if (frameDirty) { frameDirty = false; for (let i = frameHooks.length - 1; i >= 0; i--) if (frameHooks[i].dead) frameHooks.splice(i, 1); }
+  return r;
+}
+
 function sleep(ms, name = 'slaap') {
   return new Promise(resolve => {
     const id = add('once', name, ms, resolve, { background: true });
@@ -114,15 +157,31 @@ function sleep(ms, name = 'slaap') {
 }
 
 export const Tick = {
-  version: 'Tick 2 · fase 1 stap 7 deel 2',
+  version: 'Tick 3 · fase 1 stap 7 deel 3',
   /** Herhaal fn elke ms (pauzeert bij verborgen tabblad, tenzij background). */
   every: (name, ms, fn, opts = {}) => add('every', name, ms, fn, { background: !!opts.background }),
   /** Roep fn elke ms aan tot die iets waars teruggeeft of timeoutMs verstrijkt. */
   until: (name, ms, fn, timeoutMs = null, onTimeout = null) => add('until', name, ms, fn, { background: true, timeoutMs, onTimeout }),
   /** Wacht minstens ms (opstart-wachtlussen); alle slapers delen één raster en wekbeurt. */
   sleep,
-  /** Stop een taak. */
-  cancel(id) { if (id != null && tasks.delete(id)) arm(); },
+  /** Frame-hook: before/after rond de kern-update (zie deel 3 hierboven). */
+  frame,
+  /** Eén frame draaien (Game.loop). */
+  runFrame,
+  /** Stop een taak of frame-hook. */
+  cancel(id) {
+    if (id == null) return;
+    if (tasks.delete(id)) { arm(); return; }
+    const h = frameHooks.find(x => x.id === id);
+    if (h) { h.dead = true; frameDirty = true; }
+  },
+  /** Overzicht van de frame-hooks, in uitvoervolgorde van de before-delen. */
+  frames() {
+    return frameHooks.filter(h => !h.dead).map((h, i) => ({
+      order: i, name: h.name, before: !!h.before, after: !!h.after, runs: h.runs, errors: h.errors,
+      avgMs: h.runs ? Math.round((h.busyMs / h.runs) * 1000) / 1000 : 0,
+    }));
+  },
   /** Overzicht van de lopende taken. */
   list() {
     return [...tasks.values()].map(t => ({
@@ -130,7 +189,7 @@ export const Tick = {
       avgMs: t.runs ? Math.round((t.busyMs / t.runs) * 100) / 100 : 0, paused: !runnable(t),
     }));
   },
-  get stats() { return { tasks: tasks.size, wakeups, armed: handle !== null }; },
+  get stats() { return { tasks: tasks.size, wakeups, armed: handle !== null, frameHooks: frameHooks.filter(h => !h.dead).length, frames: frameCount }; },
 };
 globalThis.BerlinTick = Tick;
 export default Tick;
