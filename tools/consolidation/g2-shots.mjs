@@ -37,6 +37,9 @@ async function goTo(id, dz, yaw) {
   await page.evaluate(([id, dz, yaw]) => { const g = globalThis.__berlinMetroGame, st = g.stations.find(s => s.id === id); g.player.position.set(2.2, g.player.position.y, st.z + dz); g.player.yaw = yaw; g.player.pitch = 0; }, [id, dz, yaw]);
   await page.waitForFunction(id => globalThis.__berlinMetroGame.player.currentStation?.id === id, id, { timeout: 120000 }).catch(() => {});
   await page.waitForTimeout(6000);
+  // G3a: wacht tot de materiaalscan twee rondes verder is (nieuw geladen station omgezet).
+  const sc = await page.evaluate(() => globalThis.BerlinMaterials?.status().scans ?? -1);
+  if (sc >= 0) await page.waitForFunction(n => globalThis.BerlinMaterials.status().scans >= n + 2, sc, { timeout: 240000 }).catch(() => {});
 }
 const res = { shots: [] };
 res.shots.push(await shot('A1-alexanderplatz'));

@@ -11,6 +11,8 @@ const [url, out = './probe3'] = process.argv.slice(2);
 await fs.mkdir(out, { recursive: true });
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
 const ctx = await browser.newContext({ ...devices['iPad Pro 11 landscape'] });
+// Kwaliteit forceren (headless is te traag met omgevingslicht): QUALITY=laag node probe3.mjs …
+if (process.env.QUALITY) await ctx.addInitScript(q => { try { localStorage.setItem('berlinLife.quality', q); } catch {} }, process.env.QUALITY);
 const page = await ctx.newPage();
 const t0 = Date.now(), T = () => +((Date.now() - t0) / 1000).toFixed(1);
 const log = [], errors = [], failed = [], steps = [];

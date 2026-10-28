@@ -9,6 +9,7 @@ import { WorldStreamer } from '../world/WorldStreamer.js';
 import { TrainSystem } from '../world/Train.js';
 import { Tick } from '../state/Tick.js';
 import { RenderBase } from '../state/RenderBase.js';
+import { MaterialBase } from '../state/MaterialBase.js';
 
 export class Game {
   constructor(root, ui) {
@@ -33,6 +34,7 @@ export class Game {
 
     // G2: belichting, tone mapping, omgevingslicht, mist en kwaliteit komen uit één rendering-basis.
     RenderBase.install(this);
+    MaterialBase.install(this, () => RenderBase.quality);
 
     this.input = new InputController(ui);
     this.economy = new EconomySystem();
