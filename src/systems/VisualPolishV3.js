@@ -29,6 +29,7 @@ function install(game){
   const scan=()=>game.scene.traverse(polish);scan();for(const c of game.world?.chunks?.values?.()||[])addDetails(c);
   if(game.world&&!game.world.__polishLoad){game.world.__polishLoad=true;const load=game.world.load.bind(game.world);game.world.load=i=>{load(i);const c=game.world.chunks.get(i);if(c){addDetails(c);c.structure.traverse(polish);}};}
   const vignette=document.createElement('div');vignette.style.cssText='position:fixed;inset:0;z-index:9000;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 52%,rgba(0,0,0,.14));';document.body.appendChild(vignette);
-  let last=0;Tick.frame('VisualPolishV3',{before(){const now=performance.now();if(now-last>1800){last=now;scan();}vignette.style.display=game.player?.__streetMode?'none':'';}});game.visualPolishVersion='V3-modern-lite';
+  let last=0,stack=null;const step=()=>{let k=0;while(stack.length&&k<1500){const o=stack.pop();polish(o);const ch=o.children;for(let i=ch.length-1;i>=0;i--)stack.push(ch[i]);k++}if(!stack.length)stack=null};
+  Tick.frame('VisualPolishV3',{before(){if(stack)step();else{const now=performance.now();if(now-last>1800){last=now;stack=[game.scene];step();}}vignette.style.display=game.player?.__streetMode?'none':'';}});game.visualPolishVersion='V3-modern-lite';
 }
 const start=Game.prototype.start;Game.prototype.start=function(){const r=start.call(this);install(this);return r;};

@@ -1,4 +1,5 @@
 import { Tick } from '../state/Tick.js';
+import { byName,stopTracker } from '../state/SceneCache.js';
 import * as THREE from 'three';
 import { U8_STOPS,U8_ALEX_INDEX,stopX } from './U8FullLineVisual.js';
 
@@ -21,7 +22,7 @@ function ensureNeutralLight(game){
 
 function addU8Shell(game,stop){
   if(stop.id===U8_ALEX_INDEX)return;
-  const parent=game.scene.getObjectByName(`U8:${stop.name}`); if(!parent)return;
+  const parent=byName(game.scene,`U8:${stop.name}`); if(!parent)return;
   let g=parent.getObjectByName('Phase125Shell'); if(g)return g;
   const alex=game.stations.find(s=>s.id==='alexanderplatz'); if(!alex)return;
   const x=stopX(stop.id),z=alex.z+49,a=accentMat(stop.color);
@@ -50,13 +51,14 @@ function u8Visibility(game){
   else if(p.__u8Active){const d=globalThis.__berlinMetroU8Train?.userData?.u8;if(Number.isInteger(d?.currentIndex))idx=d.currentIndex}
   else if(p.__u8Area&&p.currentStation?.id==='alexanderplatz')idx=U8_ALEX_INDEX;
   if(idx==null)return null;
-  for(const s of U8_STOPS){if(s.id===U8_ALEX_INDEX)continue;const g=game.scene.getObjectByName(`U8:${s.name}`);if(g)g.visible=Math.abs(s.id-idx)<=1}
-  for(let i=0;i<U8_STOPS.length-1;i++){const g=game.scene.getObjectByName(`U8:tunnel:${i}`);if(g)g.visible=i>=idx-1&&i<=idx}
+  for(const s of U8_STOPS){if(s.id===U8_ALEX_INDEX)continue;const g=byName(game.scene,`U8:${s.name}`);if(g)g.visible=Math.abs(s.id-idx)<=1}
+  for(let i=0;i<U8_STOPS.length-1;i++){const g=byName(game.scene,`U8:tunnel:${i}`);if(g)g.visible=i>=idx-1&&i<=idx}
   return idx;
 }
 
+let u2g=null;
 function makeU2Floor(game,st){
-  let g=game.scene.getObjectByName('Phase125U2');if(!g){g=new THREE.Group();g.name='Phase125U2';game.scene.add(g)}
+  let g=u2g?.parent===game.scene?u2g:null;if(!g){g=new THREE.Group();g.name='Phase125U2';game.scene.add(g);u2g=g}
   if(g.userData.key===st.id)return g;g.clear();g.userData.key=st.id;
   box(g,[5.45,.075,55],[2.72,.025,st.z],floor);
   box(g,[.18,.055,55],[-.02,.08,st.z],tactile);
@@ -67,15 +69,15 @@ function makeU2Floor(game,st){
 
 function install(game){
   if(game.__phase125)return;game.__phase125=true;
-  const local=ensureNeutralLight(game);let n=0;
+  const local=ensureNeutralLight(game),shells=stopTracker(U8_STOPS);let n=0;
   Tick.frame('Phase125GraphicsV1',{after(){
     const idx=u8Visibility(game);
-    if((n++%40)===0)for(const s of U8_STOPS)addU8Shell(game,s);
+    if(!shells.complete&&(n++%40)===0)shells.run(s=>s.id===U8_ALEX_INDEX||!!addU8Shell(game,s));
     const p=game.player;
     if(idx!=null){
       const alex=game.stations.find(s=>s.id==='alexanderplatz');
       const x=stopX(idx),z=alex?.z+49??p.position.z;local.position.set(x,-.5,z);local.intensity=1.55;
-      const u2=game.scene.getObjectByName('Phase125U2');if(u2)u2.visible=false;
+      if(u2g)u2g.visible=false;
     }else if(!p.__streetMode&&p.currentStation){
       const g=makeU2Floor(game,p.currentStation);g.visible=true;local.position.set(2.7,3.4,p.currentStation.z);local.intensity=1.05;
     }else local.intensity=.45;

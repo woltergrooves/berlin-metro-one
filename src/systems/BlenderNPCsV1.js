@@ -1,4 +1,5 @@
 import { Tick } from '../state/Tick.js';
+import { byName } from '../state/SceneCache.js';
 import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/loaders/GLTFLoader.js';
 import {NpcSystem} from './NpcSystem.js';
@@ -33,7 +34,7 @@ function convert(n){
 let hoffReplacement=null;
 function swapHoff(game){
  if(!templates||!game?.scene)return;
- const hoff=game.scene.getObjectByName('DavidHasselhoff');
+ const hoff=byName(game.scene,'DavidHasselhoff');
  if(!hoff)return;
  if(!hoffReplacement){
   const template=templates.get('NPC_Clubber');if(!template)return;

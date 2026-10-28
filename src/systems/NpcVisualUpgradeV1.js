@@ -1,4 +1,5 @@
 import { Tick } from '../state/Tick.js';
+import { byName } from '../state/SceneCache.js';
 import * as THREE from 'three';
 import {NpcSystem} from './NpcSystem.js';
 
@@ -38,5 +39,5 @@ function upgradeHoff(npc){if(!npc||npc.userData.__realFaceV1)return;npc.userData
  const hairMat=new THREE.MeshLambertMaterial({color:0x3a261d});const crown=new THREE.Mesh(new THREE.BoxGeometry(.37,.09,.31),hairMat);crown.position.set(0,2.075,-.005);crown.rotation.z=-.03;npc.add(crown);
 }
 function addCredit(sheet){if(!sheet||sheet.querySelector('.hoffPhotoCredit'))return;const d=document.createElement('div');d.className='hoffPhotoCredit';d.textContent='Portrettexture: Georges Biard / Wikimedia Commons · CC BY-SA 3.0';d.style.cssText='font:9px Arial;color:#6f7884;margin-top:7px;opacity:.8';sheet.querySelector('div')?.appendChild(d)}
-const obs=new MutationObserver(()=>{const g=globalThis.__berlinMetroGame,npc=g?.scene?.getObjectByName?.('DavidHasselhoff');if(npc)upgradeHoff(npc);addCredit(document.querySelector('#hoffConversationV2'));addCredit(document.querySelector('#hoffConversation'));});obs.observe(document.documentElement,{childList:true,subtree:true});
-(async()=>{for(let i=0;i<800;i++){const g=globalThis.__berlinMetroGame;if(g?.npcSystem){g.npcSystem.n?.forEach(enhance)}const npc=g?.scene?.getObjectByName?.('DavidHasselhoff');if(npc){upgradeHoff(npc);g.npcVisualVersion='V1-detailed';break}await Tick.sleep(50,'boot.NpcVisualUpgradeV1')}})();
+const obs=new MutationObserver(()=>{const g=globalThis.__berlinMetroGame,npc=byName(g?.scene,'DavidHasselhoff');if(npc)upgradeHoff(npc);addCredit(document.querySelector('#hoffConversationV2'));addCredit(document.querySelector('#hoffConversation'));});obs.observe(document.documentElement,{childList:true,subtree:true});
+(async()=>{for(let i=0;i<800;i++){const g=globalThis.__berlinMetroGame;if(g?.npcSystem){g.npcSystem.n?.forEach(enhance)}const npc=byName(g?.scene,'DavidHasselhoff');if(npc){upgradeHoff(npc);g.npcVisualVersion='V1-detailed';break}await Tick.sleep(50,'boot.NpcVisualUpgradeV1')}})();
