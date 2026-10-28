@@ -8,6 +8,7 @@ import { InteractionSystem } from '../systems/InteractionSystem.js';
 import { WorldStreamer } from '../world/WorldStreamer.js';
 import { TrainSystem } from '../world/Train.js';
 import { Tick } from '../state/Tick.js';
+import { RenderBase } from '../state/RenderBase.js';
 
 export class Game {
   constructor(root, ui) {
@@ -30,7 +31,8 @@ export class Game {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.root.appendChild(this.renderer.domElement);
 
-    this.scene.add(new THREE.HemisphereLight(0xe8efff, 0x2b261f, 1.45));
+    // G2: belichting, tone mapping, omgevingslicht, mist en kwaliteit komen uit één rendering-basis.
+    RenderBase.install(this);
 
     this.input = new InputController(ui);
     this.economy = new EconomySystem();

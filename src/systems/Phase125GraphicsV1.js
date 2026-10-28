@@ -10,14 +10,9 @@ const concrete=std('concrete',0x74787a,.92,.02), floor=std('floor',0x8b8f91,.82,
 const box=(g,s,p,m)=>{const q=new THREE.Mesh(GEO,m);q.scale.set(...s);q.position.set(...p);g.add(q);return q};
 const accentMat=c=>std(`accent:${c}`,c,.65,.04);
 
+// G2: de lichtset staat in src/state/RenderBase.js; dit object vangt de oude positie/intensiteit-schrijfacties op.
 function ensureNeutralLight(game){
-  const old=game.scene.getObjectByName('Phase12UndergroundAmbient');
-  if(old) old.intensity=.62;
-  let hemi=game.scene.getObjectByName('Phase125Hemi');
-  if(!hemi){hemi=new THREE.HemisphereLight(0xf5f1e8,0x45494d,.78);hemi.name='Phase125Hemi';game.scene.add(hemi)}
-  let p=game.scene.getObjectByName('Phase125LocalLight');
-  if(!p){p=new THREE.PointLight(0xfff4dc,1.45,42,1.7);p.name='Phase125LocalLight';game.scene.add(p)}
-  return p;
+  return new THREE.Object3D();
 }
 
 function addU8Shell(game,stop){

@@ -22,8 +22,8 @@ function addDetails(chunk){
 }
 function install(game){
   if(game.__visualPolishV3)return;game.__visualPolishV3=true;
-  game.renderer.toneMapping=THREE.ACESFilmicToneMapping;game.renderer.toneMappingExposure=1.07;
-  const warm=new THREE.DirectionalLight(0xfff1dc,.34);warm.position.set(-6,9,4);game.scene.add(warm);const cool=new THREE.DirectionalLight(0xc4dcff,.13);cool.position.set(8,5,-10);game.scene.add(cool);
+  
+  
   const tex={floor:texture('floor',game.renderer),wall:texture('wall',game.renderer),ceiling:texture('ceiling',game.renderer)};
   const polish=m=>{if(!m?.isMesh||done.has(m))return;done.add(m);const mats=Array.isArray(m.material)?m.material:[m.material];for(const a of mats)if(a?.isMeshBasicMaterial){a.toneMapped=false;a.needsUpdate=true;}const k=type(m);if(!k)return;const next=mats.map(a=>{if(!a||a.map||a.transparent||a.isMeshBasicMaterial)return a;const key=a.uuid+':'+k;if(!matCache.has(key)){const n=a.clone();n.map=tex[k];n.needsUpdate=true;matCache.set(key,n);}return matCache.get(key)});m.material=Array.isArray(m.material)?next:next[0];};
   const scan=()=>game.scene.traverse(polish);scan();for(const c of game.world?.chunks?.values?.()||[])addDetails(c);

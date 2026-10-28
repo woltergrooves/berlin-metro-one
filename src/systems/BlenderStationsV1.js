@@ -222,6 +222,7 @@ function attach(value){
   const now=performance.now();if(now>=nextScan){nextScan=now+500;scan()}keepLateDecorHidden();
   const p=value.player,st=p.currentStation;
   const outside=!p.__streetMode&&!p.__u8Active&&!Number.isInteger(p.__u8FullStation)&&st&&Math.abs(p.position.z-st.z)<45&&[...records.values()].some(r=>r.line==='U2'&&r.station.id===st.id&&r.profile.openAir);
+  p.__openAirStation=!!outside;
   const background=scene.background,oldFog=outside&&scene.fog?.color.clone();
   if(outside){scene.background=daySky;if(scene.fog)scene.fog.color.copy(daySky);}
   try{return render.call(this,scene,camera)}finally{scene.background=background;if(oldFog&&scene.fog)scene.fog.color.copy(oldFog);}

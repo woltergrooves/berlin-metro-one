@@ -17,7 +17,6 @@ function apply(game,line){
     if(progress<.16)setGroup(line.groups?.[focus],true);
     if(progress>.78)setGroup(line.groups?.[next],true);
   }
-  if(game.scene?.fog){game.scene.fog.near=t?34:42;game.scene.fog.far=t?112:132}
   for(const tr of game.u8Trains||[]){if(tr===t){tr.visible=true;continue}const dx=Math.abs(tr.position.x-(t?.position.x??p.position.x));tr.visible=dx<145}
 }
 async function install(){for(let i=0;i<600;i++){
