@@ -110,8 +110,7 @@ import('../systems/Phase67RestoreV2.js').catch(log('Phase 6/7 restore'));
 import('../systems/Phase8ArchetypesV1.js').catch(log('Phase 8.1'));
 import('../systems/Phase823V1.js').catch(log('Phase 8.2/8.3'));
 import('../systems/U8AlexanderDetailV1.js').catch(log('U8/Alexander detail'));
-import('../systems/Phase845V1.js').catch(log('Phase 8.4/8.5'));
-import('../systems/Phase851FixV1.js').catch(log('Phase 8.5.1 fix'));
+// Phase 8.4/8.5 en 8.5.1 waren nooit actief (syntaxfout; 8.5.1 wachtte 60 s op V8.5) — zie docs/inactive-in-live-game/
 import('../systems/Phase910V1.js').catch(log('Phase 9/10'));
 import('../systems/Phase11V1.js').catch(log('Phase 11'));
 import('../systems/Phase12FixV2.js').catch(log('Phase12FixV2'));

@@ -247,3 +247,21 @@ Deel 1:
   willekeurige `ERR_ABORTED` op `.glb` (ook in oud).
 - Duurste hooks per frame (headless, swiftshader): Phase910V1 ±11 ms, Phase1315V1 ±4 ms, Phase125TexturesV2 ±3 ms,
   GfxV3 ±3 ms — kandidaten voor later (deze draaien elk frame werk dat niet elk frame hoeft).
+
+## Open punten fase 1 (28 okt 2026)
+- **Phase 8.4/8.5 + 8.5.1 weg uit de opstart.** Phase845V1 was een stub die altijd een fout gooide (origineel had
+  een syntaxfout); Phase851FixV1 wachtte 60 s op `stationArchitectureVersion==='V8.5'`, wat nooit gebeurt, en
+  installeerde dus nooit. Beide bestanden staan in `docs/inactive-in-live-game/`. Geen gedragsverandering.
+- **Race `streetOutdoorVersion` = echte bug.** StreetCoreClean zet `'V4.1'`; UniversalStationExitV5 wachtte op
+  precies `'V4.1'`. Als Phase67RestoreV2 dat eerst naar `'V4.1-static'` zette, installeerde de hele keten
+  UniversalStationExitV5 → StationLifeVisualV72 → Phase8ArchetypesV1 → Phase823V1 → U8AlexanderDetailV1
+  nooit (geen stationsdetails, trappen, tussenhallen; 25 i.p.v. 18 frame-hooks). Fix: ExitV5 accepteert elke
+  `V4.x`; Phase67 overschrijft niet meer als Phase823 al `V4.2-static` zette. Nu altijd `V4.2-static` / `V8.3`.
+- **`stations.consistency`**: controleerde `BerlinCareerV2`, dat in geen enkele build bestaat. Rondt nu direct af
+  met `skipped` (geen 25 s pollen meer); werkt nog steeds als dat systeem ooit komt.
+- **Hinterhof-validatie**: telde ontbrekende systemen (`BerlinCareerV2`, `BerlinClubBridgeV2`) als fout.
+  Nu `null` = niet aanwezig; ok als alle aanwezige verwijzingen kloppen (discovery + bouncer). Log "OK" één keer.
+- Tests: nieuw `openpoints-probe.mjs` (oud 1×, nieuw 5×): nieuw altijd V4.2-static/V8.3, 25 hooks, enige
+  resterende opstartwachter `boot.RuntimeCleanupV1` (ook in oud); fouten alleen geblokkeerde externe bestanden.
+  `probe3.mjs`: 0 fouten, 4 "no button" = basislijn.
+- Nog gezien, niet aangepast: `boot.RuntimeCleanupV1` wacht in oud én nieuw na 75 s nog.
