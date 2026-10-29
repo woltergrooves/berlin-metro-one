@@ -13,6 +13,7 @@ import { MaterialBase } from '../state/MaterialBase.js';
 
 export const HALF = 36;                 // halve perronlengte (m)
 export const EXIT_X = 18;               // uitgangstrap (lokaal x)
+export const TRANSFER_X = -19;          // overstaptrap (U1c), gespiegeld aan de uitgang; tussen zuilen/kapstaanders
 const RAIL_Y = -1.05;                   // spoorbed onder de perronvloer
 const TUNNEL_TOP = 3.8;
 
@@ -49,6 +50,16 @@ function wallSignTex(name, color) {
 function exitSignTex() {
   return tex('exit', () => canvasTex(512, 128, (x) => {
     x.fillStyle = '#1b4d9b'; x.fillRect(0, 0, 512, 128); x.fillStyle = '#fff'; x.font = '700 56px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('Ausgang  ↑', 256, 66);
+  }));
+}
+// Overstapbord (U1c): lijnsymbool van de doellijn + "Übergang" + eindpunten.
+export function transferSignTex(t) {
+  return tex('xfer:' + t.line + t.towards, () => canvasTex(768, 192, (x) => {
+    x.fillStyle = '#1b4d9b'; x.fillRect(0, 0, 768, 192);
+    x.fillStyle = t.color; x.fillRect(22, 30, 132, 132);
+    x.fillStyle = '#fff'; x.font = '700 72px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t.line, 88, 98);
+    x.textAlign = 'left'; x.font = '700 64px Arial'; x.fillText('Übergang  ↓', 182, 66, 560);
+    x.font = '700 40px Arial'; x.fillText(t.towards, 182, 140, 566);
   }));
 }
 function platformTex() {
@@ -199,6 +210,17 @@ function stationKit(line, st, m) {
   for (const s of [-1, 1]) kit.box(m.steel, 6, 1.05, 0.06, EXIT_X, 0.52, ez + s * 1.0);
   kit.box(m.steel, 0.06, 1.05, 2.0, EXIT_X - 3, 0.52, ez);
   kit.plane(exitMat, 1.6, 0.4, M4(EXIT_X - 3.1, 2.3, ez, -Math.PI / 2));
+  // Overstap (U1c): trapgat aan de andere kant, borden aan beide uiteinden. Erin lopen = overstappen.
+  if (st.transfer) {
+    const xm = std('Line_Transfer_' + st.transfer.line, '#ffffff', { map: transferSignTex(st.transfer), roughness: 0.6 });
+    kit.box(m.dark, 6, 0.02, 1.9, TRANSFER_X, 0.021, ez);
+    for (const s of [-1, 1]) kit.box(m.steel, 6, 1.05, 0.06, TRANSFER_X, 0.52, ez + s * 1.0);
+    for (const s of [-1, 1]) {
+      kit.plane(xm, 1.9, 0.475, M4(TRANSFER_X + s * 3.1, 2.25, ez, s * Math.PI / 2));
+      kit.box(m.steel, 0.04, 1.2, 0.04, TRANSFER_X + s * 3.12, 3.1, ez);
+    }
+    kit.box(m.steel, 0.06, 1.05, 2.0, TRANSFER_X - 3, 0.52, ez);   // open naar het stationsmidden
+  }
 
   if (!viaduct) tunnelShell(kit, m, st, cs, -H, H, true);
   else viaductShell(kit, m, st, cs, -H, H, true);

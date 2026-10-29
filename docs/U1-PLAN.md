@@ -38,16 +38,25 @@ Keuzes:
   + "Nächster Halt" in de trein. DFI-vertrekbord boven elk perron. Ritgeluid + waarschuwingssignaal.
   Twee treinen (één per richting) die zich, net als bij de U8, bij een wachtende speler in de buurt houden.
   Test: `tools/consolidation/u1-trains.mjs`. Console: `BerlinLines.U1.board(i, dir)`, `.status().trains`.
-- **U1c — Overstappen:** Wittenbergplatz (U2, zelfde perron in het echt → korte gang), Nollendorfplatz en
-  Gleisdreieck (U2, trap), Kottbusser Tor (U8, trap omlaag). Overgang met korte fade; stand in de save.
+- **U1c — Overstappen ✅:** `src/lines/LineTransfers.js` (herbruikbaar). Op het U1-perron een overstaptrapgat bij
+  x = −19 (`TRANSFER_X`, gespiegeld aan de uitgang) met blauwe "Übergang"-borden in de doellijnkleur; erin lopen =
+  korte fade → perron van de andere lijn. U2 (Wittenbergplatz, Nollendorfplatz, Gleisdreieck): overstappunt aan het
+  −z-einde van het U2-perron (de Street View-uitgang zit aan +z), groen U1-bord + groene vloerstrook. U8 (Kottbusser
+  Tor): westeinde van het perron (uitgang = oosteinde). Op U2/U8 werkt het op positie (perroneinde + duwen ±0,2 s),
+  los van de volgorde van de oude bewegingswrappers. Stand in de save: sectie `location` in `berlin-state-v2`
+  (`{line:'U1', station}`); na laden zet de U1 je na 2,5 s terug op dat perron. HUD-hint op overstapstations.
+  Test: `tools/consolidation/u1-transfer.mjs <url> <map> [kwaliteit] [uur]` (env `ONLY=2,3,5,9`, `TRACE=1`;
+  headless loopt ±10× te traag → wandelingen tot 90 s). Console: `BerlinLines.Transfers.status()`, `.toU1(i)`,
+  `.toU2(id)`, `.toU8(18)`, `.flags()`.
 - **U1d — Echte omgeving:** OSM-pakketten (`tools/g4/osm2pack.py`) voor de 8 viaductstations, met
   Oberbaumbrücke/Spree bij Warschauer Straße en Schlesisches Tor, Landwehrkanaal bij Möckernbrücke/Hallesches Tor.
   Stationsprofielen (kappen Prinzenstraße, groene hal Kottbusser Tor, Görlitzer Bahnhof).
 - **U1e — Uitgangen + Street View:** trap omhoog → Street View op de echte coördinaten (`src/data/u1.js`),
   gratis embed; terugkeer naar het perron. Ontdekkingen/stamps per station; ticketautomaat.
 
-## Bekende beperkingen (na U1b)
-- Je komt er alleen via het GOD-menu (overstappen = U1c).
+## Bekende beperkingen (na U1c)
+- Overstap is een sprong met fade (eigen gebied); geen doorlopende gang/trap.
+- Treinen op U2/U8 gaan door het overstapeinde heen: het bord hangt boven het perroneinde, niet in een eigen hal.
 - Eén trein per richting (zoals de U8); geen echte 5-minutendienst over de hele lijn.
 - Bebouwing langs het viaduct is tijdelijk en procedureel (U1d → OpenStreetMap).
 - Uitgangstrap is decor (U1e).

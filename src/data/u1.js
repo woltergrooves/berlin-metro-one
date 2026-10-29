@@ -41,15 +41,18 @@ const RAW = [
 ];
 
 // Overstappen die in het spel echt begaanbaar worden (U1c). De rest staat alleen op de borden.
+// line/station = waar je uitkomt; color/towards = het overstapbord op het U1-perron.
+const U2X = { line: 'U2', color: '#da421e', towards: 'Pankow · Ruhleben' };
 export const U1_TRANSFERS = {
-  wittenbergplatz: { line: 'U2', station: 'wittenbergplatz' },
-  nollendorfplatz: { line: 'U2', station: 'nollendorfplatz' },
-  gleisdreieck:    { line: 'U2', station: 'gleisdreieck' },
-  'kottbusser-tor': { line: 'U8', station: 18 },
+  wittenbergplatz: { ...U2X, station: 'wittenbergplatz' },
+  nollendorfplatz: { ...U2X, station: 'nollendorfplatz' },
+  gleisdreieck:    { ...U2X, station: 'gleisdreieck' },
+  'kottbusser-tor': { line: 'U8', color: '#224f86', towards: 'Wittenau · Hermannstraße', station: 18 },
 };
 
 export const U1_STATIONS = RAW.map(([id, name, lat, lon, kind, layout, elev, transfers, wall, accent], index) => ({
   line: 'U1', id, name, index, lat, lon, kind, layout, realLayout: layout,
   elev: kind === 'viaduct' ? elev : 0, transfers, wall: '#' + wall, accent: '#' + accent,
+  transfer: U1_TRANSFERS[id] || null,
   x: U1_LINE.origin.x + index * U1_LINE.spacing,
 }));

@@ -4,13 +4,15 @@
 // oude U2-beweging de speler (die zou hem anders naar Pankow trekken) en bepaalt dit bestand waar je
 // kunt lopen. Meerijden: player.__lineTrain = de trein, __lineRide = {ox, oz} (plek in de trein).
 // Instappen = door een open deur de trein in lopen; uitstappen = bij een open deur het perron op.
-// Overstappen bij Wittenbergplatz/Kottbusser Tor (U1c), echte omgeving
+// Overstappen (U1c): src/lines/LineTransfers.js. Echte omgeving
 // (U1d) en uitgangen/Street View (U1e) volgen; zie docs/U1-PLAN.md.
 import * as THREE from 'three';
 import { Tick } from '../state/Tick.js';
 import { CONFIG } from '../config.js';
 import { U1_LINE, U1_STATIONS } from '../data/u1.js';
-import { LineWorld, HALF, EXIT_X, crossSection } from './LineWorld.js';
+import { LineWorld, HALF, EXIT_X, TRANSFER_X, crossSection } from './LineWorld.js';
+import { installTransfers, fromLine } from './LineTransfers.js';
+import { readSection, writeSection } from '../state/Store.js';
 import { LineTrain, DepartureBoards, trackZ, platformSide, DOOR_OFFSETS, HALF_LEN, INSIDE_W } from './LineTrains.js';
 
 const line = U1_LINE, stations = U1_STATIONS;
@@ -27,12 +29,15 @@ function resetOtherLines(p) {
 }
 
 /** Zet de speler op het perron van U1-station `index` (GOD-menu; later ook overstappen). */
-function enter(index, { side = 1, dx = -10 } = {}) {
+function enter(index, { side = 1, dx = -10, at = null } = {}) {
   const st = stations[clamp(index | 0, 0, stations.length - 1)], p = game.player;
   resetOtherLines(p);
   const cs = crossSection(st.layout), band = cs.walk.length === 1 ? cs.walk[0] : cs.walk[side > 0 ? 1 : 0];
   p.__line = line.id; p.__lineStation = st.index; p.__lineOpenAir = st.kind === 'viaduct';
-  p.position.set(st.x + dx, line.origin.y + CONFIG.player.eyeHeight, line.origin.z + (band[0] + band[1]) / 2);
+  // Na een overstap: naast het overstaptrapgat (het perron op kijkend).
+  const tz = at === 'transfer' ? transferZ(cs) : (band[0] + band[1]) / 2;
+  if (at === 'transfer') dx = TRANSFER_X + 6.5;   // tussen de kapstaanders (−15, −7) en zuilen (−13,5)
+  p.position.set(st.x + dx, line.origin.y + CONFIG.player.eyeHeight, line.origin.z + tz);
   p.yaw = -Math.PI / 2; p.pitch = 0;                     // kijkt langs het perron, richting Warschauer Straße
   world.prime(st.index);
   stopRide(p);
@@ -40,7 +45,18 @@ function enter(index, { side = 1, dx = -10 } = {}) {
   const now = performance.now() / 1000;
   for (const t of trains) if (t.timeline.recenterNear(st.index, t.direction > 0 ? 3 : 9)) { t.door = 0; t.lastRecenter = now; t.place(); }
   status.enters++;
-  game.ui?.notify?.(`U1 · ${st.name}`);
+  saveLocation(st.index);
+  if (at !== 'transfer') game.ui?.notify?.(`U1 · ${st.name}`);
+}
+// Midden van het tweede perron (zijperrons) of het middenperron: daar liggen uitgang- en overstaptrap.
+const transferZ = cs => (cs.walk.length === 1 ? 0 : (cs.plat[1][0] + cs.plat[1][1]) / 2);
+
+// Stand in de save (Game State 2.0, sectie 'location'): na herladen sta je weer op hetzelfde U1-perron.
+let savedAt = undefined;
+function saveLocation(index) {
+  const v = Number.isInteger(index) ? index : null;
+  if (v === savedAt) return; savedAt = v;
+  writeSection('location', v === null ? null : { line: line.id, station: stations[v].id });
 }
 
 /** Verlaat de U1 en zet de speler terug op de U2 (standaard Wittenbergplatz, de overstap). */
@@ -52,7 +68,7 @@ function leave(u2Id = 'wittenbergplatz') {
   game.world?.update?.(s.z);
   game.ui?.notify?.(`U2 · ${s.name}`);
 }
-function clearLine(p) { stopRide(p); p.__line = null; p.__lineStation = null; p.__lineOpenAir = false; status.leaves++; }
+function clearLine(p) { stopRide(p); p.__line = null; p.__lineStation = null; p.__lineOpenAir = false; status.leaves++; saveLocation(null); }
 function stopRide(p) { if (p.__lineTrain) p.__lineTrain.rider = false; p.__lineTrain = null; p.__lineRide = null; }
 
 // Bewegingsvector uit de joystick (zelfde formule als de rest van het spel).
@@ -91,7 +107,8 @@ function move(p, delta) {
   const band = cs.walk.reduce((b, w) => (Math.abs(lz - (w[0] + w[1]) / 2) < Math.abs(lz - (b[0] + b[1]) / 2) ? w : b));
   if ((lz + mz < band[0] || lz + mz > band[1]) && tryBoard(p, st, lz, lz + mz)) return ride(p, 0);
   const nx = clamp(p.position.x - st.x + mx, -HALF + 0.8, HALF - 0.8), nz = clamp(lz + mz, band[0], band[1]);
-  const ez = cs.walk.length === 1 ? 0 : (cs.plat[1][0] + cs.plat[1][1]) / 2;
+  const ez = transferZ(cs);
+  if (st.transfer && Math.abs(nx - TRANSFER_X) < 3 && Math.abs(nz - ez) < 1.0) { fromLine(st); return; }   // overstaptrap (U1c)
   if (Math.abs(nx - EXIT_X) < 3.4 && Math.abs(nz - ez) < 1.3) return;   // trapgat (uitgang, U1e)
   p.position.x = st.x + nx; p.position.z = line.origin.z + nz; p.position.y = line.origin.y + CONFIG.player.eyeHeight;
 }
@@ -109,7 +126,7 @@ function ride(p, delta) {
       stopRide(p); status.alightings++;
       p.position.z = line.origin.z + (side > 0 ? band[0] + 0.15 : band[1] - 0.15);
       p.position.x = clamp(p.position.x, st.x - HALF + 0.8, st.x + HALF - 0.8);
-      p.__lineStation = st.index;
+      p.__lineStation = st.index; saveLocation(st.index);
       game.ui?.notify?.(`U1 · ${st.name}`);
       return;
     }
@@ -215,6 +232,7 @@ function installHud() {
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || 'U1';
     if (el.hint) el.hint.textContent = trains.some(tr => tr.boardableAt(st.index))
       ? 'Deuren open · loop naar een deur en stap in.'
+      : st.transfer ? `Overstap ${st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
       : st.kind === 'viaduct' ? 'Hochbahn boven de straat · wacht op de U1.' : 'Ondergronds station · wacht op de U1.';
   };
 }
@@ -256,6 +274,7 @@ function frame() {
     else {
       const i = world.indexOf(p.position.x);
       p.__lineStation = i; p.__lineOpenAir = stations[i].kind === 'viaduct';
+      if (!p.__lineTrain) saveLocation(i);
     }
   }
   const active = onLine(p);
@@ -279,12 +298,25 @@ async function install() {
       installMovement(); installHud(); installGod(); installSky(); installAudio();
       loadTrains();
       Tick.frame('U1Line', { before: frame });
+      installTransfers(g, { stations, enter, detach: () => { if (onLine(g.player)) clearLine(g.player); } });
+      restoreLocation();
       status.installed = true;
       console.info('[Metro] U1 ready (U1b: stations + treinen)');
       return;
     }
     await Tick.sleep(150, 'boot.U1Line');
   }
+}
+
+// Na het laden: stond je bij het opslaan op de U1, dan zet de save je daar terug (na de gewone startplaatsing).
+async function restoreLocation() {
+  const loc = readSection('location');
+  if (loc?.line !== line.id) return;
+  const i = stations.findIndex(s => s.id === loc.station); if (i < 0) return;
+  savedAt = i;
+  await Tick.sleep(2500, 'boot.U1Restore');
+  if (!onLine(game.player) && !game.player.__streetMode) enter(i);
+  status.restored = stations[i].id;
 }
 
 /** Test/GOD: direct in de trein van richting `dir` (+1 = Warschauer Straße) bij station `index` stappen. */
