@@ -46,6 +46,7 @@ await import('../world/U8Alexanderplatz.js');
 await import('../systems/PlayerConcoursePatch.js');
 await import('../world/AlexanderTransitionFix.js');
 await import('../systems/AlexanderTransferOverlay.js');
+await import('../world/AlexanderHub.js');            // Alexanderplatz: enige eigenaar van trap, hal, gang en uitgang
 
 const [{ Game }, { Hud }] = await Promise.all([import('../core/Game.js'), import('../ui/Hud.js')]);
 const boot = document.querySelector('#boot');

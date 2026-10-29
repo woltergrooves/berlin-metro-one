@@ -3,7 +3,7 @@ import { CONFIG } from '../config.js';
 import { computeMoveDelta } from '../core/motion.js';
 
 const smooth=t=>t*t*(3-2*t);
-const floorAt=rz=>rz<=26?0:4.2*smooth(Math.max(0,Math.min(1,(rz-26)/17.7)));
+const floorAt=rz=>rz<=26?0:4.2*Math.max(0,Math.min(1,(rz-26)/18));
 
 function install(game){
   const p=game.player;

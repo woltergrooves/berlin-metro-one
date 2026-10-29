@@ -93,7 +93,7 @@ function facadeTex(seed) {
 }
 
 // ── Bouwset: verzamelt geometrie per materiaal en voegt die samen ──────────────────────────────────
-class Kit {
+export class Kit {
   constructor() { this.parts = new Map(); }
   add(mat, geo) { if (!this.parts.has(mat)) this.parts.set(mat, []); this.parts.get(mat).push(geo); }
   box(mat, sx, sy, sz, x, y, z, uvScale = 0, ry = 0) {

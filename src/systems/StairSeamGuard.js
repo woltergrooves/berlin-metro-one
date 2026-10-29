@@ -17,8 +17,8 @@ export function moveAcrossStairFoot(player,delta,config) {
   if(nr>=26)nx=Math.max(.72,Math.min(4.38,nx));
   p.x=nx;
   p.z=z0+nr;
-  const t=Math.max(0,Math.min(1,(nr-26)/17.7));
-  p.y=config.player.eyeHeight+4.2*smooth(t);
+  const t=Math.max(0,Math.min(1,(nr-26)/18));
+  p.y=config.player.eyeHeight+4.2*t;
   if(nr<26){
     player.__u8Area=false;
     player.__u8FullStation=null;

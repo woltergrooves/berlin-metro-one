@@ -21,13 +21,13 @@ function floorFor(r, x, z) {
   if (!r) return 0;
   if (r.id === 'up') {
     if (z <= 26) return 0;
-    if (z >= 43.7) return 4.2;
-    return 4.2 * smooth((z - 26) / 17.7);
+    if (z >= 44) return 4.2;
+    return 4.2 * (z - 26) / 18;   // lineair = gelijk met de treden (AlexanderHub)
   }
   if (r.id === 'down') {
     if (x <= 24) return 4.2;
     if (x >= 40.5) return -4;
-    return 4.2 - 8.2 * smooth((x - 24) / 16.5);
+    return 4.2 - 8.2 * (x - 24) / 16.5;   // lineair = gelijk met de treden
   }
   if (r.id === 'u8') return -4;
   return 4.2;
