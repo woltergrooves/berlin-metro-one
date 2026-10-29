@@ -21,6 +21,7 @@ const VIEWS = [
   ['u8-trap', 47, -4, 49, PI / 2, 0.1],
   ['uitgang', 2.6, 4.2, 55, PI, 0.05],
   ['uitgang-dicht', 2.6, 4.2, 61.5, PI, 0.15],
+  ['uitgang-lucht', 2.6, 4.2, 64.5, PI, 0.45],
 ];
 const views = only ? VIEWS.filter(v => only.split(',').includes(v[0])) : VIEWS;
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });

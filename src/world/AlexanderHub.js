@@ -27,6 +27,7 @@ const HALL_X0 = -1.55, HALL_X1 = 6.65;          // binnenkant halwanden
 const HALL_RZ0 = 26, HALL_RZ1 = 66;             // achterwand boven de trapvoet … eindwand met uitgang
 const STAIR_X0 = 0.6, STAIR_X1 = 4.5;           // U2-trap (loopbaan 0,72–4,38)
 const DOWN_X0 = 24, DOWN_X1 = 40.5;             // trap naar de U8
+const ORIGIN_SHIFT = 100;                       // zie build(): buiten het zoekgebied van BlenderStationsV1
 const EXIT_X0 = 0.3, EXIT_X1 = 4.8, EXIT_TOP_RZ = 76.8, STREET_Y = 9.6;
 
 // Gebieden waarin oude geometrie verborgen wordt (middelpunt van de mesh; x, y, rz).
@@ -306,7 +307,7 @@ function build(root, st) {
   wall(k, m.cream, 'z', STAIR_X1, z(26), z(44), -0.05, hy, -1, -0.2);
   wall(k, m.cream, 'z', 0.4, z(26), z(34), 0, 3.95, -1, -0.2);            // buitenkant, vanaf het perron
   wall(k, m.cream, 'z', 4.7, z(26), z(34), 0, 3.95, 1, -0.2);
-  k.box(m.frame, 0.3, 0.3, 4.3, 2.55, 3.95, z(25.85));                    // latei boven de trapvoet
+  k.box(m.frame, 4.3, 0.3, 0.3, 2.55, 3.95, z(25.85));                    // latei boven de trapvoet
   const ang = Math.atan2(hy, 18);
   for (const x of [STAIR_X0 + 0.07, STAIR_X1 - 0.07]) {
     bar(k, m.steel, [x, 0.9, z(25.6)], [x, 0.9, z(26)]);
@@ -375,20 +376,28 @@ function build(root, st) {
   // 4. Trap naar de U8 (x 24 → 40,5, y 4,2 → −4), 46 treden, schuin plafond tot onder het U8-hallendak.
   stairs(k, m, 'x', DOWN_X0, DOWN_X1, g0, g1, hy, U8_Y, 46);
   const fl = x => hy + (U8_Y - hy) * (x - DOWN_X0) / (DOWN_X1 - DOWN_X0);
-  const cx0 = DOWN_X0 + 0.3, cx1 = 38.7;
-  quad(k, m.ceil, [[DOWN_X0 + 0.3, GANG_CEIL, g0], [cx0, GANG_CEIL, g1], [cx1, fl(cx1) + 3.4, g1], [cx1, fl(cx1) + 3.4, g0]],
-    [[0, 0], [2.7, 0], [2.7, 5.6], [0, 5.6]], [0, -1, 0]);
+  // plafond eerst vlak (je ziet de trap omlaag), daarna zakt een betegelde wand naar het U8-hallendak
+  const cx0 = 30.5, cx1 = 38.7, cy1 = fl(cx1) + 3.2;
+  flat(k, m.ceil, DOWN_X0 + 0.3, cx0, g0, g1, GANG_CEIL, false, 3);
+  quad(k, m.green, [[cx0, GANG_CEIL, g0], [cx0, GANG_CEIL, g1], [cx1, cy1, g1], [cx1, cy1, g0]],
+    [[g0 / 3, 1.6], [g1 / 3, 1.6], [g1 / 3, 0], [g0 / 3, 0]], [-1, -1, 0]);
+  k.box(m.darkgreen, 0.3, 0.3, g1 - g0, cx0, GANG_CEIL - 0.15, z(ZC));
   for (const [zz, f] of [[g0, 1], [g1, -1]]) {
     // wand: boven trapniveau tot plafond (trapezium), tegels doorlopend
-    const pts = [[DOWN_X0, hy - 0.3, zz], [41.2, U8_Y - 0.1, zz], [41.2, 0.4, zz], [DOWN_X0, GANG_CEIL, zz]];
-    quad(k, m.green, pts, [[DOWN_X0 / 3, -0.1 / 4.4], [41.2 / 3, -0.1 / 4.4], [41.2 / 3, 4.5 / 4.4], [DOWN_X0 / 3, 1.0]], [0, 0, f]);
+    // wand: van onder de treden tot aan het plafond (vlak deel, daarna de zakkende wand)
+    const ctop = x => x <= cx0 ? GANG_CEIL : GANG_CEIL + (cy1 - GANG_CEIL) * (x - cx0) / (cx1 - cx0);
+    for (const [xa, xb] of [[DOWN_X0, cx0], [cx0, 41.2]]) {
+      const ba = fl(Math.min(xa, DOWN_X1)) - 0.3, bb = fl(Math.min(xb, DOWN_X1)) - 0.3;
+      quad(k, m.green, [[xa, ba, zz], [xb, bb, zz], [xb, ctop(xb) + 0.05, zz], [xa, ctop(xa) + 0.05, zz]],
+        [[xa / 3, (ba - U8_Y) / 4.4], [xb / 3, (bb - U8_Y) / 4.4], [xb / 3, (ctop(xb) - U8_Y) / 4.4], [xa / 3, (ctop(xa) - U8_Y) / 4.4]], [0, 0, f]);
+    }
     wall(k, m.green, 'x', zz - f * 0.2, 38.2, 41.2, U8_Y, 0.4, -f, U8_Y - 0.2);        // buitenkant in de U8-hal
     bar(k, m.steel, [DOWN_X0 - 0.4, hy + 0.9, zz + f * 0.12], [DOWN_X0, hy + 0.9, zz + f * 0.12]);
     bar(k, m.steel, [DOWN_X0, hy + 0.9, zz + f * 0.12], [DOWN_X1, U8_Y + 0.9, zz + f * 0.12]);
   }
   bar(k, m.steel, [DOWN_X0, hy + 0.9, z(ZC)], [DOWN_X1, U8_Y + 0.9, z(ZC)], 0.05);       // middenleuning
   for (let x = DOWN_X0 + 1; x < DOWN_X1; x += 2.5) k.box(m.frame, 0.04, 0.9, 0.04, x, fl(x) + 0.45, z(ZC));
-  for (let x = DOWN_X0 + 1.5; x < cx1 - 1; x += 2.6) k.box(m.light, 1.4, 0.04, 0.12, x, fl(x) + 3.34, z(ZC));
+  for (const dz of [-2, 2]) for (let x = DOWN_X0 + 1; x < cx0 - 1; x += 2.1) k.box(m.light, 1.6, 0.04, 0.12, x + 0.8, GANG_CEIL - 0.03, z(ZC + dz));
 
   // 5. Uitgang: trap omhoog naar het plein (rz 66 → 76,8, y 4,2 → 9,6), daglicht en Fernsehturm.
   const er0 = HALL_RZ1, er1 = EXIT_TOP_RZ, ef = rz => hy + (STREET_Y - hy) * (rz - er0) / (er1 - er0);
@@ -419,12 +428,17 @@ function build(root, st) {
 
   const group = k.build('AlexanderHub');
   group.userData.alexHub = true; group.userData.g3b = 'alexHub';
+  // BlenderStationsV1 verbergt elke mesh waarvan het middelpunt binnen 34,6 m van het U2-station ligt (en de
+  // U8-variant binnen 18 m van de U8-as). Samengevoegde meshes hebben hun middelpunt in het nulpunt van de
+  // groep → groep 100 m verder zetten en de geometrie terugschuiven: zelfde beeld, buiten die zoekgebieden.
+  group.position.z = Z + ORIGIN_SHIFT;
+  for (const mesh of group.children) { mesh.geometry.translate(0, 0, -(Z + ORIGIN_SHIFT)); mesh.geometry.computeBoundingSphere(); }
   group.traverse(o => { o.userData.alexHub = true; if (o.isMesh) o.frustumCulled = true; });
   return group;
 }
 
 // ── Oude geometrie verbergen, nieuwe hangen, dag/nacht ──────────────────────────────────────────────
-const state = { built: 0, hidden: [], showOld: false, root: null, station: null, group: null };
+const state = { built: 0, hidden: new Set(), showOld: false, root: null, station: null, group: null };
 const _m = new THREE.Matrix4(), _p = new THREE.Vector3();
 function inClear(x, y, rz) { return CLEAR.some(c => x >= c.x[0] && x <= c.x[1] && y >= c.y[0] && y <= c.y[1] && rz >= c.rz[0] && rz <= c.rz[1]); }
 function hideOld(root, st) {
@@ -437,17 +451,18 @@ function hideOld(root, st) {
     _p.setFromMatrixPosition(o.matrixWorld).applyMatrix4(_m);
     if (inClear(_p.x, _p.y, _p.z - st.z)) out.push(o);
   });
-  for (const o of out) o.visible = false;
-  return out;
+  for (const o of out) { o.visible = false; state.hidden.add(o); }
+  return out.length;
 }
 function install(root, st) {
   if (!root || !st || root.userData.__alexHub) return;
   root.userData.__alexHub = true;
+  state.hidden.clear();
   const hidden = hideOld(root, st);
   const group = build(root, st);
   root.add(group);
-  Object.assign(state, { built: state.built + 1, hidden, root, station: st, group });
-  console.info(`[Metro] AlexanderHub: ${hidden.length} oude onderdelen verborgen, ${group.children.length} draw calls`);
+  Object.assign(state, { built: state.built + 1, root, station: st, group });
+  console.info(`[Metro] AlexanderHub: ${hidden} oude onderdelen verborgen, ${group.children.length} draw calls`);
 }
 // Platformbord van U8AlexanderDetailV1 ("U8 ↓ S-Bahn ↑ AUSGANG →") hangt pal voor de trapvoet: weg.
 function hideDetailSign(game) {
@@ -455,14 +470,51 @@ function hideDetailSign(game) {
   if (!g || !st) return;
   for (const o of g.children) if (o.geometry?.type === 'PlaneGeometry' && Math.abs(o.position.z - (st.z + 23)) < 0.2 && Math.abs(o.position.x - 2.75) < 0.2) o.visible = false;
 }
+// Het dak van U8-tunnel 13 (x 16–52, y ±0,8) loopt dwars door de trap naar de U8: uitknippen rond de trap.
+const tunnelCut = { done: new Set(), group: null };
+const _bb = new THREE.Box3();
+function cutTunnelRoof(game) {
+  const st = state.station; if (!st) return;
+  const zc = st.z + ZC, hole = { x0: DOWN_X0 - 0.3, x1: 41.6, z0: zc - GANG_HALF - 0.2, z1: zc + GANG_HALF + 0.2 };
+  const found = [];
+  const tops = []; game.scene.traverse(o => { if (/^U8:tunnel:/.test(o.name || '')) tops.push(o); });
+  for (const top of tops) {
+    top.updateWorldMatrix(true, true);
+    top.traverse(o => {
+      if (!o.isMesh || tunnelCut.done.has(o) || o.geometry?.type !== 'BoxGeometry') return;
+      _bb.setFromObject(o);
+      if (_bb.max.y - _bb.min.y > 0.6 || _bb.min.x > hole.x1 || _bb.max.x < hole.x0 || _bb.min.z > hole.z1 || _bb.max.z < hole.z0 || _bb.max.y < -4 || _bb.min.y > 7.5) return;
+      found.push([o, _bb.clone()]);
+    });
+  }
+  if (!found.length) return;
+  const k = new Kit(), SH = st.z + ORIGIN_SHIFT;
+  for (const [o, b] of found) {
+    tunnelCut.done.add(o);
+    Object.defineProperty(o, 'visible', { configurable: true, get() { return false; }, set() {} });   // tunnelstreaming zet hem anders terug
+    const h = b.max.y - b.min.y, y = (b.min.y + b.max.y) / 2, mat = o.material;
+    const piece = (x0, x1, z0, z1) => { if (x1 - x0 > 0.01 && z1 - z0 > 0.01) k.box(mat, x1 - x0, h, z1 - z0, (x0 + x1) / 2, y, (z0 + z1) / 2 - SH); };
+    piece(b.min.x, Math.max(b.min.x, hole.x0), b.min.z, b.max.z);
+    piece(Math.min(b.max.x, hole.x1), b.max.x, b.min.z, b.max.z);
+    piece(Math.max(b.min.x, hole.x0), Math.min(b.max.x, hole.x1), b.min.z, Math.max(b.min.z, hole.z0));
+    piece(Math.max(b.min.x, hole.x0), Math.min(b.max.x, hole.x1), Math.min(b.max.z, hole.z1), b.max.z);
+  }
+  const g = k.build('AlexanderHubTunnelCut'); g.position.z = SH; g.userData.alexHub = true; g.userData.g3b = 'alexHub';
+  game.scene.add(g); tunnelCut.group = g;
+  console.info(`[Metro] AlexanderHub: ${found.length} tunneldak-delen rond de trap naar de U8 uitgeknipt`);
+}
 function tick() {
   const game = globalThis.__berlinMetroGame;
   if (!game) return;
   const chunks = game.world?.chunks;
   if (chunks?.values) for (const c of chunks.values()) if (c?.station?.id === 'alexanderplatz' && c.structure && !c.structure.userData.__alexHub) install(c.structure, c.station);
   if (state.group && !state.group.parent) state.group = null;            // chunk ontladen
-  if (!state.showOld) for (const o of state.hidden) if (o.visible) o.visible = false;
+  // de wereld voegt na onze load nog oude stukken toe (eigen load op het object) → opnieuw zoeken
+  if (state.group?.parent && !state.showOld) { hideOld(state.root, state.station); for (const o of state.hidden) if (o.visible) o.visible = false; }
   hideDetailSign(game);
+  if (game.player?.currentStation?.id === 'alexanderplatz' && (tunnelCut.n = (tunnelCut.n || 0) + 1) % 2 === 1) {   // hele scene doorzoeken: alleen hier, om de 3 s
+    try { cutTunnelRoof(game); } catch (e) { console.error('[Metro] AlexanderHub tunnel', e); }
+  }
   if (M) {                                                                 // dag/nacht boven de uitgang
     const d = globalThis.BerlinRender?.daylight ?? 1;
     M.sky.color.setRGB(0.12 + 0.88 * d, 0.14 + 0.86 * d, 0.22 + 0.78 * d);
@@ -483,7 +535,7 @@ WorldStreamer.prototype.load = function alexanderHubLoad(index) {
 Tick.every('alexHub', 1500, tick);
 
 globalThis.BerlinAlexHub = {
-  status() { return { built: state.built, hidden: state.hidden.length, drawCalls: state.group?.children.length ?? 0, attached: !!state.group?.parent, showOld: state.showOld }; },
+  status() { return { built: state.built, hidden: state.hidden.size, drawCalls: state.group?.children.length ?? 0, attached: !!state.group?.parent, showOld: state.showOld }; },
   /** Vergelijken: oude geometrie weer tonen (true) of verbergen (false). */
   showOld(on = true) { state.showOld = !!on; for (const o of state.hidden) o.visible = !!on; if (state.group) state.group.visible = !on; return this.status(); },
 };
