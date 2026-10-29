@@ -175,7 +175,8 @@ export const RenderBase = {
     const r = game?.renderer;
     return { quality, auto: !storedQuality(), environment: current, toneMapping: 'Neutral', exposure: r?.toneMappingExposure,
       pixelRatio: r?.getPixelRatio(), shadows: !!r?.shadowMap.enabled, ...counts,
-      materials: globalThis.BerlinMaterials?.status?.() && (({ converted, tuned }) => ({ converted, tuned }))(globalThis.BerlinMaterials.status()) };
+      materials: globalThis.BerlinMaterials?.status?.() && (({ converted, tuned }) => ({ converted, tuned }))(globalThis.BerlinMaterials.status()),
+      stationProfiles: globalThis.BerlinStationProfiles?.status?.().templates ?? null };
   },
   // GOD-menu: kwaliteitskeuze onder de Street View-teller.
   mountGod(panel, tools) {
@@ -189,7 +190,8 @@ export const RenderBase = {
         `<div style="display:flex;gap:6px;margin-top:6px">${Object.entries(PROFILES).map(([k, v]) =>
           `<button data-q="${k}" style="flex:1;min-height:36px;border-radius:8px;border:1px solid #ffffff33;font:700 12px Arial;background:${k === s.quality ? '#ffcf5c' : '#ffffff18'};color:${k === s.quality ? '#111' : '#fff'}">${v.label}</button>`).join('')}</div>` +
         `<div style="display:block;font-weight:400;opacity:.8;margin-top:4px">Pixelratio ${s.pixelRatio?.toFixed(2)} · schaduw ${s.shadows ? 'aan' : 'uit'} · omgeving: ${s.environment}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8">Materialen (G3a): ${s.materials ? `${s.materials.converted} omgezet naar PBR, ${s.materials.tuned} afgesteld${s.quality === 'laag' ? ' · laag: Lambert blijft' : ''}` : '—'}</div>`;
+        `<div style="display:block;font-weight:400;opacity:.8">Materialen (G3a): ${s.materials ? `${s.materials.converted} omgezet naar PBR, ${s.materials.tuned} afgesteld${s.quality === 'laag' ? ' · laag: Lambert blijft' : ''}` : '—'}</div>` +
+        `<div style="display:block;font-weight:400;opacity:.8">Stationsprofielen (G3b): ${(() => { const p = globalThis.BerlinStationProfiles?.status?.(); return p ? `${p.profiles} stations · ${p.templates} geladen${p.failed ? ` · ${p.failed} overgeslagen` : ''}` : '—'; })()}</div>`;
       d.querySelectorAll('button[data-q]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); RenderBase.setQuality(b.dataset.q); draw(); game.ui?.notify?.(`Grafische kwaliteit: ${PROFILES[b.dataset.q].label}`); }; });
     };
     tools.parentNode.insertBefore(d, tools);

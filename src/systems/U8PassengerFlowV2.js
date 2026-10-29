@@ -32,7 +32,7 @@ function pose(n,type='idle'){
 }
 function removeLegacy(root){
   root.traverse(g=>{
-    if(!g.isGroup||g.userData.__u8NpcV2)return;
+    if(!g.isGroup||g.userData.__u8NpcV2||g.userData.g3b)return; // G3b-stationsprofiel (lampen+stangen) is geen oude NPC
     const cyl=g.children.some(c=>c.geometry?.type==='CylinderGeometry');
     const sphere=g.children.some(c=>c.geometry?.type==='SphereGeometry');
     if(cyl&&sphere)g.visible=false;

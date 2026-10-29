@@ -2,6 +2,7 @@ import { Tick } from '../state/Tick.js';
 import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/loaders/GLTFLoader.js';
 import {Game} from '../core/Game.js';
+import {StationProfiles} from '../state/StationProfiles.js';
 
 // A visual layer only. The existing floor boundaries, service, interactions and exits remain authoritative.
 const BASE = new URL('/assets/stations/', location.href);
@@ -12,7 +13,7 @@ const status = {version:8,total:53,installed:0,loads:0,errors:[],byLine:{U2:0,U8
 let profiles = new Map();
 const manifestReady = fetch(new URL('stations.json',BASE)).then(r=>{if(!r.ok)throw new Error('Station manifest '+r.status);return r.json()}).then(m=>{
  if(m.stations?.length!==53)throw new Error('Incomplete station manifest');
- profiles=new Map(m.stations.map(p=>[`${p.line}:${p.id}`,p]));return m;
+ profiles=new Map(m.stations.map(p=>[`${p.line}:${p.id}`,p]));for(const p of m.stations)StationProfiles.register(p);return m;
 }).catch(e=>{status.errors.push(String(e.message));console.warn('[Berlin Life] Station models unavailable; original stations retained',e);return null});
 const connected = parent => {for(let p=parent;p;p=p.parent)if(p.isScene)return true;return false};
 
@@ -24,6 +25,7 @@ function pump(){
    const gltf=await loader.parseAsync(bytes,BASE.href);
    if(!gltf.scene.getObjectByName('Station_Floor')||!gltf.scene.getObjectByName('Station_Accent'))throw new Error('Invalid station mesh');
    gltf.scene.traverse(n=>{if(n.isMesh){n.castShadow=n.receiveShadow=false;n.geometry.computeBoundingSphere();for(const m of(Array.isArray(n.material)?n.material:[n.material]))if(m?.transparent)m.forceSinglePass=true;}});
+   StationProfiles.apply(gltf.scene,task.profile); // G3b: stationsprofiel (wand, zuilen, plafond, lampen, borden)
    task.template=gltf.scene;task.state='ready';task.last=performance.now();status.loads++;task.resolve(task.template);
   })().catch(e=>{task.state='failed';task.failedAt=performance.now();status.errors.push(`${task.key}: ${e.message}`);console.warn('[Berlin Life] Original station retained',task.key,e);task.resolve(null)}).finally(()=>{busy--;pump();});
  }
@@ -40,8 +42,9 @@ function trim(){
 }
 function signage(root,profile){
  const c=document.createElement('canvas');c.width=1024;c.height=144;const x=c.getContext('2d');if(!x)throw new Error('Station sign canvas unavailable');
- x.fillStyle=profile.line==='U8'?'#171d1b':'#e9e5dc';x.fillRect(0,0,1024,144);x.fillStyle='#'+profile.accent;x.fillRect(0,0,1024,7);x.fillRect(0,137,1024,7);
- x.fillStyle=profile.line==='U8'?'#f6f2e7':'#172124';x.font=`700 ${profile.name.length>25?39:profile.name.length>19?45:56}px Arial`;x.textAlign='center';x.textBaseline='middle';x.fillText(profile.name,512,76,960);
+ const st=StationProfiles.wallSign(profile); // G3b: wandbordstijl per station (zwart emaille, wit, blauw, reliëf)
+ x.fillStyle=st.bg;x.fillRect(0,0,1024,144);if(st.bar){x.fillStyle=st.bar;x.fillRect(0,0,1024,7);x.fillRect(0,137,1024,7);}if(st.border){x.strokeStyle=st.border;x.lineWidth=8;x.strokeRect(10,10,1004,124);}
+ x.fillStyle=st.fg;x.font=`700 ${profile.name.length>25?39:profile.name.length>19?45:56}px Arial`;x.textAlign='center';x.textBaseline='middle';x.fillText(profile.name,512,76,960);
  const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.minFilter=THREE.LinearFilter;texture.generateMipmaps=false;
  const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,toneMapped:false});const signs=new THREE.InstancedMesh(SIGN_GEOMETRY,material,6);signs.name='BlenderStationNames';
  const dummy=new THREE.Object3D(),ys=profile.line==='U2'?[-8.8,9.2]:[-12,12],xs=profile.line==='U2'?[-18,0,18]:[-15,0,15];let i=0;

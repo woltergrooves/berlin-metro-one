@@ -18,6 +18,8 @@
 //     onder schuine hoek (anisotropie).
 //   - TL-buizen en ledstrips gloeien (emissive) zodat ze in de mist en bij omgevingslicht licht blijven.
 //
+// G3b: ook de stationsprofiel-texturen (wand, plafond, zuil, glaswand) worden hier gemaakt: MaterialBase.station.
+//
 // Werkwijze: één scanronde per 2 s door de scene, verdeeld over frames (max. 1.500 objecten per frame);
 // elk materiaal wordt één keer behandeld (WeakSet). Status: BerlinMaterials.status().
 import * as THREE from 'three';
@@ -53,6 +55,8 @@ const BY_NAME = {
   Ceramic: 'tegel', IvoryGlaze: 'tegel', BlueGlaze: 'tegel', Terrazzo: 'terrazzo', TactileStone: 'steen',
   TrackBed: 'beton', Ceiling: 'plafond', StationSteel: 'verf', BrushedMetal: 'metaal', BenchTimber: 'hout',
   BVG_Painted_Metal_Atlas: 'lak', Smoked_Safety_Glass: 'glas', WarmFluorescent: 'licht', Warm_LED: 'licht',
+  // G3b (StationProfiles.js): eigen onderdelen per stationsprofiel
+  G3b_Tile: 'tegel', G3b_Paint: 'verf', G3b_Stone: 'steen', G3b_Polished: 'tegel', G3b_Glass: 'glas', G3b_Plaster: 'plafond',
 };
 // Objectnamen (mesh of een voorouder), voor code-gebouwde onderdelen.
 const NAME_RULES = [
@@ -191,6 +195,220 @@ function boxUV(geo, size) {
   geo.userData.__boxUV = true;
 }
 
+// ── G3b: stationstexturen per stationsprofiel (StationProfiles.js levert de beschrijving) ──────────────
+// Alles procedureel (canvas), geen foto's. Elke textuur wordt per beschrijving één keer gemaakt (cache op
+// JSON-sleutel) en hoort bij het station-sjabloon: BlenderStationsV1.trim() ruimt ze mee op.
+const stationTexCache = new Map();
+function cached(kind, spec, make) {
+  const key = kind + JSON.stringify(spec);
+  let t = stationTexCache.get(key);
+  if (t && t.image) return t;
+  t = make(); t.userData.g3b = kind;
+  t.addEventListener?.('dispose', () => stationTexCache.delete(key));
+  stationTexCache.set(key, t);
+  return t;
+}
+function rngOf(seed) { let s = (seed >>> 0) % 2147483647 || 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); }
+function seedOf(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return h >>> 0; }
+function rgbOf(hex) { const n = parseInt(String(hex).replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function css(hex, f = 1, a = 1) { const [r, g, b] = rgbOf(hex).map(v => Math.max(0, Math.min(255, Math.round(v * f)))); return a < 1 ? `rgba(${r},${g},${b},${a})` : `rgb(${r},${g},${b})`; }
+
+// Tegelvlak tekenen in een rechthoek (px). pattern bepaalt maat en verband; m2px = pixels per meter.
+const TILE = { square: [0.15, 0.15], rect: [0.24, 0.12], vrect: [0.12, 0.24], large: [0.6, 0.3], brick: [0.25, 0.065],
+  mosaic: [0.05, 0.05], panel: [1.2, 0.8], marble: [1.0, 1.25], diagonal: [0.2, 0.2], relief: [0.4, 0.4], plain: [0, 0] };
+function tileField(ctx, x0, y0, w, h, sx, sy, spec, rnd) {
+  const pat = spec.t || 'square', base = spec.c, g = spec.g || null;
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, w, h); ctx.clip();
+  ctx.fillStyle = css(base); ctx.fillRect(x0, y0, w, h);
+  if (pat === 'plain') { ctx.restore(); return; }
+  const [tw, th] = TILE[pat] || TILE.square, pw = tw * sx, ph = th * sy;
+  const jit = spec.jit ?? (pat === 'brick' ? 0.16 : pat === 'mosaic' ? 0.1 : 0.05);
+  const grout = g ? css(g) : css(base, pat === 'brick' ? 0.55 : 0.78);
+  const gp = pat === 'brick' ? 2 : pat === 'panel' || pat === 'large' || pat === 'marble' ? 2 : 1;
+  if (pat === 'diagonal') {
+    ctx.translate(x0 + w / 2, y0 + h / 2); ctx.rotate(Math.PI / 4);
+    const R = Math.hypot(w, h) / 2 + pw;
+    for (let y = -R; y < R; y += ph) for (let x = -R; x < R; x += pw) {
+      ctx.fillStyle = grout; ctx.fillRect(x, y, pw, ph);
+      const f = 1 + (rnd() - 0.5) * 2 * jit; ctx.fillStyle = css(spec.c2 && rnd() < 0.18 ? spec.c2 : base, f); ctx.fillRect(x + gp, y + gp, pw - gp, ph - gp);
+    }
+    ctx.restore(); return;
+  }
+  let row = 0;
+  for (let y = y0 + h; y > y0 - ph; y -= ph, row++) {          // van onder naar boven: hele tegels op vloerhoogte
+    const off = (pat === 'brick' || pat === 'rect' && spec.bond) && row % 2 ? pw / 2 : 0;
+    for (let x = x0 - off; x < x0 + w; x += pw) {
+      ctx.fillStyle = grout; ctx.fillRect(x, y - ph, pw, ph);
+      let col = base;
+      if (spec.c2 && pat === 'mosaic' && rnd() < (spec.mix ?? 0.25)) col = spec.c2;
+      const f = 1 + (rnd() - 0.5) * 2 * jit;
+      ctx.fillStyle = css(col, f); ctx.fillRect(x + gp, y - ph + gp, pw - gp, ph - gp);
+      if (pat !== 'brick' && pat !== 'mosaic' && pw > 6) {      // glazuur: lichte bovenrand
+        ctx.fillStyle = 'rgba(255,255,255,0.10)'; ctx.fillRect(x + gp, y - ph + gp, pw - gp, Math.max(1, ph * 0.12));
+      }
+      if (pat === 'relief') {                                   // reliëftegels (Pankstraße): schaduw rechtsonder
+        ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(x + pw * 0.55, y - ph * 0.45, pw * 0.35, ph * 0.35);
+        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(x + pw * 0.15, y - ph * 0.85, pw * 0.35, ph * 0.35);
+      }
+    }
+  }
+  if (pat === 'marble') {                                        // aders
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 14; i++) {
+      ctx.strokeStyle = css(spec.c2 || base, 1.35, 0.35 + rnd() * 0.3); ctx.beginPath();
+      let px = x0 + rnd() * w, py = y0 + rnd() * h; ctx.moveTo(px, py);
+      for (let k = 0; k < 5; k++) { px += (rnd() - 0.3) * 60; py += (rnd() - 0.5) * 40; ctx.lineTo(px, py); }
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+// Wand: W meter breed (herhaalt langs het spoor), van y0 tot y0+H hoog (canvas boven = plafond).
+function wallTexture(spec) {
+  return cached('wall', spec, () => canvasTex(512, 512, (ctx, w, h) => {
+    const W = spec.W || 3, H = spec.H || 4.4, Y0 = spec.y0 ?? -0.2, sx = w / W, sy = h / H;
+    const py = y => h - (y - Y0) * sy, rnd = rngOf(seedOf(JSON.stringify(spec)));
+    tileField(ctx, 0, 0, w, h, sx, sy, spec, rnd);
+    if (spec.dado) tileField(ctx, 0, py(spec.dado.h), w, h - py(spec.dado.h), sx, sy, { t: spec.t, ...spec.dado }, rnd);
+    for (const [c, y, bh] of spec.bands || []) { ctx.fillStyle = css(c); ctx.fillRect(0, py(y + bh / 2), w, bh * sy); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(0, py(y + bh / 2), w, 1); }
+    const m = spec.motif;
+    if (spec.frames) {                                          // gekleurde kaders (Alexanderplatz U2)
+      const f = spec.frames, lw = (f.lw || 0.07) * sx;
+      ctx.strokeStyle = css(f.c); ctx.lineWidth = lw;
+      ctx.strokeRect(0.3 * sx + lw / 2, py(f.y1) + lw / 2, w - 0.6 * sx - lw, (f.y1 - f.y0) * sy - lw);
+    }
+    if (m?.k === 'gallery') {                                   // ingelijste historische 'foto' (procedureel, sepia)
+      const fx = w / 2 - 0.9 * sx, fy = py(2.45), fw = 1.8 * sx, fh = 1.25 * sy;
+      ctx.fillStyle = css(m.frame || '#3b2f25'); ctx.fillRect(fx - 6, fy - 6, fw + 12, fh + 12);
+      const gr = ctx.createLinearGradient(0, fy, 0, fy + fh); gr.addColorStop(0, '#d8c9a8'); gr.addColorStop(0.6, '#b9a582'); gr.addColorStop(1, '#8a7558');
+      ctx.fillStyle = gr; ctx.fillRect(fx, fy, fw, fh);
+      ctx.fillStyle = 'rgba(70,52,36,0.75)';
+      for (let x = fx; x < fx + fw - 8;) { const bw = 8 + rnd() * 26, bh = fh * (0.2 + rnd() * 0.45); ctx.fillRect(x, fy + fh - bh, bw - 2, bh); x += bw; }
+      ctx.fillStyle = 'rgba(40,30,22,0.5)'; ctx.fillRect(fx, fy + fh * 0.86, fw, fh * 0.14);
+    }
+    if (m?.k === 'window') {                                    // lichtvensters met blauw kader (Spittelmarkt)
+      const fx = w / 2 - 0.85 * sx, fy = py(3.35), fw = 1.7 * sx, fh = 2.2 * sy;
+      ctx.fillStyle = css(m.c); ctx.fillRect(fx - 0.18 * sx, fy - 0.18 * sy, fw + 0.36 * sx, fh + 0.36 * sy);
+      const gr = ctx.createLinearGradient(0, fy, 0, fy + fh); gr.addColorStop(0, '#f4f8fb'); gr.addColorStop(1, '#c9d9e6');
+      ctx.fillStyle = gr; ctx.fillRect(fx, fy, fw, fh);
+      ctx.fillStyle = css(m.c, 0.8); for (let i = 1; i < 3; i++) ctx.fillRect(fx + fw * i / 3 - 2, fy, 4, fh);
+    }
+    if (m?.k === 'trees') {                                     // mozaïekboom (Franz-Neumann-Platz)
+      const cx = w / 2, top = py(3.4), trunkTop = py(2.2), bottom = py(spec.dado?.h ?? 0.3);
+      ctx.fillStyle = css(m.c, 0.75); ctx.fillRect(cx - 4, trunkTop, 8, bottom - trunkTop);
+      const ts = 0.05 * sx;
+      for (let a = -1.1; a <= 1.1; a += 0.09) for (let r = 0.2; r < 1.25; r += 0.07) {
+        const x = cx + Math.sin(a) * r * sx * 0.95, y = trunkTop - Math.cos(a) * r * sy * 0.95;
+        if (y < top) continue;
+        ctx.fillStyle = css(rnd() < 0.15 && m.c2 ? m.c2 : m.c, 0.85 + rnd() * 0.3); ctx.fillRect(x, y, ts, ts);
+      }
+    }
+    if (m?.k === 'flags') {                                     // Noorse vlaggen (Osloer Straße)
+      const fw = 1.9 * sx, fh = 1.3 * sy, fx = w / 2 - fw / 2, fy = py(2.6);
+      ctx.fillStyle = '#ba0c2f'; ctx.fillRect(fx, fy, fw, fh);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(fx + fw * 0.28, fy, fw * 0.16, fh); ctx.fillRect(fx, fy + fh * 0.4, fw, fh * 0.2);
+      ctx.fillStyle = '#00205b'; ctx.fillRect(fx + fw * 0.31, fy, fw * 0.1, fh); ctx.fillRect(fx, fy + fh * 0.44, fw, fh * 0.12);
+    }
+    if (m?.k === 'diamonds') {                                  // ruitband in de tegels (Karl-Bonhoeffer)
+      ctx.fillStyle = css(m.c);
+      for (let x = 0.15 * sx; x < w; x += 0.6 * sx) { const y = py(2.9); ctx.beginPath(); ctx.moveTo(x, y - 9); ctx.lineTo(x + 9, y); ctx.lineTo(x, y + 9); ctx.lineTo(x - 9, y); ctx.fill(); }
+      ctx.fillRect(w / 2 - 3, py(3.3), 6, (3.3 - 0.8) * sy);
+    }
+    // vuil: donkerder onderaan (remstof van de treinen), lichte ruis
+    const gr = ctx.createLinearGradient(0, py(0.8), 0, h); gr.addColorStop(0, 'rgba(30,26,22,0)'); gr.addColorStop(1, 'rgba(30,26,22,0.28)');
+    ctx.fillStyle = gr; ctx.fillRect(0, py(0.8), w, h - py(0.8));
+    noise(ctx, w, h, 9);
+  }));
+}
+// Plafond: één tegel = 3 × 3 m (zelfde maat als de doos-UV). Types: flat, kappen (gewelfjes tussen
+// balken), coffered (cassette), slats (latten), panel (metalen panelen), steel/wood/concrete (open-air).
+function ceilingTexture(spec) {
+  return cached('ceil', spec, () => canvasTex(256, 256, (ctx, w) => {
+    const c = spec.c || '#e4e2da', t = spec.t || 'flat', rnd = rngOf(seedOf(t + c));
+    ctx.fillStyle = css(c); ctx.fillRect(0, 0, w, w);
+    if (t === 'kappen') {                                       // licht in het midden van elk gewelfje, donker bij de balken
+      const gr = ctx.createLinearGradient(0, 0, w, 0);
+      gr.addColorStop(0, css(c, 0.5)); gr.addColorStop(0.15, css(c, 0.82)); gr.addColorStop(0.5, css(c, 1.08)); gr.addColorStop(0.85, css(c, 0.82)); gr.addColorStop(1, css(c, 0.5));
+      ctx.fillStyle = gr; ctx.fillRect(0, 0, w, w);
+    } else if (t === 'coffered') {
+      const n = 2, s = w / n;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+        const gr = ctx.createRadialGradient(i * s + s / 2, j * s + s / 2, 4, i * s + s / 2, j * s + s / 2, s * 0.7);
+        gr.addColorStop(0, css(c, 1.08)); gr.addColorStop(1, css(c, 0.78)); ctx.fillStyle = gr; ctx.fillRect(i * s + 8, j * s + 8, s - 16, s - 16);
+        ctx.fillStyle = css(c, 0.6); ctx.fillRect(i * s, j * s, s, 8); ctx.fillRect(i * s, j * s, 8, s);
+      }
+    } else if (t === 'slats') {
+      for (let y = 0; y < w; y += 12) { ctx.fillStyle = css(c, 0.85 + rnd() * 0.3); ctx.fillRect(0, y, w, 10); ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(0, y + 10, w, 2); }
+    } else if (t === 'panel') {
+      ctx.fillStyle = css(c, 0.72); for (let x = 0; x < w; x += w / 5) ctx.fillRect(x, 0, 3, w); ctx.fillRect(0, 0, w, 3); ctx.fillRect(0, w / 2, w, 3);
+    } else if (t === 'steel') {                                 // gegolfd plaatstaal / glasroeden (open-air)
+      for (let y = 0; y < w; y += 16) { ctx.fillStyle = css(c, 1.12); ctx.fillRect(0, y, w, 4); ctx.fillStyle = css(c, 0.82); ctx.fillRect(0, y + 10, w, 3); }
+    } else if (t === 'wood') {
+      for (let y = 0; y < w; y += 9) { ctx.fillStyle = css(c, 0.8 + rnd() * 0.35); ctx.fillRect(0, y, w, 8); }
+      ctx.fillStyle = css(c, 0.5); ctx.fillRect(0, 0, 6, w);
+    } else {
+      for (let i = 0; i < 40; i++) {
+        const x = rnd() * w, y = rnd() * w, r = 12 + rnd() * 50, gr = ctx.createRadialGradient(x, y, 0, x, y, r);
+        gr.addColorStop(0, `rgba(70,64,56,${0.015 + rnd() * 0.03})`); gr.addColorStop(1, 'rgba(70,64,56,0)'); ctx.fillStyle = gr; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      ctx.fillStyle = 'rgba(70,66,60,0.35)'; ctx.fillRect(0, 0, 2, w); ctx.fillRect(0, 0, w, 2);
+    }
+    noise(ctx, w, w, 10);
+  }));
+}
+// Zuilen: één textuur per zijvlak (BoxGeometry/Cylinder-UV 0..1). Types: paint (geklonken staal),
+// tiles, marble, granite, polished (zwart graniet), brick, mosaic (ornament), plain.
+function columnTexture(spec) {
+  return cached('col', spec, () => canvasTex(128, 512, (ctx, w, h) => {
+    const c = spec.c, t = spec.t || 'paint', rnd = rngOf(seedOf(t + c));
+    ctx.fillStyle = css(c); ctx.fillRect(0, 0, w, h);
+    if (t === 'paint') {                                        // klinknagels langs de randen en naadbanden
+      for (let y = 6; y < h; y += 14) for (const x of [9, w - 11]) { ctx.fillStyle = css(c, 1.35); ctx.fillRect(x, y, 3, 3); ctx.fillStyle = css(c, 0.6); ctx.fillRect(x + 2, y + 2, 2, 2); }
+      for (let y = 96; y < h; y += 128) { ctx.fillStyle = css(c, 0.75); ctx.fillRect(0, y, w, 3); for (let x = 6; x < w; x += 12) { ctx.fillStyle = css(c, 1.3); ctx.fillRect(x, y - 6, 3, 3); } }
+      ctx.fillStyle = css(c, 0.85); ctx.fillRect(w / 2 - 1, 0, 2, h);
+    } else if (t === 'tiles' || t === 'brick') {
+      tileField(ctx, 0, 0, w, h, w / 0.6, h / 3.8, { t: t === 'brick' ? 'brick' : 'square', c, g: spec.g }, rnd);
+      if (spec.corner) { ctx.fillStyle = css(spec.corner); ctx.fillRect(0, 0, 10, h); ctx.fillRect(w - 10, 0, 10, h); }
+      if (spec.cap) { ctx.fillStyle = css(spec.cap); ctx.fillRect(0, 0, w, 26); ctx.fillRect(0, h - 22, w, 22); }
+    } else if (t === 'marble' || t === 'granite' || t === 'polished') {
+      const d = ctx.getImageData(0, 0, w, h), p = d.data;
+      for (let i = 0; i < p.length; i += 4) { const n = (rnd() - 0.5) * (t === 'granite' ? 60 : t === 'marble' ? 8 : 14); p[i] += n; p[i + 1] += n; p[i + 2] += n; }
+      ctx.putImageData(d, 0, 0);
+      if (t === 'marble') { ctx.lineWidth = 1.3; for (let i = 0; i < 12; i++) { ctx.strokeStyle = css(c, 1.5, 0.45); ctx.beginPath(); let x = rnd() * w, y = rnd() * h; ctx.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 40; y += rnd() * 60; ctx.lineTo(x, y); } ctx.stroke(); } }
+      if (t === 'polished') { const gr = ctx.createLinearGradient(0, 0, w, 0); gr.addColorStop(0.2, 'rgba(255,255,255,0)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.18)'); gr.addColorStop(0.5, 'rgba(255,255,255,0)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, w, h); }
+    } else if (t === 'mosaic') {                                // ornamentpaneel met boog (Residenzstraße)
+      tileField(ctx, 0, 0, w, h, w / 0.6, h / 3.8, { t: 'mosaic', c, c2: spec.c2, mix: 0.2 }, rnd);
+      ctx.fillStyle = css(spec.c3 || '#e8dcb4'); ctx.beginPath(); ctx.moveTo(18, h - 40); ctx.lineTo(18, 150); ctx.arc(w / 2, 150, w / 2 - 18, Math.PI, 0); ctx.lineTo(w - 18, h - 40); ctx.fill();
+      for (let y = 150; y < h - 50; y += 18) for (let x = 26; x < w - 26; x += 12) { ctx.fillStyle = css((x + y) % 3 ? spec.c2 || c : c, 0.8 + rnd() * 0.4); ctx.fillRect(x, y, 8, 8); }
+    }
+    noise(ctx, w, h, 8);
+  }));
+}
+// Zijwanden van open-air stations: onderaan dicht (paneel), daarboven ramen. RGBA: glas half doorzichtig.
+// Eén tegel = 6 m breed × 3,9 m hoog.
+function sidePanelTexture(spec) {
+  return cached('side', spec, () => canvasTex(512, 384, (ctx, w, h) => {
+    const sx = w / 6, sy = h / 3.9, low = spec.low ?? 1.2, frame = css(spec.c);
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = frame; ctx.fillRect(0, h - low * sy, w, low * sy);
+    ctx.fillStyle = css(spec.c, 0.8); for (let x = 0; x < w; x += 1.5 * sx) ctx.fillRect(x, h - low * sy, 3, low * sy);
+    const top = h - 3.5 * sy, bottom = h - (low + 0.15) * sy;
+    ctx.fillStyle = frame; ctx.fillRect(0, top - 0.25 * sy, w, 0.25 * sy); ctx.fillRect(0, bottom, w, 0.15 * sy);
+    for (let i = 0; i < 4; i++) {
+      const x = i * 1.5 * sx + 0.14 * sx, ww = 1.22 * sx;
+      ctx.fillStyle = frame; ctx.fillRect(x - 0.14 * sx, top, 0.14 * sx, bottom - top);          // stijl tussen de ramen
+      ctx.beginPath();
+      if (spec.win === 'arched') { ctx.moveTo(x, bottom); ctx.lineTo(x, top + ww / 2); ctx.arc(x + ww / 2, top + ww / 2, ww / 2, Math.PI, 0); ctx.lineTo(x + ww, bottom); ctx.closePath(); }
+      else ctx.rect(x, top, ww, bottom - top);
+      ctx.fillStyle = 'rgba(160,190,204,0.5)'; ctx.fill();
+      ctx.lineWidth = 7; ctx.strokeStyle = frame; ctx.stroke();
+      if (spec.win === 'arched') { ctx.fillStyle = frame; ctx.fillRect(x, top, 7, ww / 2); ctx.fillRect(x + ww - 7, top, 7, ww / 2); }
+      ctx.fillStyle = frame; ctx.fillRect(x + ww / 2 - 4, top + (spec.win === 'arched' ? ww / 2 : 0), 8, bottom - top); // roeden
+      for (const f of [0.33, 0.66]) ctx.fillRect(x, top + (bottom - top) * f, ww, 6);
+    }
+  }));
+}
+
 // ── Toepassen ───────────────────────────────────────────────────────────────────────────────────────────
 const done = new WeakSet(), counts = { converted: 0, tuned: 0, emissive: 0, ceilings: 0, roughMaps: 0, scans: 0 };
 const byRole = {};
@@ -219,7 +437,7 @@ function treat(m, mesh) {
   if (m.userData.__fromLambert || fromGLB || role !== 'standaard') { applyRole(m, role); counts.tuned++; }
   if (role === 'tegel' && m.map) { const rm = roughnessFrom(m.map, 0.18, 0.85); if (rm) { m.roughnessMap = rm; m.roughness = 1; counts.roughMaps++; } }
   if (role === 'terrazzo' && m.map) { const rm = roughnessFrom(m.map, 0.45, 0.8); if (rm) { m.roughnessMap = rm; m.roughness = 1; counts.roughMaps++; } }
-  if (m.name === 'Ceiling') {
+  if (m.name === 'Ceiling' && !m.userData.g3b) {            // G3b-plafonds hebben een eigen stationstextuur
     m.map = ceiling(); m.color.setHex(0xffffff); counts.ceilings++;
   }
   // Lichtbronnen: TL-buizen en ledstrips gloeien.
@@ -265,7 +483,15 @@ export const MaterialBase = {
   },
   /** Na een kwaliteitswissel: direct een nieuwe ronde (laag → midden zet de Lambert-materialen om). */
   rescan() { if (game) startScan(); },
-  status() { return { ...counts, byRole: { ...byRole } }; },
+  status() { return { ...counts, byRole: { ...byRole }, stationTextures: stationTexCache.size }; },
+  /** G3b: stationstexturen per profiel (aangeroepen door StationProfiles.js). */
+  station: {
+    wall(spec) { const t = wallTexture(spec); t.wrapT = THREE.ClampToEdgeWrapping; return t; },
+    ceiling: ceilingTexture,
+    column(spec) { const t = columnTexture(spec); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; return t; },
+    side(spec) { const t = sidePanelTexture(spec); t.wrapT = THREE.ClampToEdgeWrapping; return t; },
+    boxUV,
+  },
   roles: ROLES,
 };
 globalThis.BerlinMaterials = MaterialBase;
