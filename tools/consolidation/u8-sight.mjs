@@ -39,8 +39,15 @@ for (const idx of list.split(',').map(Number)) {
       // Welke U8-stationsmodellen/groepen zijn zichtbaar (hele keten), en hoe ver weg?
       const vis = o => { for (let n = o; n; n = n.parent) if (!n.visible) return false; return true; };
       const seen = [];
-      g.scene.traverse(o => { if (!o.isGroup || !o.name) return; if (!/^(Blender|U8:|BlenderU8)/.test(o.name)) return; if (!vis(o)) return;
-        const w = o.getWorldPosition(new o.position.constructor()); const d = Math.round(Math.abs(w.x - p.position.x)); if (d > 40) seen.push(o.name.slice(0, 40) + '@' + d); });
+      // Alle zichtbare meshes verder dan 45 m langs de U8 (binnen ±30 m dwars), gegroepeerd per herkomst.
+      const by = new Map(), V = p.position.constructor;
+      g.scene.traverse(o => { if (!o.isMesh || !vis(o) || !o.geometry) return; if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+        const c = o.geometry.boundingSphere.center.clone().applyMatrix4(o.matrixWorld), dx = Math.abs(c.x - p.position.x), dz = Math.abs(c.z - (a0z + 49));
+        if (dx < 45 || dx > 220 || dz > 30) return;
+        const chain = []; for (let n = o; n && n !== g.scene; n = n.parent) if (n.name) chain.push(n.name.slice(0, 28));
+        const key = chain.slice(-2).reverse().join(' > ') + ' | ' + (o.name || '').slice(0, 20) + '/' + (o.material?.name || '').slice(0, 14);
+        const e = by.get(key) || { n: 0, d: 999 }; e.n++; e.d = Math.min(e.d, Math.round(dx)); by.set(key, e); });
+      for (const [k, e] of [...by].sort((a, b) => a[1].d - b[1].d).slice(0, 40)) seen.push(`${k} ×${e.n} @${e.d}`);
       // Stralen langs het spoor (perronhoogte en sporen): eerste zichtbare treffer.
       const T = g.camera.constructor ? null : null; const THREE = globalThis.__THREE__;
       const rays = [];
@@ -56,7 +63,7 @@ for (const idx of list.split(',').map(Number)) {
       const line = [...g.world.chunks.values()].find(c => c.structure.userData?.u8FullLine)?.structure.userData.u8FullLine;
       const gv = (line?.groups || []).map((x, k) => x?.visible ? k : null).filter(k => k != null).join(',');
       const sv = (line?.segments || []).map((x, k) => x?.visible ? k : null).filter(k => k != null).join(',');
-      return { rays, groupsVisible: gv, segsVisible: sv, bg: g.scene.background?.getHexString?.(), fog: [g.scene.fog?.near, g.scene.fog?.far], calls: i.calls, tris: i.triangles, x: Math.round(p.position.x), z: Math.round(p.position.z - g.stations.find(s => s.id === "alexanderplatz").z), y: p.position.y.toFixed(1), st: p.__u8FullStation, far: [...new Set(seen)].slice(0, 12) }; });
+      return { seen, rays, groupsVisible: gv, segsVisible: sv, bg: g.scene.background?.getHexString?.(), fog: [g.scene.fog?.near, g.scene.fog?.far], calls: i.calls, tris: i.triangles, x: Math.round(p.position.x), z: Math.round(p.position.z - g.stations.find(s => s.id === "alexanderplatz").z), y: p.position.y.toFixed(1), st: p.__u8FullStation, far: [...new Set(seen)].slice(0, 12) }; });
     console.log('shot', idx, yaw, JSON.stringify(info));
   }
 }
