@@ -124,7 +124,7 @@ const M4 = (x, y, z, ry = 0) => new THREE.Matrix4().makeRotationY(ry).setPositio
 // ── Dwarsprofiel per perronvorm ──────────────────────────────────────────────────────────────────
 export function crossSection(layout) {
   return layout === 'island'
-    ? { tracks: [-5.0, 5.0], plat: [[-3.55, 3.55]], wall: 7.1, walk: [[-3.2, 3.2]] }
+    ? { tracks: [-5.15, 5.15], plat: [[-3.55, 3.55]], wall: 7.1, walk: [[-3.2, 3.2]] }
     : { tracks: [-1.75, 1.75], plat: [[-7.1, -3.35], [3.35, 7.1]], wall: 7.5, walk: [[-6.85, -3.6], [3.6, 6.85]] };
 }
 
@@ -231,7 +231,7 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
 
 // Viaduct: dek, stalen liggers, kolommen tot de straat, leuningen; bij een station perronkappen.
 function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 = st.elev, withStreet = true) {
-  const len = x1 - x0, cx = (x0 + x1) / 2, deckW = isStation ? cs.wall * 2 : 9.4;
+  const len = x1 - x0, cx = (x0 + x1) / 2, deckW = isStation || cs.wide ? cs.wall * 2 : 9.4;   // breed naast een middenperron
   kit.box(m.steel, len, 0.9, deckW, cx, RAIL_Y - 0.75, 0);                    // dek + hoofdliggers
   for (const s of [-1, 1]) kit.box(m.steel, len, 0.5, 0.3, cx, RAIL_Y - 1.4, s * (deckW / 2 - 0.4));
   for (let x = x0 + 6; x < x1; x += 12) {
@@ -240,7 +240,7 @@ function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 
     if (h > 0.5) for (const s of [-1, 1]) kit.box(m.steel, 0.5, h, 0.5, x, g + h / 2, s * 3.6);
     if (h > 0.5) kit.box(m.steel, 0.4, 0.5, 8.2, x, RAIL_Y - 1.45, 0);
   }
-  if (!isStation) { for (const s of [-1, 1]) { kit.box(m.steel, len, 0.06, 0.06, cx, 0.1, s * 4.6); kit.box(m.steel, len, 0.5, 0.05, cx, -0.15, s * 4.6); } }
+  if (!isStation) { const rz = deckW / 2 - 0.1; for (const s of [-1, 1]) { kit.box(m.steel, len, 0.06, 0.06, cx, 0.1, s * rz); kit.box(m.steel, len, 0.5, 0.05, cx, -0.15, s * rz); } }
   if (isStation) {
     // Perronkappen: staanders + licht hellend dak per perron; buitenleuning met glas.
     const roof = std('Line_Roof_' + st.id, st.accent, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
@@ -305,7 +305,7 @@ function street(kit, m, st, x0, x1, elev0, elev1) {
 function segmentKit(line, a, b, m) {
   const kit = new Kit(), x0 = HALF, x1 = b.x - a.x - HALF;      // in de ruimte van station a
   const csA = crossSection(a.layout), csB = crossSection(b.layout);
-  const cs = { ...csA, tracks: csA.tracks, wall: Math.max(csA.wall, csB.wall) };
+  const cs = { ...csA, tracks: csA.tracks, wall: Math.max(csA.wall, csB.wall), wide: csA.plat.length === 1 || csB.plat.length === 1 };
   // Sporen: lopen recht door; bij wisselende perronvorm buigen ze in het midden (eenvoudige S-bocht).
   if (csA.tracks[1] === csB.tracks[1]) tracks(kit, m, cs, x0, x1);
   else {

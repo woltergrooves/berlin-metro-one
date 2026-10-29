@@ -36,8 +36,8 @@ function autoQuality() { return isMobile() ? 'midden' : 'hoog'; }
 // Per omgeving: mist, lampen en omgevingslicht. Ondergronds = warm TL-licht van boven, donkere tunnel.
 const ENV = {
   ondergronds: { fog: 0x14171a, near: 30, far: 105, hemiSky: 0xfff4e4, hemiGround: 0x4a443c, hemi: 0.95, amb: 0.22, key: 1.55, keyColor: 0xfff2dc, env: 0.55 },
-  // U8-perron: stations liggen 84 m uit elkaar → mist verder open, zodat de buurstations verderop in de tunnel zichtbaar zijn.
-  u8:          { fog: 0x14171a, near: 36, far: 160, hemiSky: 0xfff4e4, hemiGround: 0x4a443c, hemi: 0.95, amb: 0.22, key: 1.55, keyColor: 0xfff2dc, env: 0.55 },
+  // U8-perron: zelfde mist als ondergronds; de tunnel verdwijnt in het donker (geen buurstations in de verte).
+  u8:          { fog: 0x14171a, near: 30, far: 105, hemiSky: 0xfff4e4, hemiGround: 0x4a443c, hemi: 0.95, amb: 0.22, key: 1.55, keyColor: 0xfff2dc, env: 0.55 },
   trein:       { fog: 0x0e1012, near: 34, far: 115, hemiSky: 0xfff4e4, hemiGround: 0x3c3832, hemi: 0.9,  amb: 0.22, key: 1.3,  keyColor: 0xfff2dc, env: 0.5 },
 };
 const _c = new THREE.Color(), _sky = new THREE.Color();

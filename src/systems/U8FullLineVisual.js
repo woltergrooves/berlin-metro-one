@@ -86,7 +86,7 @@ export function addFullU8Visual(root,station){
     const a=stopX(i),b=stopX(i+1),g=new THREE.Group();g.name=`U8:tunnel:${i}`;g.userData.centerX=(a+b)/2;root.add(g);trackSegment(g,zc,Math.min(a,b)+24,Math.max(a,b)-24);
     box(g,[Math.abs(b-a)-48,4.8,.22],[(a+b)/2,-1.6,zc-12],DARK);box(g,[Math.abs(b-a)-48,4.8,.22],[(a+b)/2,-1.6,zc+12],DARK);
     for(let x=Math.min(a,b)+30;x<Math.max(a,b)-30;x+=18) box(g,[3,.05,.18],[x,.12,zc-11.72],LIGHT);
-    // U1-stap: tunnel dicht (plafond + bodem), zodat je vanaf het perron door de tunnel het buurstation ziet i.p.v. de lucht.
+    // Tunnel dicht (plafond + bodem): vanaf het perroneinde kijk je in een donkere tunnel i.p.v. de lucht.
     box(g,[Math.abs(b-a)-48,.3,24.2],[(a+b)/2,.6,zc],DARK);box(g,[Math.abs(b-a)-48,.12,24],[(a+b)/2,-4.62,zc],DARK);
     segments[i]=g;
   }

@@ -194,6 +194,8 @@ const discoverGame = Tick.every('trains.glb-discover', 750, () => {
 load('U2'); load('U8');
 window.BerlinBlenderTrains = {
  version: 1,
+ // Gedeelde modellen voor nieuwe lijnen (src/lines/): load('U2') = HK (Kleinprofil), load('U8') = H.
+ load: line => load(line),
  get status() { return JSON.parse(JSON.stringify(status)); },
  check: () => ({ ...JSON.parse(JSON.stringify(status)), trains: [...records.values()].map(r => ({
   line: r.line, family: manifest[r.line].family, visible: r.parent.visible, doors: r.bindings.length,

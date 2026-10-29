@@ -29,8 +29,15 @@ Keuzes:
   tunnelstations (tegelwand in stationskleur, naamborden, zuilen bij middenperron), viaductstations (perronkap,
   glasleuning, stalen viaduct, straat met gevels en bomen eronder), tunnelmond tussen Kurfürstenstraße en
   Gleisdreieck, hemel dag/nacht. Status: `BerlinLines.U1.status()`. Test: `tools/consolidation/u1-shots.mjs`.
-- **U1b — Treinen:** twee HK-treinen (beide richtingen, `TrainTimeline` zoals U8Service), instappen, meerijden,
-  deuren, HUD-voortgang, vertrekborden. Ritgeluid hergebruiken.
+- **U1b — Treinen ✅:** `src/lines/LineTrains.js` (herbruikbaar): `LineTrain` = `TrainTimeline` (zelfde dienst als
+  U2/U8) + het Blender-HK-model van de U2 (`BerlinBlenderTrains.load('U2')`), twee gekoppelde eenheden (50 m),
+  elke eenheid volgt het spoor (ook de S-bocht middenperron ↔ zijperrons); bak 0,85× zo breed zodat hij tussen
+  perronrand en tweede spoor past. Middenperron-sporen naar ±5,15 m; viaduct breder naast een middenperron.
+  Deuren openen alleen aan de perronkant. Instappen = door een open deur de trein in lopen; meerijden = lopen
+  in de trein; uitstappen = bij een open deur het perron op. HUD: vertrektijden op het perron, voortgangsbalk
+  + "Nächster Halt" in de trein. DFI-vertrekbord boven elk perron. Ritgeluid + waarschuwingssignaal.
+  Twee treinen (één per richting) die zich, net als bij de U8, bij een wachtende speler in de buurt houden.
+  Test: `tools/consolidation/u1-trains.mjs`. Console: `BerlinLines.U1.board(i, dir)`, `.status().trains`.
 - **U1c — Overstappen:** Wittenbergplatz (U2, zelfde perron in het echt → korte gang), Nollendorfplatz en
   Gleisdreieck (U2, trap), Kottbusser Tor (U8, trap omlaag). Overgang met korte fade; stand in de save.
 - **U1d — Echte omgeving:** OSM-pakketten (`tools/g4/osm2pack.py`) voor de 8 viaductstations, met
@@ -39,7 +46,8 @@ Keuzes:
 - **U1e — Uitgangen + Street View:** trap omhoog → Street View op de echte coördinaten (`src/data/u1.js`),
   gratis embed; terugkeer naar het perron. Ontdekkingen/stamps per station; ticketautomaat.
 
-## Bekende beperkingen U1a
-- Nog geen treinen; je komt er alleen via het GOD-menu.
+## Bekende beperkingen (na U1b)
+- Je komt er alleen via het GOD-menu (overstappen = U1c).
+- Eén trein per richting (zoals de U8); geen echte 5-minutendienst over de hele lijn.
 - Bebouwing langs het viaduct is tijdelijk en procedureel (U1d → OpenStreetMap).
 - Uitgangstrap is decor (U1e).
