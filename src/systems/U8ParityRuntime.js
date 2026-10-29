@@ -115,8 +115,11 @@ export function installU8FullRuntime(game,hud,train,line){
     const selected=trains.find(t=>p.__u8Active && t.userData.u8.fullId===p.__u8ActiveTrainId)||trains.find(t=>t.userData.u8.currentIndex===index && t.userData.u8.service.canUseDoors)||train;
     globalThis.__berlinMetroU8Train=selected;globalThis.__berlinMetroU8Network=selected.userData.u8;
     const anchors=[p.position.x,...trains.map(t=>t.position.x)];
+    // Zichtbaarheid van stations/tunnels: U8LineOfSightV6 is eigenaar (alleen eigen station, geen buurstations in de verte).
+    if(!globalThis.__berlinMetroGame?.__u8SightlineV6){
     for(const group of line.groups){if(group)group.visible=anchors.some(x=>Math.abs(group.userData.centerX-x)<190);}
     for(const group of line.segments){if(group)group.visible=anchors.some(x=>Math.abs(group.userData.centerX-x)<150);}
+    }
     }});
   game.u8ServiceVersion='U2-shared-timeline-v1';
   game.__u8Parity=true;

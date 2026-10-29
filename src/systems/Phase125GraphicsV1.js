@@ -46,6 +46,7 @@ function u8Visibility(game){
   else if(p.__u8Active){const d=globalThis.__berlinMetroU8Train?.userData?.u8;if(Number.isInteger(d?.currentIndex))idx=d.currentIndex}
   else if(p.__u8Area&&p.currentStation?.id==='alexanderplatz')idx=U8_ALEX_INDEX;
   if(idx==null)return null;
+  if(game.__u8SightlineV6)return idx;   // U8LineOfSightV6 is eigenaar van de zichtbaarheid
   for(const s of U8_STOPS){if(s.id===U8_ALEX_INDEX)continue;const g=byName(game.scene,`U8:${s.name}`);if(g)g.visible=Math.abs(s.id-idx)<=1}
   for(let i=0;i<U8_STOPS.length-1;i++){const g=byName(game.scene,`U8:tunnel:${i}`);if(g)g.visible=i>=idx-1&&i<=idx}
   return idx;

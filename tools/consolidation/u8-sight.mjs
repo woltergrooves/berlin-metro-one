@@ -67,6 +67,14 @@ for (const idx of list.split(',').map(Number)) {
     console.log('shot', idx, yaw, JSON.stringify(info));
   }
 }
+// Extra: zichtbaarheid in situaties zonder vaste stationsindex (meerijden, lopen in het U8-gebied).
+const gv = () => page.evaluate(() => { const g = globalThis.__berlinMetroGame, line = [...g.world.chunks.values()].find(c => c.structure.userData?.u8FullLine)?.structure.userData.u8FullLine;
+  return (line?.groups || []).map((x, k) => x?.visible ? k : null).filter(k => k != null).join(','); });
+await page.evaluate(() => { const p = globalThis.__berlinMetroGame.player; p.__u8FullStation = null; p.__u8Area = true; });
+await page.waitForTimeout(3000); console.log('gebied zonder index', await gv());
+await page.evaluate(() => { const g = globalThis.__berlinMetroGame, p = g.player, t = g.u8Trains[0]; globalThis.__berlinMetroU8Train = t; p.__u8Active = true; p.__u8ActiveTrainId = 'onbekend';
+  globalThis.__u8TestIdx = t.userData.u8.currentIndex + '/' + t.userData.u8.nextIndex + '/' + t.userData.u8.fullPhase; });
+await page.waitForTimeout(3000); console.log('meerijden', await page.evaluate(() => globalThis.__u8TestIdx), await gv());
 console.log('fouten', errors.length, errors.slice(0, 6));
 console.log('done');
 await browser.close();

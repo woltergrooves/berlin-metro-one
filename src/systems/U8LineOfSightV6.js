@@ -1,8 +1,9 @@
 import { Tick } from '../state/Tick.js';
 const ALEX=14;
 const U8_MIN_Z=40.2,U8_MAX_Z=57.8;
-function activeTrain(game){const p=game.player;if(!p?.__u8Active)return null;return game.u8Trains?.find(t=>t.userData?.u8?.fullId===p.__u8ActiveTrainId)||null}
-function platformIndex(game){const p=game.player;if(Number.isInteger(p?.__u8FullStation))return p.__u8FullStation;if(p?.currentStation?.id==='alexanderplatz'){const rel=p.position.z-p.currentStation.z;if(p.position.x>=37&&p.position.x<=85&&rel>=U8_MIN_Z&&rel<=U8_MAX_Z)return ALEX}return null}
+// Meerijden: eerst via het trein-id, anders de trein die U8ParityRuntime als 'huidige' publiceert.
+function activeTrain(game){const p=game.player;if(!p?.__u8Active)return null;return game.u8Trains?.find(t=>t.userData?.u8?.fullId===p.__u8ActiveTrainId)||(globalThis.__berlinMetroU8Train?.userData?.u8?globalThis.__berlinMetroU8Train:null)}
+function platformIndex(game){const p=game.player;if(Number.isInteger(p?.__u8FullStation))return p.__u8FullStation;if(p?.__u8Area&&p?.currentStation?.id==='alexanderplatz')return ALEX;if(p?.currentStation?.id==='alexanderplatz'){const rel=p.position.z-p.currentStation.z;if(p.position.x>=37&&p.position.x<=85&&rel>=U8_MIN_Z&&rel<=U8_MAX_Z)return ALEX}return null}
 function setGroup(g,on){if(g)g.visible=!!on}
 // Op een U8-perron zie je alleen je eigen station en de donkere tunnel (plafond + bodem) ernaast —
 // geen buurstations in de verte (wens speler 29 okt). Rijdend: het volgende station verschijnt pas
@@ -12,7 +13,10 @@ function apply(game,line,root){
   let focus=null,next=null,progress=0,travelling=false;
   if(t){const d=t.userData.u8;focus=d.currentIndex;next=d.nextIndex;progress=d.progress||0;travelling=d.fullPhase==='travel'}else focus=platformIndex(game);
   const w=root?.userData?.blenderU8AlexParent;
+  // Nog in de U8 (trein of perron) maar index even onbekend → laatste bekende houden, nooit alles tonen.
+  if(focus==null&&(p?.__u8Active||p?.__u8Area)&&Number.isInteger(game.__u8SightLast))focus=game.__u8SightLast;
   if(focus==null){if(w)w.visible=true;return}
+  if(!travelling)game.__u8SightLast=focus;
   const groups=line.groups||[],segs=line.segments||[],on=new Set();
   for(const g of groups)if(g)setGroup(g,false);
   for(const s of segs)if(s)setGroup(s,false);
