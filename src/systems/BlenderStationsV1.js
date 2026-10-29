@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from '../vendor/loaders/GLTFLoader.js';
 import {Game} from '../core/Game.js';
 import {StationProfiles} from '../state/StationProfiles.js';
+import {Surroundings} from '../state/Surroundings.js';
 
 // A visual layer only. The existing floor boundaries, service, interactions and exits remain authoritative.
 const BASE = new URL('/assets/stations/', location.href);
@@ -123,6 +124,7 @@ function install(parent,line,station,profile,template,mixed=false){
  if(line==='U2')for(const board of game.world.chunks.get(station.index)?.boards||[])keep.add(board.group);
  const record={parent,visualSource:mixed?parent.parent:parent,line,station,profile,root,mixed,cx,zc,hidden:new Map(),keep,signs,asset:assets.get(`${line}:${profile.id}`)};
  parent.add(root);records.set(parent,record);record.asset.refs++;
+ if(line==='U2'&&profile.openAir)Surroundings.register(game,root,parent,station,profile); // G4: 3D-omgeving buitenstation
  // BVG departure boards are functional, not legacy station shells. Lower them
  // below the new Blender beams to avoid depth fighting with station roofs.
  if(line==='U2'){
@@ -134,6 +136,7 @@ function install(parent,line,station,profile,template,mixed=false){
  parent.userData.blenderStation={version:2,id:profile.id,line,name:profile.name,family:profile.family,provenance:profile.provenance,layoutAdapted:profile.layoutAdapted};
 }
 function drop(record){
+ Surroundings.unregister(record.root);
  for(const[node,visible]of record.hidden)node.visible=visible;record.root.removeFromParent();record.signs.signs.dispose();record.signs.material.dispose();record.signs.texture.dispose();record.asset.refs=Math.max(0,record.asset.refs-1);records.delete(record.parent);delete record.parent.userData.blenderStation;
 }
 function refreshStatus(){status.installed=records.size;status.byLine={U2:0,U8:0};for(const r of records.values())status.byLine[r.line]++;}
@@ -227,7 +230,8 @@ function attach(value){
   const outside=!p.__streetMode&&!p.__u8Active&&!Number.isInteger(p.__u8FullStation)&&st&&Math.abs(p.position.z-st.z)<45&&[...records.values()].some(r=>r.line==='U2'&&r.station.id===st.id&&r.profile.openAir);
   p.__openAirStation=!!outside;
   const background=scene.background,oldFog=outside&&scene.fog?.color.clone();
-  if(outside){scene.background=daySky;if(scene.fog)scene.fog.color.copy(daySky);}
+  const sky=globalThis.BerlinRender?.sky||daySky; // G4: dag/nacht-hemel van RenderBase i.p.v. altijd daglicht
+  if(outside){scene.background=sky;if(scene.fog)scene.fog.color.copy(sky);}
   try{return render.call(this,scene,camera)}finally{scene.background=background;if(oldFog&&scene.fog)scene.fog.color.copy(oldFog);}
  };
  void manifestReady.then(()=>scan());

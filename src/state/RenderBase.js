@@ -163,6 +163,9 @@ export const RenderBase = {
     frameId = Tick.frame('RenderBase', { before: applyEnvironment });
   },
   get quality() { return quality; },
+  /** Daglicht 0 (nacht) … 1 (middag) uit de spelklok; hemelkleur buiten (G4: verlichte ramen, verre silhouetten). */
+  get daylight() { return daylight(); },
+  get sky() { return _sky.setHex(0x9db7c5).lerp(_c.setHex(0x0b1018), 1 - daylight()); },
   setQuality(q) {
     if (!PROFILES[q] || !game) return false;
     quality = q;
@@ -191,7 +194,8 @@ export const RenderBase = {
           `<button data-q="${k}" style="flex:1;min-height:36px;border-radius:8px;border:1px solid #ffffff33;font:700 12px Arial;background:${k === s.quality ? '#ffcf5c' : '#ffffff18'};color:${k === s.quality ? '#111' : '#fff'}">${v.label}</button>`).join('')}</div>` +
         `<div style="display:block;font-weight:400;opacity:.8;margin-top:4px">Pixelratio ${s.pixelRatio?.toFixed(2)} · schaduw ${s.shadows ? 'aan' : 'uit'} · omgeving: ${s.environment}</div>` +
         `<div style="display:block;font-weight:400;opacity:.8">Materialen (G3a): ${s.materials ? `${s.materials.converted} omgezet naar PBR, ${s.materials.tuned} afgesteld${s.quality === 'laag' ? ' · laag: Lambert blijft' : ''}` : '—'}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8">Stationsprofielen (G3b): ${(() => { const p = globalThis.BerlinStationProfiles?.status?.(); return p ? `${p.profiles} stations · ${p.templates} geladen${p.failed ? ` · ${p.failed} overgeslagen` : ''}` : '—'; })()}</div>`;
+        `<div style="display:block;font-weight:400;opacity:.8">Stationsprofielen (G3b): ${(() => { const p = globalThis.BerlinStationProfiles?.status?.(); return p ? `${p.profiles} stations · ${p.templates} geladen${p.failed ? ` · ${p.failed} overgeslagen` : ''}` : '—'; })()}</div>` +
+        `<div style="display:block;font-weight:400;opacity:.8">Omgeving buitenstations (G4): ${(() => { const g = globalThis.BerlinSurroundings?.status?.(); return g ? `${g.packs} pakketten · geladen: ${g.loaded.join(', ') || 'geen'}${g.failed ? ` · ${g.failed} fouten` : ''} · © OpenStreetMap-bijdragers` : '—'; })()}</div>`;
       d.querySelectorAll('button[data-q]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); RenderBase.setQuality(b.dataset.q); draw(); game.ui?.notify?.(`Grafische kwaliteit: ${PROFILES[b.dataset.q].label}`); }; });
     };
     tools.parentNode.insertBefore(d, tools);

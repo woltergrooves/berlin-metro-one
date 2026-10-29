@@ -540,7 +540,7 @@ Berlin Life moet er minstens zo goed uitzien als Gods Are Made Not Born, met beh
 * G1 — Prestaties: dure frame-hooks lichter maken (Phase910V1, Phase1315V1, Phase125TexturesV2, GfxV3), zodat er ruimte is op iPhone/iPad.
 * G2 — Rendering-basis: tone mapping, kleurruimte, belichting, schaduw/ambient occlusion, mist en één centrale kwaliteitsinstelling voor iPhone/iPad.
 * G3 — Stations en treinen: materialen en textures.
-* G4 — Straat en buiten.
+* G4 — Straat en buiten. ✅ (29 okt 2026) 3D-omgeving bij de zeven buitenstations uit OpenStreetMap (© OpenStreetMap-bijdragers): gebouwen met Berlijnse gevels en 's avonds verlichte ramen, wegen, parken, bomen, eigen viaduct; U1-bovenhal Gleisdreieck, koepel Nollendorfplatz, Fernsehturm en Olympiastadion in de verte. Laadt alleen bij het station (`src/state/Surroundings.js`, pakketten in `public/assets/surroundings/`).
 
 Elke stap apart als preview, met vóór/na-screenshots. Audio (BVG-geluiden, aankondigingen) volgt later binnen Fase 46.
 
