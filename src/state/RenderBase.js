@@ -36,6 +36,8 @@ function autoQuality() { return isMobile() ? 'midden' : 'hoog'; }
 // Per omgeving: mist, lampen en omgevingslicht. Ondergronds = warm TL-licht van boven, donkere tunnel.
 const ENV = {
   ondergronds: { fog: 0x14171a, near: 30, far: 105, hemiSky: 0xfff4e4, hemiGround: 0x4a443c, hemi: 0.95, amb: 0.22, key: 1.55, keyColor: 0xfff2dc, env: 0.55 },
+  // U8-perron: stations liggen 84 m uit elkaar → mist verder open, zodat de buurstations verderop in de tunnel zichtbaar zijn.
+  u8:          { fog: 0x14171a, near: 36, far: 160, hemiSky: 0xfff4e4, hemiGround: 0x4a443c, hemi: 0.95, amb: 0.22, key: 1.55, keyColor: 0xfff2dc, env: 0.55 },
   trein:       { fog: 0x0e1012, near: 34, far: 115, hemiSky: 0xfff4e4, hemiGround: 0x3c3832, hemi: 0.9,  amb: 0.22, key: 1.3,  keyColor: 0xfff2dc, env: 0.5 },
 };
 const _c = new THREE.Color(), _sky = new THREE.Color();
@@ -51,7 +53,9 @@ function environmentOf(game) {
   const p = game.player || {};
   if (p.__streetMode) return 'street';
   if (p.activeTrain || p.__u8Active) return 'trein';
+  if (p.__line) return p.__lineOpenAir ? 'openair' : 'ondergronds';   // nieuwe lijnen (src/lines/)
   if (p.__openAirStation) return 'openair';
+  if (Number.isInteger(p.__u8FullStation) || (p.__u8Area && p.position?.y < -1)) return 'u8';
   return 'ondergronds';
 }
 
@@ -132,6 +136,10 @@ function applyEnvironment() {
   } else {
     e = ENV[kind];
     if (fog) fog.color.setHex(e.fog);
+    // Volledig ondergronds (U8, U1-tunnel): geen hemel door tunnelgaten → achtergrond = mistkleur.
+    // (Phase12FixV2 zet de achtergrond elke frame op de hemel; dit `before`-deel loopt daarna.)
+    // U2 blijft ongemoeid (daglicht bij trappen naar de straat).
+    if (scene.background?.isColor && (kind === 'u8' || (kind === 'trein' && p?.__u8Active) || (kind === 'ondergronds' && p?.__line))) scene.background.setHex(e.fog);
     rig.hemi.color.setHex(e.hemiSky); rig.hemi.groundColor.setHex(e.hemiGround); rig.key.color.setHex(e.keyColor);
   }
   if (fog) { fog.near = e.near; fog.far = e.far; }

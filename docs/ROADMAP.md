@@ -550,6 +550,13 @@ De eerstvolgende grote gameplay-uitbreiding.
 
 Een volledige U1 met stations, treinen, overstappen, Blender-modellen, Street View en ontdekkingen.
 
+Opgeknipt in vijf stappen (zie `docs/U1-PLAN.md`):
+* U1a — Lijnwereld + alle 13 stations begaanbaar (GOD-menu). 🟡 (29 okt 2026, in test)
+* U1b — Treinen in beide richtingen, instappen en meerijden.
+* U1c — Overstappen Wittenbergplatz, Nollendorfplatz, Gleisdreieck (U2) en Kottbusser Tor (U8).
+* U1d — Echte omgeving langs het viaduct (OSM), Oberbaumbrücke/Spree, stationsprofielen.
+* U1e — Uitgangen + Street View, ontdekkingen, ticketautomaat.
+
 Pas na een succesvolle test doorgaan.
 
 Mijlpaal 2 — U3 toevoegen

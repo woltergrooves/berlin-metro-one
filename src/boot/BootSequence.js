@@ -101,6 +101,9 @@ import('../systems/U8LegacyTimingDisabled.js').catch(log('U8 ride feel V5'));
 import('../systems/U8LineOfSightV6.js').catch(log('U8 sightline V6'));
 import('../systems/U8TunnelDetailV1.js').catch(log('U8 tunnel detail'));
 
+// ── 4b. Nieuwe lijnen (Mijlpaal 1): U1 — eigen gebied, eigen beweging/HUD (src/lines/) ─────
+import('../lines/U1Line.js').catch(log('U1'));
+
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────
 await import('../systems/StreetCoreClean.js').catch(log('all-station Street View V4.1'));
 import('../systems/AlexanderStairSeamFixV2.js').catch(log('stair seam V2'));
