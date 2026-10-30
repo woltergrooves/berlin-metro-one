@@ -51,12 +51,15 @@ Keuzes:
 - **U1d — Echte omgeving:** OSM-pakketten (`tools/g4/osm2pack.py`) voor de 8 viaductstations, met
   Oberbaumbrücke/Spree bij Warschauer Straße en Schlesisches Tor, Landwehrkanaal bij Möckernbrücke/Hallesches Tor.
   Stationsprofielen (kappen Prinzenstraße, groene hal Kottbusser Tor, Görlitzer Bahnhof).
-- **U1e — Uitgangen + Street View:** trap omhoog → Street View op de echte coördinaten (`src/data/u1.js`),
-  gratis embed; terugkeer naar het perron. Ontdekkingen/stamps per station; ticketautomaat.
+- **U1e — Uitgangen + Street View ✅:** de uitgangstrap (x = 18, open kant richting Warschauer Straße) erin lopen
+  → Street View (gratis embed) op de echte haltecoördinaten uit `src/data/u1.js`; '← U-Bahn' zet je boven aan de trap
+  terug op het perron (`returnKind: 'line'` + `onReturn` in `StreetCoreClean`). Buiten: nieuw `src/street/StreetScreen.js`
+  (geldt voor álle U1/U2/U8-uitgangen): HUD, buurtkaart, echte plekken uit OSM (`public/assets/places/`), kopen, Pfand,
+  Berlin Stamps, uitgaan, verhalen. Betaalde Maps API standaard uit. Test: `tools/consolidation/u1e-test.mjs`.
 
 ## Bekende beperkingen (na U1c)
 - Overstap is een sprong met fade (eigen gebied); geen doorlopende gang/trap.
 - Treinen op U2/U8 gaan door het overstapeinde heen: het bord hangt boven het perroneinde, niet in een eigen hal.
 - Eén trein per richting (zoals de U8); geen echte 5-minutendienst over de hele lijn.
 - Bebouwing langs het viaduct is tijdelijk en procedureel (U1d → OpenStreetMap).
-- Uitgangstrap is decor (U1e).
+- Uitgang = sprong naar Street View vanaf de trap (geen 3D-trap naar straatniveau).

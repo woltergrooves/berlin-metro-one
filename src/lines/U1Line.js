@@ -39,7 +39,7 @@ function enter(index, { side = 1, dx = -10, at = null } = {}) {
   const ez = at === 'exit' ? transferZ(cs) : null;
   const tz = at === 'transfer' ? transferZ(cs) : at === 'exit' ? ez : (band[0] + band[1]) / 2;
   if (at === 'transfer') dx = TRANSFER_X + 6.5;   // tussen de kapstaanders (−15, −7) en zuilen (−13,5)
-  if (at === 'exit') dx = EXIT_X + 4.6;           // net naast de open kant van de uitgangstrap
+  if (at === 'exit') dx = EXIT_X + 5.8;           // voorbij de open kant van de trap, net achter de zuil (raster 9 m: 22,5)
   p.position.set(st.x + dx, line.origin.y + CONFIG.player.eyeHeight, line.origin.z + tz);
   p.yaw = -Math.PI / 2; p.pitch = 0;                     // kijkt langs het perron, richting Warschauer Straße
   world.prime(st.index);
@@ -250,7 +250,7 @@ function installHud() {
     if (el.hint) el.hint.textContent = trains.some(tr => tr.boardableAt(st.index))
       ? 'Deuren open · loop naar een deur en stap in.'
       : st.transfer ? `Overstap ${st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
-      : st.kind === 'viaduct' ? 'Hochbahn boven de straat · wacht op de U1.' : 'Ondergronds station · wacht op de U1.';
+      : st.kind === 'viaduct' ? 'Hochbahn boven de straat · wacht op de U1 of neem de trap naar buiten (Ausgang).' : 'Ondergronds station · wacht op de U1 of neem de trap naar buiten (Ausgang).';
   };
 }
 

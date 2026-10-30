@@ -11,6 +11,8 @@ const check = (name, ok, info = '') => { results.push(`${ok ? 'OK  ' : 'FOUT'} $
 for (const dev of ['iPad Pro 11 landscape', 'iPhone 13']) {
   const ctx = await browser.newContext({ ...devices[dev] });
   const page = await ctx.newPage();
+  const cdp = await ctx.newCDPSession(page);
+  const shot = async path => { const { data } = await cdp.send('Page.captureScreenshot'); fs.writeFileSync(path, Buffer.from(data, 'base64')); };
   const errs = []; page.on('pageerror', e => errs.push(e.message));
   await page.addInitScript(q => { try { localStorage.setItem('berlin-quality', q); } catch {} }, quality);
   await page.goto(url);
@@ -33,10 +35,10 @@ for (const dev of ['iPad Pro 11 landscape', 'iPhone 13']) {
   check(`${tag}: buurtpakket`, st.places > 5, `plekken ${st.places}`);
   const hud = await page.evaluate(() => { const r = document.querySelector('#bls'); return { on: r.classList.contains('on'), txt: r.innerText.replace(/\s+/g, ' ') }; });
   check(`${tag}: HUD zichtbaar`, hud.on && /€/.test(hud.txt), hud.txt.slice(0, 90));
-  await page.screenshot({ path: `${out}/${tag}-1-hud.png` });
+  await shot(`${out}/${tag}-1-hud.png`);
   // 2. Buurt openen
   await page.click('#bls .buurt'); await page.waitForTimeout(800);
-  await page.screenshot({ path: `${out}/${tag}-2-buurt.png` });
+  await shot(`${out}/${tag}-2-buurt.png`);
   // 3. Eerste Späti/bakker/imbiss: erheen lopen en iets kopen.
   const buy = await page.evaluate(async () => {
     const B = globalThis.BerlinStreet, p = B.pack(), i = p.places.findIndex(x => ['spati', 'bakery', 'imbiss', 'cafe', 'super'].includes(x.kind));
@@ -46,7 +48,7 @@ for (const dev of ['iPad Pro 11 landscape', 'iPhone 13']) {
     return { i, name: p.places[i]?.name, kind: p.places[i]?.kind, before, after: globalThis.BerlinState.clock.hhmm, m0, m1: globalThis.__berlinMetroGame.metroEconomy?.balanceCents, frame: globalThis.__berlinMetroGame.__allStreetOverlay.frame.src.slice(0, 80), hasBtn: !!btn };
   });
   check(`${tag}: erheen + kopen`, buy.hasBtn && buy.m1 < buy.m0, JSON.stringify(buy));
-  await page.screenshot({ path: `${out}/${tag}-3-plek.png` });
+  await shot(`${out}/${tag}-3-plek.png`);
   // 4. Bezienswaardigheid → stempel
   const stamp = await page.evaluate(async () => {
     const B = globalThis.BerlinStreet, p = B.pack(), i = p.places.findIndex(x => x.kind === 'sight'); if (i < 0) return { none: true };
@@ -55,13 +57,14 @@ for (const dev of ['iPad Pro 11 landscape', 'iPhone 13']) {
   });
   check(`${tag}: Berlin Stamp`, stamp.none || stamp.stamps > 0, JSON.stringify(stamp));
   await page.evaluate(() => globalThis.BerlinStreet.bag()); await page.waitForTimeout(400);
-  await page.screenshot({ path: `${out}/${tag}-4-tas.png` });
+  await shot(`${out}/${tag}-4-tas.png`);
   // 5. Terug naar de U-Bahn → op het U1-perron bij de uitgang.
+  await page.evaluate(() => document.querySelector('#bls-sheet .close')?.click()); await page.waitForTimeout(300);
   await page.click('#bls .back'); await page.waitForTimeout(1500);
   const back = await page.evaluate(() => { const p = globalThis.__berlinMetroGame.player, U1 = globalThis.BerlinLines.U1; return { street: p.__streetMode, line: p.__line, st: p.__lineStation, x: Math.round(p.position.x - U1.stations[p.__lineStation ?? 0].x), hud: document.querySelector('#bls').classList.contains('on') }; });
   check(`${tag}: terug op U1-perron`, !back.street && back.line === 'U1' && back.st === IDX && !back.hud, JSON.stringify(back));
   await page.waitForTimeout(1500);
-  await page.screenshot({ path: `${out}/${tag}-5-terug.png` });
+  await shot(`${out}/${tag}-5-terug.png`);
   // 6. U2-uitgang (Wittenbergplatz) → StreetScreen → terug op de U2.
   if (tag === 'ipad') {
     const u2 = await page.evaluate(async () => {

@@ -15,7 +15,7 @@ er wordt niets meer geladen van oude `berlin-metro-*.vercel.app`-adressen.
 |-----------|--------|
 | Fase 1 — technische opschoning | ✅ centrale state, één save-formaat (`berlin-state-v2`), één portemonnee, één klok, één `BootSequence.js`, één `Tick` |
 | Mijlpaal 0 — graphics (G1–G4) | ✅ prestaties, rendering-basis, materialen, stationsprofielen (53 U2/U8-stations), 3D-omgeving buitenstations · audio nog open |
-| U1 (Mijlpaal 1) | ✅ U1a lijn + 13 stations · ✅ U1b treinen · ✅ U1c overstappen (Wittenbergplatz, Nollendorfplatz, Gleisdreieck, Kottbusser Tor) · ⬜ U1d omgeving · ⬜ U1e uitgangen/Street View |
+| U1 (Mijlpaal 1) | ✅ U1a lijn + 13 stations · ✅ U1b treinen · ✅ U1c overstappen (Wittenbergplatz, Nollendorfplatz, Gleisdreieck, Kottbusser Tor) · ✅ U1d omgeving · ✅ U1e uitgangen/Street View |
 | Alexanderplatz | ✅ trap U2 → Verteilerebene, hal, gang en trap naar de U8 en de uitgang opnieuw gebouwd (`AlexanderHub.js`) |
 
 ## Snel starten
@@ -85,6 +85,8 @@ Nieuwe code hoort bij één eigenaar; oude patches worden niet uitgebreid.
 | nieuwe lijnen | `src/lines/` + `src/data/<lijn>.js` |
 | overstappen tussen lijnen | `src/lines/LineTransfers.js` |
 | spelerslocatie in de save | Store-sectie `location` |
+| alles boven Street View: HUD, buurt (kaart + echte plekken), kopen, Pfand, stempels, uitgaan, verhalen | `src/street/StreetScreen.js` (stand: Store-sectie `street`; plekken: `public/assets/places/`, gemaakt met `tools/places/osm2places.py`) |
+| Street View zelf (iframe, coördinaten, terugkeer) | `src/systems/StreetCoreClean.js` (`game.__allStreetOverlay`) |
 | timers en frame-hooks | `src/state/Tick.js` (geen eigen `setInterval`/`requestAnimationFrame`) |
 
 ### Alexanderplatz (`AlexanderHub.js`)
@@ -134,7 +136,8 @@ Praktijktests op iPhone/iPad horen bij iedere release.
 **Google Maps API-sleutel.** `src/systems/ProgrammableStreetViewV2.js` bevat een browsersleutel. Beperk hem
 in Google Cloud Console tot de eigen domeinen (*HTTP referrers*: `berlin-metro-one.vercel.app/*`,
 `berlin-metro-one-wolter1.vercel.app/*`) en tot de Maps JavaScript API. Het GOD-menu toont of Street View
-nu gratis (embed) of betaald draait.
+nu gratis (embed) of betaald draait. **Standaard staat de betaalde API uit** (U1e); aanzetten kan alleen bewust
+met `localStorage.setItem('berlin-sv-paid', '1')`.
 
 ## Bekende punten
 

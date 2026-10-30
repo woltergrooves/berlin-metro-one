@@ -141,8 +141,10 @@ html.bl-street #stationLifeV5,html.bl-street #streetHotspotV3,html.bl-street #bl
 #bls-sheet{position:fixed;z-index:11950;display:none;pointer-events:auto;color:#fff;font:600 13px/1.35 system-ui,-apple-system,Arial;background:#121a24f5;
   box-shadow:0 10px 40px #000a;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);overflow:hidden;flex-direction:column}
 #bls-sheet.on{display:flex}
-@media (min-width:700px){#bls-sheet{right:max(10px,env(safe-area-inset-right));top:max(70px,calc(env(safe-area-inset-top) + 64px));bottom:max(12px,env(safe-area-inset-bottom));width:min(420px,46vw);border-radius:18px}}
-@media (max-width:699px){#bls-sheet{left:0;right:0;bottom:0;max-height:78dvh;border-radius:18px 18px 0 0}}
+@media (min-width:700px){#bls-sheet{right:max(10px,env(safe-area-inset-right));top:max(70px,calc(env(safe-area-inset-top) + 64px));bottom:max(126px,calc(env(safe-area-inset-bottom) + 118px));width:min(420px,46vw);border-radius:18px}}
+@media (max-width:699px){#bls-sheet{left:0;right:0;bottom:0;max-height:80dvh;border-radius:18px 18px 0 0}
+  html.bl-street.bl-sheet #bls .bottom,html.bl-street.bl-sheet #phoneBtnV2,html.bl-street.bl-sheet #god3{display:none!important}
+  #bls .where{max-width:none;flex:1 1 120px}#bls .stats{gap:7px;font-size:12px;padding:6px 8px}#bls .stats .tk{display:none}#bls .where b{font-size:14px}}
 #bls-sheet header{display:flex;align-items:center;gap:8px;padding:12px 12px 8px}
 #bls-sheet header b{font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bls-sheet button{font:800 13px system-ui,-apple-system,Arial;border:0;border-radius:11px;color:#fff;background:#2a3a4d;min-height:42px;padding:0 13px;touch-action:manipulation;cursor:pointer}
@@ -232,7 +234,7 @@ function episodes() {
 }
 function openList() {
   sheetOpen = true; cardIndex = -1; cardEpisode = null;
-  ui.sheet.classList.add('on'); ui.back2.style.visibility = 'hidden';
+  showSheet(); ui.back2.style.visibility = 'hidden';
   ui.title.textContent = `${ctx?.name || 'Buurt'} · buurt`;
   const places = pack?.places || [], eps = episodes();
   const chips = GROUPS.filter(([g]) => g === 'alles' || (g === 'werk' ? eps.length : places.some(p => KINDS[p.kind]?.group === g)))
@@ -263,7 +265,8 @@ function openList() {
   ui.body.querySelector('[data-pfand]')?.addEventListener('click', () => searchPfand(pfandKey));
   drawMap(ui.body.querySelector('canvas'));
 }
-function closeSheet() { sheetOpen = false; cardIndex = -1; cardEpisode = null; ui?.sheet.classList.remove('on'); }
+function showSheet() { ui.sheet.classList.add('on'); document.documentElement.classList.add('bl-sheet'); ui.body.scrollTop = 0; }
+function closeSheet() { sheetOpen = false; cardIndex = -1; cardEpisode = null; ui?.sheet.classList.remove('on'); document.documentElement.classList.remove('bl-sheet'); }
 
 function drawMap(cv) {
   if (!cv) return;
@@ -330,7 +333,7 @@ function wikiUrl(p) {
 function openPlace(i) {
   const p = pack?.places?.[i]; if (!p) return;
   sheetOpen = true; cardIndex = i; cardEpisode = null;
-  ui.sheet.classList.add('on'); ui.back2.style.visibility = 'visible';
+  showSheet(); ui.back2.style.visibility = 'visible';
   const k = KINDS[p.kind], at = atPlace(i), open = isOpen(p.kind), from = here || { x: 0, y: 0 }, d = dist(from, p);
   ui.title.textContent = `${k.emoji} ${p.name}`;
   const st = street(), stamped = st.stamps[stampKey(p)], visits = st.visits[stampKey(p)] || 0, s = econ();
@@ -444,7 +447,7 @@ function searchPfand(key) {
 function openEpisode(id, view) {
   const ep = globalThis.BerlinCityEpisodes; const v = view || ep?.view?.(id); if (!v) return;
   sheetOpen = true; cardEpisode = id; cardIndex = -1;
-  ui.sheet.classList.add('on'); ui.back2.style.visibility = 'visible';
+  showSheet(); ui.back2.style.visibility = 'visible';
   ui.title.textContent = v.title || 'Verhaal';
   ui.body.innerHTML = `<div class="card"><p>${esc(v.text || '')}</p>${(v.extras || []).filter(Boolean).map(t => `<div class="muted">${esc(t)}</div>`).join('')}</div>` +
     (v.actions || []).map(o => `<button class="wide" data-o="${esc(o.id)}"><span>${esc(o.label)}</span>${o.detail ? `<small class="muted">${esc(o.detail)}</small>` : ''}</button>`).join('') +
@@ -457,7 +460,7 @@ function openEpisode(id, view) {
 function openBag() {
   const s = econ(), items = Object.entries(s?.surfaceItems || {}).filter(([, n]) => n > 0);
   sheetOpen = true; cardIndex = -1; cardEpisode = null;
-  ui.sheet.classList.add('on'); ui.back2.style.visibility = 'visible'; ui.title.textContent = '🎒 Tas';
+  showSheet(); ui.back2.style.visibility = 'visible'; ui.title.textContent = '🎒 Tas';
   const st = street(), stamps = Object.values(st.stamps);
   ui.body.innerHTML = `<div class="card"><div>💶 ${euro(s?.balanceCents)} · ♻ ${s?.pfand || 0} Pfand</div></div>` +
     (items.length ? items.map(([id, n]) => { const [name, e] = ITEM_NAMES[id] || [id, '📦']; return `<div class="row"><span class="e">${e}</span><span class="n"><b>${esc(name)}</b></span><span class="d">×${n}</span></div>`; }).join('') : '<p class="muted">Je tas is leeg.</p>') +
