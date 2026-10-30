@@ -50,9 +50,30 @@ export const U1_TRANSFERS = {
   'kottbusser-tor': { line: 'U8', color: '#224f86', towards: 'Wittenau · Hermannstraße', station: 18 },
 };
 
+// U1d — stationsprofielen op het viaduct (herkenbaar, niet 1:1). Zonder profiel: perronkappen in de accentkleur.
+//   hall-barrel  — gesloten hal met tongewelf en glazen zijwanden over twee zijperrons (Görlitzer Bahnhof);
+//   hall-green   — groene staal-en-glashal over het middenperron (Kottbusser Tor);
+//   canopy-glass — losse glazen kappen per zijperron, lichte staanders (Prinzenstraße).
+export const U1_PROFILES = {
+  prinzenstrasse: { hall: 'canopy-glass', steel: '#d6d7d1', roof: '#e9ece9' },
+  'kottbusser-tor': { hall: 'hall-green', steel: '#3d6b4c', roof: '#2f4d3a' },
+  'goerlitzer-bahnhof': { hall: 'hall-barrel', steel: '#56695c', roof: '#3c4640' },
+};
+// U1d — echte omgeving (OpenStreetMap, tools/g4/osm2pack.py → public/assets/surroundings/u1/<id>.json).
+// sunk = het water ligt lager dan de straat, met kademuren (Landwehrkanaal).
+export const U1_SURROUNDINGS = {
+  gleisdreieck: {}, moeckernbruecke: { sunk: true }, 'hallesches-tor': { sunk: true }, prinzenstrasse: {},
+  'kottbusser-tor': {}, 'goerlitzer-bahnhof': {}, 'schlesisches-tor': {}, 'warschauer-strasse': {},
+};
+// Bruggen in het tussenstuk ná het genoemde station (LineWorld bouwt ze; de omgeving laat de rivier vrij).
+export const U1_BRIDGES = {
+  'schlesisches-tor': { name: 'Oberbaumbrücke', river: 'Spree', width: 52 },
+};
+
 export const U1_STATIONS = RAW.map(([id, name, lat, lon, kind, layout, elev, transfers, wall, accent], index) => ({
   line: 'U1', id, name, index, lat, lon, kind, layout, realLayout: layout,
   elev: kind === 'viaduct' ? elev : 0, transfers, wall: '#' + wall, accent: '#' + accent,
-  transfer: U1_TRANSFERS[id] || null,
+  transfer: U1_TRANSFERS[id] || null, profile: U1_PROFILES[id] || null, bridge: U1_BRIDGES[id] || null,
+  surroundings: U1_SURROUNDINGS[id] || null,
   x: U1_LINE.origin.x + index * U1_LINE.spacing,
 }));

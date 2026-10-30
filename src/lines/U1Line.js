@@ -12,11 +12,12 @@ import { CONFIG } from '../config.js';
 import { U1_LINE, U1_STATIONS } from '../data/u1.js';
 import { LineWorld, HALF, EXIT_X, TRANSFER_X, crossSection } from './LineWorld.js';
 import { installTransfers, fromLine } from './LineTransfers.js';
+import { LineSurroundings } from './LineSurroundings.js';
 import { readSection, writeSection } from '../state/Store.js';
 import { LineTrain, DepartureBoards, trackZ, platformSide, DOOR_OFFSETS, HALF_LEN, INSIDE_W } from './LineTrains.js';
 
 const line = U1_LINE, stations = U1_STATIONS;
-let game = null, world = null, trains = [], boards = null;
+let game = null, world = null, trains = [], boards = null, surround = null;
 const status = { installed: false, enters: 0, leaves: 0, hud: false, god: false, model: 'laden', boardings: 0, alightings: 0 };
 
 const onLine = p => p?.__line === line.id;
@@ -279,6 +280,7 @@ function frame() {
   }
   const active = onLine(p);
   world.update(p.position.x, active);
+  surround?.update(p, active, p.position.x);
   for (const t of trains) t.group.visible = active && Math.abs(t.x - p.position.x) < 260;
   boards?.update(active && !p.__lineTrain ? p.__lineStation : -1, trains, active);
 }
@@ -289,6 +291,7 @@ async function install() {
     if (g?.player && g.scene && g.renderer && Array.isArray(g.u8Trains)) {
       if (g.__u1Line) return; g.__u1Line = true; game = g;
       world = new LineWorld(g.scene, line, stations);
+      surround = new LineSurroundings(world, line, stations);
       trains = [
         new LineTrain({ line, stations, direction: 1, startIndex: 0, delay: 4 }),
         new LineTrain({ line, stations, direction: -1, startIndex: stations.length - 1, delay: 10 }),
@@ -332,11 +335,11 @@ function board(index, dir = 1) {
 }
 
 export const U1 = {
-  line, stations, enter, leave, board,
+  line, stations, enter, leave, board, surroundings: () => surround?.status() ?? null,
   get trains() { return trains; },
   status: () => ({
     ...status, onLine: onLine(game?.player), station: game?.player?.__lineStation ?? null, world: world?.status() ?? null,
-    riding: game?.player?.__lineTrain?.id ?? null,
+    riding: game?.player?.__lineTrain?.id ?? null, surroundings: surround?.status() ?? null,
     trains: trains.map(t => ({ id: t.id, dir: t.direction, x: Math.round(t.x), state: t.state, at: t.currentIndex, door: +t.door.toFixed(2), visible: t.group.visible, units: t.units.length })),
   }),
 };

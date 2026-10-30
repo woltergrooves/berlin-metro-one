@@ -20,6 +20,20 @@ STATIONS = {
   'olympia-stadion':    dict(name='Olympia-Stadion', prev=(52.5163, 13.2596), next=(52.5255, 13.2418), elev=1.5),
   'ruhleben':           dict(name='Ruhleben', prev=(52.5170, 13.2502), next=None, elev=2.5),
 }
+# U1d: viaductstations van de U1 (eigen gebied in het spel, zie src/lines/LineWorld.js). Assenstelsel = het
+# U1-station in LineWorld: +x richting Warschauer Straße, +z rechts. Het eigen spoor (alle bovengrondse
+# metro behalve de U2) bouwt het spel zelf; de U2 bij Gleisdreieck blijft als ander viaduct (laag 1 onder de U1).
+# Coördinaten = src/data/u1.js. Uitvoer: <dst>/u1/<id>.json. Bestandsnaam van de uitsnede: osm/<osm>.osm.
+U1 = [('kurfuerstenstrasse', 52.5003037, 13.3609762), ('gleisdreieck', 52.4995715, 13.3735305, 15.6, 'u1-gleisdreieck'),
+      ('moeckernbruecke', 52.4991271, 13.3826389, 7), ('hallesches-tor', 52.4978374, 13.3899703, 7),
+      ('prinzenstrasse', 52.4984002, 13.4050918, 7), ('kottbusser-tor', 52.4990137, 13.4178906, 7),
+      ('goerlitzer-bahnhof', 52.4992519, 13.4276166, 7), ('schlesisches-tor', 52.5008434, 13.4414409, 7),
+      ('warschauer-strasse', 52.5051735, 13.4490382, 7)]
+LINE_STATIONS = {}
+for i in range(1, len(U1)):
+    sid, la, lo, el = U1[i][:4]
+    LINE_STATIONS[U1[i][4] if len(U1[i]) > 4 else sid] = dict(line='U1', id=sid, at=(la, lo), prev=U1[i - 1][1:3],
+                                                               next=U1[i + 1][1:3] if i + 1 < len(U1) else None, elev=float(el))
 RADIUS = 260.0          # m rond het station
 CORRIDOR = 12.5         # |z| < dit = spoorstrook van het spel (zijwanden G3b op ±9,08)
 LEVEL = 3.4             # verdiepingshoogte Berlijnse Altbau
@@ -83,16 +97,35 @@ def kind_of(tg):
 ROADW = {'motorway': 18, 'trunk': 16, 'primary': 14, 'secondary': 12, 'tertiary': 10, 'unclassified': 7, 'residential': 7, 'living_street': 6,
          'service': 4, 'pedestrian': 6, 'footway': 2.4, 'path': 2.2, 'cycleway': 2.4, 'track': 3, 'steps': 2}
 
+def clip_square(pts, h):
+    # Sutherland–Hodgman tegen het vierkant |x|,|z| <= h (water/groen kan kilometers doorlopen).
+    for ax, sg in ((0, 1), (0, -1), (1, 1), (1, -1)):
+        if not pts: break
+        out = []
+        for i in range(len(pts)):
+            a, b = pts[i - 1], pts[i]; ina, inb = sg * a[ax] <= h, sg * b[ax] <= h
+            if ina != inb:
+                t = (sg * h - a[ax]) / ((b[ax] - a[ax]) or 1e-9); out.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+            if inb: out.append(b)
+        pts = out
+    return pts
+
+def is_own_line(tg):
+    # U1-pakketten: alle bovengrondse metro behalve de U2 is "eigen spoor" (namen in OSM wisselen: U1, Hochbahn …).
+    nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
+    return tg.get('railway') == 'subway' and tg.get('tunnel') not in ('yes',) and 'U2' not in nm
+
 def run(src, dst):
     os.makedirs(dst, exist_ok=True)
-    for slug, cfg in STATIONS.items():
+    for slug, cfg in list(STATIONS.items()) + list(LINE_STATIONS.items()):
         fn = os.path.join(src, slug + '.osm')
         if not os.path.exists(fn): print('ontbreekt', fn); continue
+        line = cfg.get('line')
         root = ET.parse(fn).getroot()
         nodes = {n.get('id'): (float(n.get('lat')), float(n.get('lon'))) for n in root.iter('node') if n.get('lat')}
         ways = {w.get('id'): ([x.get('ref') for x in w.iter('nd')], tagsof(w)) for w in root.iter('way')}
-        st = None
-        for n in root.iter('node'):
+        st = cfg.get('at')
+        for n in ([] if st else root.iter('node')):
             tg = tagsof(n)
             if tg.get('railway') == 'station' and tg.get('name') == cfg['name'] and tg.get('station') == 'subway': st = nodes[n.get('id')]
         if not st:
@@ -102,24 +135,34 @@ def run(src, dst):
         f0 = Frame(st[0], st[1], (1, 0)); p = f0.en(*st)
         # Dichtstbijzijnde U2-segment: oorsprong + richting.
         best = None
+        dirv = (f0.en(*cfg['next'])[0] - f0.en(*cfg['prev'])[0], f0.en(*cfg['next'])[1] - f0.en(*cfg['prev'])[1]) if cfg['next'] else (p[0] - f0.en(*cfg['prev'])[0], p[1] - f0.en(*cfg['prev'])[1])
+        own_layer = 1
         for wid, (nd, tg) in ways.items():
             if tg.get('railway') != 'subway': continue
             nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
-            if any(k in nm for k in ('U1', 'U3', 'U5', 'U6', 'U7', 'U8', 'U9', 'U4')) and 'U2' not in nm: continue
+            if line:
+                if not is_own_line(tg): continue
+            elif any(k in nm for k in ('U1', 'U3', 'U5', 'U6', 'U7', 'U8', 'U9', 'U4')) and 'U2' not in nm: continue
             pts = [f0.en(*nodes[r]) for r in nd if r in nodes]
             for i in range(1, len(pts)):
                 q, d, v = seg_project(p, pts[i - 1], pts[i])
-                if best is None or d < best[1]: best = (q, d, v)
+                if line:   # alleen segmenten die ongeveer in de rijrichting lopen (geen keersporen dwars)
+                    c = abs(v[0] * dirv[0] + v[1] * dirv[1]) / ((math.hypot(*v) * math.hypot(*dirv)) or 1)
+                    if c < 0.8: continue
+                if best is None or d < best[1]:
+                    best = (q, d, v)
+                    try: own_layer = int(tg.get('layer', '1'))
+                    except Exception: own_layer = 1
         q, d, v = best
-        dirv = (f0.en(*cfg['next'])[0] - f0.en(*cfg['prev'])[0], f0.en(*cfg['next'])[1] - f0.en(*cfg['prev'])[1]) if cfg['next'] else (p[0] - f0.en(*cfg['prev'])[0], p[1] - f0.en(*cfg['prev'])[1])
         if v[0] * dirv[0] + v[1] * dirv[1] < 0: v = (-v[0], -v[1])
         lat0 = st[0] + q[1] / f0.ky; lon0 = st[1] + q[0] / f0.kx
         F = Frame(lat0, lon0, v)
         L = lambda r: F.local(*nodes[r])
         rnd = lambda x: int(round(x * 10))
-        out = dict(v=1, slug=slug, name=cfg['name'], attribution='© OpenStreetMap-bijdragers (ODbL)', origin=[round(lat0, 6), round(lon0, 6)],
+        out = dict(v=1, slug=cfg.get('id', slug), name=cfg.get('name', cfg.get('id')), attribution='© OpenStreetMap-bijdragers (ODbL)', origin=[round(lat0, 6), round(lon0, 6)],
                    bearing=round(math.degrees(math.atan2(v[0], v[1])) % 360, 1), elev=cfg['elev'], radius=RADIUS,
                    b=[], r=[], g=[], w=[], rail=[], via=[], trees=[], scale=10)
+        if line: out['line'] = line; out['ownLayer'] = own_layer
         def poly_of(nd):
             pts = [L(r) for r in nd if r in nodes]
             if len(pts) > 3 and pts[0] == pts[-1]: pts = pts[:-1]
@@ -157,6 +200,8 @@ def run(src, dst):
                              or tg.get('natural') in ('wood', 'scrub', 'grassland')):
                 pts = poly_of(nd)
                 if len(pts) < 3 or not near(pts): continue
+                pts = clip_square(pts, RADIUS + 60)
+                if len(pts) < 3: continue
                 wooded = tg.get('landuse') == 'forest' or tg.get('natural') in ('wood', 'scrub')
                 kind = 1 if wooded else (2 if tg.get('leisure') == 'pitch' else 0)
                 if area(pts) < 0: pts = pts[::-1]
@@ -164,6 +209,8 @@ def run(src, dst):
             elif closed and (tg.get('natural') == 'water' or tg.get('waterway') == 'riverbank' or tg.get('landuse') == 'basin'):
                 pts = poly_of(nd)
                 if len(pts) < 3 or not near(pts): continue
+                pts = clip_square(pts, RADIUS + 60)
+                if len(pts) < 3: continue
                 if area(pts) < 0: pts = pts[::-1]
                 out['w'].append(flat(pts))
             elif tg.get('waterway') in ('canal', 'river'):
@@ -173,7 +220,9 @@ def run(src, dst):
                 pts = poly_of(nd)
                 if len(pts) < 2 or not near(pts): continue
                 nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
-                if tg['railway'] == 'subway' and ('U2' in nm or not nm.strip()):
+                if line:
+                    if is_own_line(tg): continue   # eigen lijn (U1): bouwt LineWorld zelf, recht
+                elif tg['railway'] == 'subway' and ('U2' in nm or not nm.strip()):
                     continue   # eigen lijn: het spel heeft een recht spoor; die bouwt de app zelf
                 try: layer = int(tg.get('layer', '0'))
                 except Exception: layer = 0
@@ -187,7 +236,9 @@ def run(src, dst):
                 x, z = L(n.get('id'))
                 if math.hypot(x, z) < RADIUS and abs(z) > CORRIDOR: out['trees'].append([rnd(x), rnd(z)])
         js = json.dumps(out, separators=(',', ':'), ensure_ascii=False)
-        with open(os.path.join(dst, slug + '.json'), 'w', encoding='utf-8') as fh: fh.write(js)
+        od = os.path.join(dst, line.lower()) if line else dst
+        os.makedirs(od, exist_ok=True)
+        with open(os.path.join(od, out['slug'] + '.json'), 'w', encoding='utf-8') as fh: fh.write(js)
         print(f"{slug}: bearing {out['bearing']}°, afstand node→spoor {d:.1f} m, gebouwen {len(out['b'])} (strook {dropped} weg), wegen {len(out['r'])}, groen {len(out['g'])}, "
               f"water {len(out['w'])}, sporen {len(out['rail'])}, viaducten {len(out['via'])}, bomen {len(out['trees'])}, {len(js)//1024} kB")
 

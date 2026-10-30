@@ -92,6 +92,24 @@ function facadeTex(seed) {
   }));
 }
 
+function brickTex() {
+  return tex('brick', () => canvasTex(256, 256, (x, w, h) => {
+    x.fillStyle = '#7a3b2e'; x.fillRect(0, 0, w, h);
+    const bh = 16, bw = 42;
+    for (let r = 0; r < h / bh; r++) for (let c = -1; c < w / bw + 1; c++) {
+      const o = r % 2 ? bw / 2 : 0, v = Math.random();
+      x.fillStyle = `rgb(${150 + v * 40 | 0},${62 + v * 22 | 0},${44 + v * 14 | 0})`;
+      x.fillRect(c * bw + o + 1.5, r * bh + 1.5, bw - 3, bh - 3);
+    }
+  }));
+}
+function waterTex() {
+  return tex('water', () => canvasTex(256, 256, (x, w, h) => {
+    x.fillStyle = '#3d5a63'; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${150 + Math.random() * 80 | 0},${180 + Math.random() * 60 | 0},200,0.10)`; x.fillRect(Math.random() * w, Math.random() * h, 6 + Math.random() * 18, 1.5); }
+  }));
+}
+
 // ── Bouwset: verzamelt geometrie per materiaal en voegt die samen ──────────────────────────────────
 export class Kit {
   constructor() { this.parts = new Map(); }
@@ -157,6 +175,10 @@ function mats(line) {
     pavement: std('LinePavement', '#8d8a83', { map: platformTex(), roughness: 0.9 }),
     tree: std('LineTree', '#4f6f3a', { roughness: 0.9 }),
     trunk: std('LineTrunk', '#4b3a2b', { roughness: 0.95 }),
+    brick: std('LineBrick', '#ffffff', { map: brickTex(), roughness: 0.92 }),
+    stone: std('LineStone', '#a39b8c', { map: concreteTex(), roughness: 0.9 }),
+    water: std('LineWater', '#ffffff', { map: waterTex(), roughness: 0.15, metalness: 0.15 }),
+    copper: std('LineCopper', '#5e8f7d', { roughness: 0.6, metalness: 0.3 }),
   };
 }
 
@@ -173,7 +195,7 @@ function tracks(kit, m, cs, x0, x1) {
 
 // ── Station ──────────────────────────────────────────────────────────────────────────────────────
 function stationKit(line, st, m) {
-  const kit = new Kit(), cs = crossSection(st.layout), H = HALF, viaduct = st.kind === 'viaduct';
+  const kit = new Kit(), city = new Kit(), cs = crossSection(st.layout), H = HALF, viaduct = st.kind === 'viaduct';
   tracks(kit, m, cs, -H, H);
   // Perrons met witte veiligheidslijn en geleidestrook.
   for (const [z0, z1] of cs.plat) {
@@ -223,8 +245,8 @@ function stationKit(line, st, m) {
   }
 
   if (!viaduct) tunnelShell(kit, m, st, cs, -H, H, true);
-  else viaductShell(kit, m, st, cs, -H, H, true);
-  return kit;
+  else viaductShell(kit, m, st, cs, -H, H, true, st.elev, st.elev, true, city);
+  return { kit, city };
 }
 
 function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
@@ -252,7 +274,7 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
 }
 
 // Viaduct: dek, stalen liggers, kolommen tot de straat, leuningen; bij een station perronkappen.
-function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 = st.elev, withStreet = true) {
+function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 = st.elev, withStreet = true, city = kit) {
   const len = x1 - x0, cx = (x0 + x1) / 2, deckW = isStation || cs.wide ? cs.wall * 2 : 9.4;   // breed naast een middenperron
   kit.box(m.steel, len, 0.9, deckW, cx, RAIL_Y - 0.75, 0);                    // dek + hoofdliggers
   for (const s of [-1, 1]) kit.box(m.steel, len, 0.5, 0.3, cx, RAIL_Y - 1.4, s * (deckW / 2 - 0.4));
@@ -263,7 +285,8 @@ function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 
     if (h > 0.5) kit.box(m.steel, 0.4, 0.5, 8.2, x, RAIL_Y - 1.45, 0);
   }
   if (!isStation) { const rz = deckW / 2 - 0.1; for (const s of [-1, 1]) { kit.box(m.steel, len, 0.06, 0.06, cx, 0.1, s * rz); kit.box(m.steel, len, 0.5, 0.05, cx, -0.15, s * rz); } }
-  if (isStation) {
+  if (isStation && st.profile?.hall) stationHall(kit, m, st, cs, x0, x1);
+  else if (isStation) {
     // Perronkappen: staanders + licht hellend dak per perron; buitenleuning met glas.
     const roof = std('Line_Roof_' + st.id, st.accent, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
     for (const [z0, z1] of cs.plat) {
@@ -281,7 +304,131 @@ function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 
       kit.box(m.glass, x1 - x0, 1.0, 0.03, cx, 0.55, outer + s * 0.05);
     }
   }
-  if (withStreet) street(kit, m, st, x0, x1, elev0, elev1);
+  if (withStreet) street(city, m, st, x0, x1, elev0, elev1);
+}
+
+// ── U1d: stationsprofielen (hal / kappen) ───────────────────────────────────────────────────────────
+// Schuine plaat langs x tussen (z0, y0) en (z1, y1) in het dwarsprofiel.
+function slab(kit, mat, x0, x1, z0, y0, z1, y1, th = 0.1) {
+  const g = new THREE.BoxGeometry(x1 - x0, th, Math.hypot(z1 - z0, y1 - y0));
+  g.rotateX(-Math.atan2(y1 - y0, z1 - z0)); g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); kit.add(mat, g);
+}
+function stationHall(kit, m, st, cs, x0, x1) {
+  const P = st.profile, len = x1 - x0, cx = (x0 + x1) / 2;
+  const steel = std('Line_HallSteel_' + st.id, P.steel, { roughness: 0.5, metalness: 0.4 });
+  const roof = std('Line_HallRoof_' + st.id, P.roof, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
+  const glass = std('Line_HallGlass', '#b9d0d6', { roughness: 0.08, metalness: 0.2, transparent: true, opacity: 0.26, side: THREE.DoubleSide, depthWrite: false });
+  if (P.hall === 'canopy-glass') {
+    // Prinzenstraße: per zijperron een glazen kap op lichte staanders aan de buitenkant, aflopend naar het spoor.
+    for (const [z0, z1] of cs.plat) {
+      const s = Math.sign(z0 + z1), zo = s * 7.25, zi = s * 3.05;
+      for (let x = x0 + 4; x <= x1 - 4; x += 7.5) {
+        kit.box(steel, 0.2, 3.95, 0.2, x, 1.97, s * 6.95);
+        slab(kit, steel, x - 0.08, x + 0.08, zo, 4.0, zi, 3.4, 0.22);                      // spant
+      }
+      slab(kit, glass, x0 + 3, x1 - 3, zo, 4.06, zi, 3.46, 0.04);
+      for (const [z, y] of [[zo, 4.0], [zi, 3.4]]) kit.box(steel, len - 6, 0.16, 0.14, cx, y, z);
+      for (let x = x0 + 6; x < x1 - 4; x += 6) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.45, s * 5.4);
+      kit.box(m.steel, len, 0.06, 0.06, cx, 1.1, s * 7.15); kit.box(m.glass, len, 1.0, 0.03, cx, 0.55, s * 7.15);
+    }
+    return;
+  }
+  const W = cs.wall + (P.hall === 'hall-green' ? 0.35 : 0.1);
+  const top = P.hall === 'hall-green' ? 4.8 : 4.0, mull = P.hall === 'hall-green' ? 2.25 : 3;
+  for (const s of [-1, 1]) {
+    const z = s * W;
+    kit.box(steel, len, 1.0, 0.16, cx, 0.5, z);                                              // borstwering
+    kit.box(glass, len, top - 1.0, 0.03, cx, (top + 1.0) / 2, z);                           // glazen wand
+    kit.box(steel, len, 0.3, 0.3, cx, top + 0.1, z);                                         // bovenregel
+    if (P.hall === 'hall-green') kit.box(steel, len, 0.1, 0.12, cx, 2.9, z);                 // kampfer
+    for (let x = x0 + 0.5; x <= x1 - 0.5; x += mull) kit.box(steel, 0.12, top - 1.0, 0.16, x, (top + 1.0) / 2, z);
+  }
+  if (P.hall === 'hall-barrel') {
+    // Görlitzer Bahnhof: tongewelf met lichtstraat in de nok, spanten om de 6 m.
+    const n = 12, rise = 2.6, Wr = W + 0.15, y0 = top + 0.2;
+    const pt = i => { const t = Math.PI - i / n * Math.PI; return [Math.cos(t) * Wr, y0 + Math.sin(t) * rise]; };
+    for (let i = 0; i < n; i++) {
+      const [za, ya] = pt(i), [zb, yb] = pt(i + 1), sky = i >= 4 && i < 8;
+      slab(kit, sky ? glass : roof, x0, x1, za, ya, zb, yb, sky ? 0.04 : 0.1);
+      for (let x = x0 + 0.5; x <= x1 - 0.5; x += 6) slab(kit, steel, x - 0.1, x + 0.1, za, ya - 0.16, zb, yb - 0.16, 0.26);
+    }
+    for (const [z0, z1] of cs.plat) for (let x = x0 + 4; x < x1 - 2; x += 6) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.7, (z0 + z1) / 2);
+  } else {
+    // Kottbusser Tor: groene hal, flauw zadeldak met lichtband, middenrij zuilen op het perron.
+    const ridge = 6.1, eave = top + 0.15;
+    for (const s of [-1, 1]) {
+      slab(kit, roof, x0, x1, s * (W + 0.3), eave, s * 1.6, ridge - 0.25, 0.12);
+      slab(kit, glass, x0, x1, s * 1.6, ridge - 0.25, 0, ridge, 0.04);
+      for (let x = x0 + 0.5; x <= x1 - 0.5; x += 4.5) slab(kit, steel, x - 0.09, x + 0.09, s * W, eave - 0.2, 0, ridge - 0.2, 0.28);
+    }
+    for (const x of [-31.5, -24, -12, 2.5, 12, 23.5, 31.5]) { kit.box(steel, 0.36, ridge - 0.2, 0.36, x, (ridge - 0.2) / 2, 0); kit.box(steel, 1.2, 0.3, 0.6, x, 3.2, 0); }
+    for (let x = x0 + 4; x < x1 - 2; x += 4.5) for (const z of [-1.9, 1.9]) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.55, z);
+  }
+}
+
+// ── U1d: Oberbaumbrücke (baksteengotiek, twee torens, onderdek voor de weg) over de Spree ─────────────
+// x in de ruimte van het station vóór de brug; rivier tussen rv0 en rv1, straat op −elev.
+function riverBridge(kit, m, st, cs, x0, x1, rv0, rv1) {
+  const g = -st.elev, deckY = RAIL_Y - 0.3, WY = g - 4.6, b0 = rv0 - 2, b1 = rv1 + 2, L = b1 - b0, cx = (b0 + b1) / 2;
+  // Rivier + kades (ver dwars door, zodat je de Spree ziet lopen).
+  kit.flat(m.water, rv0, rv1, -420, 420, WY, true, 9);
+  for (const xq of [rv0, rv1]) kit.box(m.stone, 0.8, g - WY + 0.4, 840, xq + (xq === rv0 ? -0.4 : 0.4), (g + WY) / 2 - 0.2, 0, 2);
+  // Brugkern: dek van de weg (−z) en de arcade onder het U-Bahn-dek, op pijlers in de rivier.
+  const zr0 = -19.5, zr1 = 5.1;
+  kit.box(m.brick, L, 1.2, zr1 - zr0, cx, g - 0.6, (zr0 + zr1) / 2, 3);                       // brugdek
+  kit.box(m.asphalt, L, 0.04, 13.4, cx, g + 0.02, -12.1);                                      // rijbaan
+  kit.box(m.stone, L, 0.2, 3.4, cx, g + 0.1, -17.5);                                           // stoep
+  const piers = []; for (let i = 0; i <= 4; i++) piers.push(rv0 + (rv1 - rv0) * i / 4);
+  for (const px of piers) {
+    kit.box(m.brick, 2.6, g - 1.2 - WY + 0.5, zr1 - zr0, px, (g - 1.2 + WY - 0.5) / 2, (zr0 + zr1) / 2, 3);
+    for (const [w, y0, y1] of [[4.0, g - 2.6, g - 1.2], [3.2, g - 3.5, g - 2.6]]) kit.box(m.brick, w, y1 - y0, zr1 - zr0, px, (y0 + y1) / 2, (zr0 + zr1) / 2, 3);   // aanzet van de bogen
+    for (const s of [-1, 1]) { const ze = s > 0 ? zr1 : zr0; const c = new THREE.BoxGeometry(1.84, g - 2.6 - WY + 0.5, 1.84); c.rotateY(Math.PI / 4); c.translate(px, (g - 2.6 + WY - 0.5) / 2, ze); kit.add(m.stone, c); } // ijsbrekers
+  }
+  // Borstwering aan de wegkant met kantelen.
+  kit.box(m.brick, L, 1.0, 0.6, cx, g + 0.5, zr0 + 0.3, 3);
+  for (let x = b0 + 1; x < b1; x += 2.4) kit.box(m.brick, 1.1, 0.45, 0.62, x, g + 1.22, zr0 + 0.3, 3);
+  for (let x = b0 + 6; x < b1; x += 14) { kit.box(m.dark, 0.14, 4.6, 0.14, x, g + 2.3, zr0 + 1.0); kit.box(m.lamp, 0.5, 0.25, 0.5, x, g + 4.7, zr0 + 1.0); }
+  // Arcade (Bogengang) onder het U-Bahn-dek: pijlers met spitsbogen aan beide kanten.
+  const AZ = 4.7, bayW = 3.6;
+  for (const s of [-1, 1]) {
+    const z = s * AZ;
+    kit.box(m.brick, L, deckY - 0.9 - (g + 3.6), 0.8, cx, (deckY - 0.9 + g + 3.6) / 2, z, 3);       // band boven de bogen
+    for (let x = b0; x <= b1 + 0.01; x += bayW) {
+      kit.box(m.brick, 1.0, 3.6, 0.8, x, g + 1.8, z, 3);
+      if (x + bayW <= b1 + 0.01) {                                                                  // spitsboog: twee treden
+        kit.box(m.brick, 0.7, 0.45, 0.8, x + 0.85, g + 3.0, z, 3); kit.box(m.brick, 0.7, 0.45, 0.8, x + bayW - 0.85, g + 3.0, z, 3);
+        kit.box(m.brick, 0.75, 0.4, 0.8, x + 1.2, g + 3.4, z, 3); kit.box(m.brick, 0.75, 0.4, 0.8, x + bayW - 1.2, g + 3.4, z, 3);
+      }
+    }
+  }
+  kit.box(m.stone, L, 0.04, AZ * 2, cx, g + 0.02, 0);                                           // looppad in de arcade
+  kit.box(m.brick, L, 0.9, AZ * 2 + 0.8, cx, deckY - 0.45, 0, 3);                                // U-Bahn-dek
+  for (const s of [-1, 1]) {                                                                     // borstwering bovendek
+    kit.box(m.brick, L, 0.85, 0.5, cx, deckY + 0.42, s * (AZ + 0.15), 3);
+    for (let x = b0 + 1; x < b1; x += 2.4) kit.box(m.brick, 1.0, 0.4, 0.52, x, deckY + 1.05, s * (AZ + 0.15), 3);
+  }
+  // Twee torens (voorbeeld: Mitteltorturm Prenzlau) over het spoor, aan weerszijden van het stalen middendeel.
+  const mid = (rv0 + rv1) / 2;
+  for (const tx of [mid - 8, mid + 8]) {
+    const TW = 5.2, TZ = 10.6, base = deckY + 4.6, body = 10.4, crown = base + body;
+    for (const s of [-1, 1]) kit.box(m.brick, TW, base - deckY, 1.4, tx, (base + deckY) / 2, s * (TZ / 2 - 0.7), 3);       // poortpijlers
+    kit.box(m.brick, TW, 1.0, TZ, tx, base - 0.5, 0, 3);                                         // poortboog
+    kit.box(m.brick, TW, body, TZ, tx, base + body / 2, 0, 3);
+    for (const s of [-1, 1]) for (const yy of [base + 2.6, base + 6.4]) kit.box(m.dark, 0.06, 2.4, 0.9, tx + s * (TW / 2 + 0.02), yy, 0);   // spitsboogvensters
+    for (const s of [-1, 1]) for (const yy of [base + 2.6, base + 6.4]) for (const zz of [-2.4, 2.4]) kit.box(m.dark, 0.9, 2.4, 0.06, tx, yy, zz + s * 0, 0);
+    kit.box(m.stone, TW + 0.6, 0.5, TZ + 0.6, tx, crown + 0.25, 0);                               // lijst
+    for (let i = 0; i < 6; i++) for (const s of [-1, 1]) {                                       // kantelen
+      kit.box(m.brick, 0.6, 0.8, 0.5, tx - TW / 2 + 0.4 + i * (TW - 0.8) / 5, crown + 0.9, s * (TZ / 2 + 0.05), 3);
+      kit.box(m.brick, 0.5, 0.8, 0.6, tx + s * (TW / 2 + 0.05), crown + 0.9, -TZ / 2 + 0.4 + i * (TZ - 0.8) / 5, 3);
+    }
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {                                        // hoektorentjes
+      const qx = tx + sx * (TW / 2 - 0.2), qz = sz * (TZ / 2 - 0.2);
+      kit.box(m.brick, 1.2, 4.2, 1.2, qx, crown + 2.1, qz, 3);
+      const c = new THREE.ConeGeometry(0.95, 2.4, 4); c.rotateY(Math.PI / 4); c.translate(qx, crown + 5.4, qz); kit.add(m.copper, c);
+    }
+    kit.box(m.brick, TW - 1.8, 3.0, TZ - 3.4, tx, crown + 1.5, 0, 3);
+    const sp = new THREE.ConeGeometry(Math.min(TW, TZ) * 0.55, 7.2, 4); sp.rotateY(Math.PI / 4); sp.scale(1, 1, (TZ - 3.4) / (TW - 1.8)); sp.translate(tx, crown + 6.6, 0); kit.add(m.copper, sp);
+  }
 }
 
 // Straat onder het viaduct + tijdelijke bebouwing en bomen (U1d vervangt dit door OSM-pakketten).
@@ -325,7 +472,7 @@ function street(kit, m, st, x0, x1, elev0, elev1) {
 
 // ── Tussenstukken ────────────────────────────────────────────────────────────────────────────────
 function segmentKit(line, a, b, m) {
-  const kit = new Kit(), x0 = HALF, x1 = b.x - a.x - HALF;      // in de ruimte van station a
+  const kit = new Kit(), city = new Kit(), x0 = HALF, x1 = b.x - a.x - HALF;      // in de ruimte van station a
   const csA = crossSection(a.layout), csB = crossSection(b.layout);
   const cs = { ...csA, tracks: csA.tracks, wall: Math.max(csA.wall, csB.wall), wide: csA.plat.length === 1 || csB.plat.length === 1 };
   // Sporen: lopen recht door; bij wisselende perronvorm buigen ze in het midden (eenvoudige S-bocht).
@@ -340,7 +487,17 @@ function segmentKit(line, a, b, m) {
     }
   }
   if (a.kind === 'tunnel' && b.kind === 'tunnel') tunnelShell(kit, m, a, cs, x0, x1, false);
-  else if (a.kind === 'viaduct' && b.kind === 'viaduct') viaductShell(kit, m, a, cs, x0, x1, false, a.elev, b.elev);
+  else if (a.kind === 'viaduct' && b.kind === 'viaduct' && a.bridge) {
+    // Brug (U1d): staal tot de oever, dan de brug; geen straat boven de rivier.
+    const [rv0, rv1] = riverOf(a, x0, x1);
+    viaductShell(kit, m, a, cs, x0, rv0 - 2, false, a.elev, a.elev, true, city);
+    viaductShell(kit, m, a, cs, rv1 + 2, x1, false, b.elev, b.elev, true, city);
+    // Tussen de torens: stalen middendeel (zoals de Calatrava-overspanning), verder de bakstenen brug.
+    riverBridge(kit, m, a, cs, x0, x1, rv0, rv1);
+    const mid = (rv0 + rv1) / 2;
+    kit.box(m.steel, 11, 0.5, 9.4, mid, RAIL_Y - 0.55, 0);
+  }
+  else if (a.kind === 'viaduct' && b.kind === 'viaduct') viaductShell(kit, m, a, cs, x0, x1, false, a.elev, b.elev, true, city);
   else {
     // Tunnelmond: eerst tunnel, dan een open helling (keerwanden), dan het viaduct.
     const tunnelFirst = a.kind === 'tunnel', len = x1 - x0;
@@ -360,10 +517,12 @@ function segmentKit(line, a, b, m) {
     const e0 = tunnelFirst ? -TUNNEL_TOP : el, e1 = tunnelFirst ? el : -TUNNEL_TOP;
     const eAt = x => e0 + (e1 - e0) * (x - sA) / (sB - sA);
     viaductShell(kit, m, vst, { ...cs }, vA, vB, false, eAt(vA), eAt(vB), false);
-    street(kit, m, vst, sA, sB, e0, e1);
+    street(city, m, vst, sA, sB, e0, e1);
   }
-  return kit;
+  return { kit, city };
 }
+// Rivier van een brug in het tussenstuk (lokale x van station a).
+function riverOf(a, x0, x1) { const c = (x0 + x1) / 2, h = (a.bridge?.width || 52) / 2; return [c - h, c + h]; }
 
 // ── Lijnwereld met streaming ─────────────────────────────────────────────────────────────────────
 export class LineWorld {
@@ -402,11 +561,49 @@ export class LineWorld {
   prime(index) { const w = this.wanted(index); for (const i of [index, ...w.st]) if (!this.stationGroups.has(i)) this.buildOne('st', i); }
   buildOne(kind, i) {
     const a = this.stations[i];
-    const kit = kind === 'st' ? stationKit(this.line, a, this.m) : segmentKit(this.line, a, this.stations[i + 1], this.m);
+    const { kit, city } = kind === 'st' ? stationKit(this.line, a, this.m) : segmentKit(this.line, a, this.stations[i + 1], this.m);
     const g = kit.build(`${this.line.id}:${kind}:${a.id}`);
+    // Tijdelijke stadsbebouwing (straat, gevels, bomen) apart: verborgen zodra de OSM-omgeving (U1d) er staat.
+    const c = city.build(`${this.line.id}:${kind}:${a.id}:city`); c.userData.lineCity = true; c.visible = this.cityVisible !== false;
+    if (c.children.length) g.add(c);
     g.position.x = a.x; g.userData.line = this.line.id; g.userData.lineStation = i;
     this.root.add(g); this.built++;
     (kind === 'st' ? this.stationGroups : this.segmentGroups).set(i, g);
+  }
+  /** Toon of verberg de tijdelijke stadsbebouwing (U1d: de OSM-omgeving neemt het over). */
+  setCity(visible) {
+    if (this.cityVisible === visible) return; this.cityVisible = visible;
+    for (const map of [this.stationGroups, this.segmentGroups]) for (const g of map.values()) for (const c of g.children) if (c.userData.lineCity) c.visible = visible;
+  }
+  /** Straathoogte (y) langs de lijn op lijn-x — dezelfde hoogtes als viaduct en straat hierboven. */
+  groundAt(x) {
+    if (!this.profile) {
+      const pts = [], S = this.stations;
+      for (let i = 0; i < S.length; i++) {
+        const st = S[i], y = st.kind === 'viaduct' ? -st.elev : TUNNEL_TOP;
+        pts.push([st.x - HALF, y], [st.x + HALF, y]);
+        const b = S[i + 1];
+        if (b && st.kind !== b.kind) {     // tunnelmond: maaiveld op tunnelhoogte tot het begin van de helling
+          const len = b.x - st.x - 2 * HALF;
+          if (st.kind === 'tunnel') pts.push([st.x + HALF + len * 0.38, TUNNEL_TOP]);
+          else pts.push([st.x + HALF + len * 0.62, TUNNEL_TOP]);
+        }
+      }
+      this.profile = pts;
+    }
+    const P = this.profile;
+    if (x <= P[0][0]) return P[0][1];
+    for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const [xa, ya] = P[i - 1], [xb, yb] = P[i]; return xb - xa < 1e-6 ? yb : ya + (yb - ya) * (x - xa) / (xb - xa); }
+    return P[P.length - 1][1];
+  }
+  /** Lijn-x-intervallen waar de omgeving niets mag bouwen (rivieren onder bruggen). */
+  clearZones() {
+    const out = [];
+    for (let i = 0; i + 1 < this.stations.length; i++) {
+      const a = this.stations[i]; if (!a.bridge) continue;
+      const [r0, r1] = riverOf(a, HALF, this.stations[i + 1].x - a.x - HALF); out.push([a.x + r0, a.x + r1]);
+    }
+    return out;
   }
   dispose(g) { g.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); g.parent?.remove(g); }
   clear() { for (const g of this.stationGroups.values()) this.dispose(g); for (const g of this.segmentGroups.values()) this.dispose(g); this.stationGroups.clear(); this.segmentGroups.clear(); }

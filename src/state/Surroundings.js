@@ -26,7 +26,7 @@ const NEAR = 300, FAR = 460;                       // m (langs het spoor): laden
 const LEVEL = 3.4, BAY = 3.0;                      // verdieping en raamtravee (m)
 const TILE_U = 8 * BAY, TILE_V = 8 * LEVEL;        // gevelstextuur: 8 traveeën × 8 verdiepingen
 const FAR_MARKS = {                                // herkenningspunten in de verte (echte positie, ingekorte afstand)
-  fernsehturm: { lat: 52.520833, lon: 13.409444, at: ['gleisdreieck', 'schoenhauser-allee', 'eberswalder-strasse', 'nollendorfplatz', 'buelowstrasse'] },
+  fernsehturm: { lat: 52.520833, lon: 13.409444, line: ['U1'], at: ['gleisdreieck', 'schoenhauser-allee', 'eberswalder-strasse', 'nollendorfplatz', 'buelowstrasse'] },
   olympiastadion: { lat: 52.514722, lon: 13.239444, at: ['olympia-stadion', 'ruhleben'] },
 };
 const OWN = {                                       // eigen viaduct: stijl per station
@@ -81,6 +81,20 @@ class Batch {
   beam(a, b, y0, y1, w, col) {
     const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < 0.01) return;
     this.box((a[0] + b[0]) / 2, (y0 + y1) / 2, (a[1] + b[1]) / 2, L, y1 - y0, w, col, -Math.atan2(dz, dx));
+  }
+  // Driehoeken langs x opknippen (≤ maxDX), zodat een verschuiving in y per x (lijnpakketten) de grond volgt.
+  splitX(maxDX) {
+    const P = this.p, N = this.n, Cc = this.c, U = this.uv, out = { p: [], n: [], c: [], uv: U ? [] : null };
+    const V = i => ({ p: P.slice(i * 3, i * 3 + 3), n: N.slice(i * 3, i * 3 + 3), c: Cc.slice(i * 3, i * 3 + 3), u: U ? U.slice(i * 2, i * 2 + 2) : null });
+    const mid = (a, b) => ({ p: a.p.map((v, k) => (v + b.p[k]) / 2), n: a.n, c: a.c, u: a.u ? a.u.map((v, k) => (v + b.u[k]) / 2) : null });
+    const emit = t => { for (const v of t) { out.p.push(...v.p); out.n.push(...v.n); out.c.push(...v.c); if (out.uv) out.uv.push(...v.u); } };
+    const rec = (a, b, c, d) => {
+      const e = [[a, b, c], [b, c, a], [c, a, b]].map(([x, y, z]) => [Math.abs(x.p[0] - y.p[0]), x, y, z]).sort((u, v) => v[0] - u[0])[0];
+      if (e[0] <= maxDX || d > 14) return emit([a, b, c]);
+      const [, x, y, z] = e, m = mid(x, y); rec(x, m, z, d + 1); rec(m, y, z, d + 1);
+    };
+    for (let i = 0; i < P.length / 3; i += 3) rec(V(i), V(i + 1), V(i + 2), 0);
+    this.p = out.p; this.n = out.n; this.c = out.c; this.uv = out.uv; return this;
   }
   mesh(mat, name) {
     if (!this.p.length) return null;
@@ -143,20 +157,60 @@ const PAL = {
   small: ['#7d756c', '#8a8378', '#6f6c66', '#9b9182'],
 };
 
-function build(entry, pack) {
+// opts (U1d, lijnpakketten — zie src/lines/LineSurroundings.js):
+//   line   — lijn-id: geen eigen U2-viaduct/bovenhal, andere viaducten ten opzichte van pack.ownLayer;
+//   ground — x → straathoogte (y) in pakket-x; de hele omgeving wordt daarlangs verschoven (helling naar de tunnel);
+//   clear  — [[x0, x1], …]: hier niets bouwen (rivier onder de Oberbaumbrücke, die bouwt LineWorld zelf);
+//   sunkWater — water 1,6 m lager met kademuren (Landwehrkanaal).
+export function buildPack(pack, opts = {}) { return build(null, pack, opts); }
+
+function build(entry, pack, opts = {}) {
   const s = pack.scale || 10, R = pack.radius || 260, elev = pack.elev, r = rng(pack.slug), q = globalThis.BerlinRender?.quality || 'midden';
-  const group = new THREE.Group(); group.name = 'G4_Surroundings'; group.userData.g4 = VERSION; group.position.y = -elev;
+  const line = opts.line || null, zones = opts.clear || [];
+  const inZone = x => zones.some(([a, b]) => x > a && x < b);
+  const group = new THREE.Group(); group.name = line ? 'G4_LineSurroundings' : 'G4_Surroundings'; group.userData.g4 = VERSION; group.position.y = line ? 0 : -elev;
+  if (line) group.userData.line = line;
   const mats = [], geos = [];
-  const add = (batch, mat, name) => { const m = batch.mesh(mat, name); if (m) { group.add(m); geos.push(m.geometry); } if (!mats.includes(mat)) mats.push(mat); return m; };
-  const steelCol = C(globalThis.BerlinStationProfiles?.get?.('U2', pack.slug)?.open?.steel || '#4d5a55');
+  const slope = !!opts.ground && (() => { const g0 = opts.ground(0); for (let x = -R - 61; x <= R + 61; x += 10) if (Math.abs(opts.ground(x) - g0) > 0.05) return true; return false; })();
+  const add = (batch, mat, name) => { if (slope) batch.splitX(8); const m = batch.mesh(mat, name); if (m) { group.add(m); geos.push(m.geometry); } if (!mats.includes(mat)) mats.push(mat); return m; };
+  const steelCol = C(opts.steel || globalThis.BerlinStationProfiles?.get?.('U2', pack.slug)?.open?.steel || '#4d5a55');
 
   // Grond + groen + water + wegen + sporen
-  const ground = new Batch(), green = new Batch(), water = new Batch(), roads = new Batch(), rails = new Batch();
-  const disc = []; for (let i = 0; i < 48; i++) { const a = i / 48 * Math.PI * 2; disc.push([Math.cos(a) * (R + 60), Math.sin(a) * (R + 60)]); }
-  ground.flat(disc, 0, C('#8d8a82'));
+  const ground = new Batch(), green = new Batch(), water = new Batch(), roads = new Batch(), rails = new Batch(), quays = new Batch();
+  const GROUND = C('#8d8a82'), WATER = C('#40606c');
+  const sunk = !!(opts.sunkWater && !zones.length), WY = sunk ? -1.6 : 0.05;
+  if (!line) {
+    const disc = []; for (let i = 0; i < 48; i++) { const a = i / 48 * Math.PI * 2; disc.push([Math.cos(a) * (R + 60), Math.sin(a) * (R + 60)]); }
+    ground.flat(disc, 0, GROUND);
+  } else {
+    // Vierkant (ruim), opgeknipt bij de vrije zones; verzonken water als gaten in de grond.
+    const E = R + 61, cuts = [-E, ...zones.flat().map(v => Math.max(-E, Math.min(E, v))), E];
+    for (let i = 0; i + 1 < cuts.length; i += 2) {
+      const a = cuts[i], b = cuts[i + 1]; if (b - a < 0.5) continue;
+      const rect = [[a, -E], [b, -E], [b, E], [a, E]];
+      const holes = sunk ? pack.w.map(w => unpack(w, 0, s)).filter(p => p.length >= 3) : [];
+      try {
+        const tris = THREE.ShapeUtils.triangulateShape(rect.map(([x, z]) => new THREE.Vector2(x, z)), holes.map(h => h.map(([x, z]) => new THREE.Vector2(x, z))));
+        const all = rect.concat(...holes), UP = new THREE.Vector3(0, 1, 0);
+        for (const [i0, j, k] of tris) ground.tri([all[i0][0], 0, all[i0][1]], [all[j][0], 0, all[j][1]], [all[k][0], 0, all[k][1]], GROUND, null, null, null, UP);
+      } catch (err) { ground.flat(rect, 0, GROUND); }
+    }
+  }
   const GREEN = [C('#6c8648'), C('#55703d'), C('#6f9550')];
-  for (const g of pack.g) { const p = unpack(g, 1, s); if (p.length >= 3) green.flat(p, 0.08, GREEN[g[0]] || GREEN[0]); }
-  for (const w of pack.w) { const p = unpack(w, 0, s); if (p.length >= 3) water.flat(p, 0.05, C('#40606c')); }
+  const centerX = p => p.reduce((a, [x]) => a + x, 0) / p.length;
+  for (const g of pack.g) { const p = unpack(g, 1, s); if (p.length >= 3 && !inZone(centerX(p))) green.flat(p, 0.08, GREEN[g[0]] || GREEN[0]); }
+  for (const w of pack.w) {
+    const p = unpack(w, 0, s); if (p.length < 3) continue;
+    water.flat(p, WY, WATER);
+    if (sunk) {
+      const edge = R + 59.5, QUAY = C('#8a8274');
+      for (let i = 0; i < p.length; i++) {
+        const [x1, z1] = p[i], [x2, z2] = p[(i + 1) % p.length];
+        if ((Math.abs(x1) > edge && Math.abs(x2) > edge) || (Math.abs(z1) > edge && Math.abs(z2) > edge)) continue;   // knip aan de rand
+        quays.quad([x1, WY - 0.2, z1], [x2, WY - 0.2, z2], [x2, 0.02, z2], [x1, 0.02, z1], QUAY);
+      }
+    }
+  }
   const ASPH = C('#4b4c4e'), WALK = C('#9b958b'), RAIL = C('#6a6158'), TRAM = C('#3d3a37');
   const ribbon = (batch, pts, w, y, col) => {
     for (let i = 1; i < pts.length; i++) {
@@ -165,16 +219,29 @@ function build(entry, pack) {
       batch.quad([x1 - ex + nx, y, z1 - ez + nz], [x2 + ex + nx, y, z2 + ez + nz], [x2 + ex - nx, y, z2 + ez - nz], [x1 - ex - nx, y, z1 - ez - nz], col, null, new THREE.Vector3(0, 1, 0));
     }
   };
+  // Lijnen knippen in de vrije zones (stukje per segment: middelpunt in een zone → weg).
+  const cut = pts => {
+    if (!zones.length) return [pts];
+    const out = []; let cur = [];
+    for (let i = 0; i < pts.length; i++) {
+      if (i && inZone((pts[i - 1][0] + pts[i][0]) / 2)) { if (cur.length > 1) out.push(cur); cur = [pts[i]]; continue; }
+      cur.push(pts[i]);
+    }
+    if (cur.length > 1) out.push(cur); return out;
+  };
   for (const rd of pack.r) {
-    const w = rd[0] / s, pts = unpack(rd, 1, s);
-    if (w < 0) ribbon(water, pts, -w, 0.05, C('#40606c'));
-    else ribbon(roads, pts, w, w < 3 ? 0.14 : 0.18, w < 3 ? WALK : ASPH);
+    const w = rd[0] / s;
+    for (const pts of cut(unpack(rd, 1, s))) {
+      if (w < 0) { if (!sunk) ribbon(water, pts, -w, 0.05, WATER); }      // verzonken: het watervlak is er al
+      else ribbon(roads, pts, w, w < 3 ? 0.14 : 0.18, w < 3 ? WALK : ASPH);
+    }
   }
-  for (const rl of pack.rail) ribbon(rails, unpack(rl, 1, s), rl[0] ? 1.6 : 3.2, rl[0] ? 0.21 : 0.12, rl[0] ? TRAM : RAIL);
+  for (const rl of pack.rail) for (const pts of cut(unpack(rl, 1, s))) ribbon(rails, pts, rl[0] ? 1.6 : 3.2, rl[0] ? 0.21 : 0.12, rl[0] ? TRAM : RAIL);
   const off = (f, u) => ({ polygonOffset: true, polygonOffsetFactor: f, polygonOffsetUnits: u });
   add(ground, std('G4_Ground', { vertexColors: true }), 'G4_Ground');
   add(green, std('G4_Green', { vertexColors: true, ...off(-1, -2) }), 'G4_Green');
   add(water, std('G4_Water', { vertexColors: true, roughness: 0.18, metalness: 0.1, ...off(-1, -3) }), 'G4_Water');
+  add(quays, std('G4_Quays', { vertexColors: true, side: THREE.DoubleSide }), 'G4_Quays');
   add(rails, std('G4_Rails', { vertexColors: true, ...off(-2, -4) }), 'G4_Rails');
   add(roads, std('G4_Roads', { vertexColors: true, roughness: 0.85, ...off(-3, -6) }), 'G4_Roads');
 
@@ -182,6 +249,7 @@ function build(entry, pack) {
   const walls = { altbau: new Batch(true), modern: new Batch(true) }, roofs = new Batch(), smalls = new Batch();
   for (const b of pack.b) {
     const h = b[0], mh = b[1], k = b[2]; let p = unpack(b, 3, s); if (p.length < 3) continue;
+    if (zones.length && p.some(([x]) => inZone(x))) continue;
     if (signedArea(p) < 0) p = p.reverse();
     const kind = k === 1 ? 'modern' : 'altbau', small = k === 2 || h < 4.5;
     const pal = small ? PAL.small : PAL[kind], col = C(pal[Math.floor(r() * pal.length)]);
@@ -213,7 +281,7 @@ function build(entry, pack) {
 
   // Bomen: OSM-bomen + verspreid in parken/bos (niet in de spoorstrook, niet op gebouwen ongeveer).
   const trees = [];
-  for (const t of pack.trees) trees.push([t[0] / s, t[1] / s]);
+  for (const t of pack.trees) if (!inZone(t[0] / s)) trees.push([t[0] / s, t[1] / s]);
   for (const g of pack.g) {
     if (g[0] === 2) continue;
     const p = unpack(g, 1, s); if (p.length < 3) continue;
@@ -221,7 +289,7 @@ function build(entry, pack) {
     let minX = 1e9, maxX = -1e9, minZ = 1e9, maxZ = -1e9; for (const [x, z] of p) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
     for (let i = 0, tries = 0; i < n && tries < n * 4; tries++) {
       const x = minX + r() * (maxX - minX), z = minZ + r() * (maxZ - minZ);
-      if (Math.abs(z) < 13 || Math.hypot(x, z) > R) continue;
+      if (Math.abs(z) < 13 || Math.hypot(x, z) > R || inZone(x)) continue;
       let inside = false; for (let j = 0, k2 = p.length - 1; j < p.length; k2 = j++) { const [xi, zi] = p[j], [xj, zj] = p[k2]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) inside = !inside; }
       if (inside) { trees.push([x, z]); i++; }
     }
@@ -247,7 +315,7 @@ function build(entry, pack) {
 
   // Eigen U2-viaduct / talud (recht, zoals het spoor in het spel), over de hele lengte, ook onder het station.
   const own = new Batch(), style = OWN[pack.slug] || 'girder', top = elev - 0.45;
-  if (style === 'bank') {
+  if (line) { /* eigen spoor: LineWorld */ } else if (style === 'bank') {
     const w0 = 21, w1 = 21 + elev * 3;
     const bankCol = C('#7b7a6c'), grassCol = C('#6a8044');
     for (const sgn of [-1, 1]) own.quad([-R, 0, sgn * w1 / 2], [R, 0, sgn * w1 / 2], [R, top, sgn * w0 / 2], [-R, top, sgn * w0 / 2], grassCol, null, new THREE.Vector3(0, 1, sgn));
@@ -274,7 +342,7 @@ function build(entry, pack) {
   const via = new Batch();
   for (const v of pack.via) {
     const layer = v[0], w = v[1] / s, pts = unpack(v, 2, s);
-    const deck = elev + Math.max(0, layer - 1) * 7.6;
+    const deck = line ? Math.max(4.5, elev - Math.max(0, (pack.ownLayer || 2) - layer) * 7.6) : elev + Math.max(0, layer - 1) * 7.6;
     for (let i = 1; i < pts.length; i++) {
       via.beam(pts[i - 1], pts[i], deck - 1.6, deck - 0.2, w, steelCol);
       via.beam(pts[i - 1], pts[i], deck - 0.2, deck, w + 0.4, C('#4c4f50'));
@@ -291,15 +359,15 @@ function build(entry, pack) {
       acc -= L;
     }
   }
-  if (pack.slug === 'gleisdreieck') gleisdreieckHall(via, pack, elev, steelCol);
+  if (pack.slug === 'gleisdreieck' && !line) gleisdreieckHall(via, pack, elev, steelCol);
   add(via, std('G4_Viaducts', { vertexColors: true, roughness: 0.55, metalness: 0.35 }), 'G4_Viaducts');
 
-  if (pack.slug === 'nollendorfplatz') { const d = dome(elev, steelCol); group.add(d.mesh); geos.push(d.mesh.geometry); mats.push(d.mat); }
+  if (pack.slug === 'nollendorfplatz' && !line) { const d = dome(elev, steelCol); group.add(d.mesh); geos.push(d.mesh.geometry); mats.push(d.mat); }
 
   // Verre herkenningspunten: echte richting, afstand ingekort tot net binnen het zicht, nevelig ingekleurd.
   const far = [];
   for (const [id, f] of Object.entries(FAR_MARKS)) {
-    if (!f.at.includes(pack.slug)) continue;
+    if (!(line ? f.line?.includes(line) : f.at.includes(pack.slug))) continue;
     const [x, z] = localOf(pack, f.lat, f.lon), d = Math.hypot(x, z), D = Math.min(d, 360), k = D / d;
     const b = new Batch(), col = C('#5f6870');
     if (id === 'fernsehturm') {
@@ -320,6 +388,20 @@ function build(entry, pack) {
     const m = b.mesh(mat, 'G4_Far_' + id); if (!m) continue;
     m.position.set(x * k, 0, z * k); m.updateMatrix(); m.renderOrder = -1; m.userData.base = null; m.userData.haze = Math.min(0.62, 0.3 + d / 9000);
     group.add(m); geos.push(m.geometry); mats.push(mat); far.push(m);
+  }
+  // Lijnpakket: alles op de straathoogte van de lijn zetten (helling bij Gleisdreieck / tunnelmond).
+  if (opts.ground) {
+    const gy = opts.ground, m4 = new THREE.Matrix4();
+    for (const m of group.children) {
+      if (far.includes(m)) { m.position.y = gy(m.position.x); m.updateMatrix(); continue; }
+      if (m.isInstancedMesh) {
+        for (let i = 0; i < m.count; i++) { m.getMatrixAt(i, m4); m4.elements[13] += gy(m4.elements[12]); m.setMatrixAt(i, m4); }
+        m.instanceMatrix.needsUpdate = true; m.computeBoundingSphere(); continue;
+      }
+      const P = m.geometry?.attributes?.position; if (!P) continue;
+      for (let i = 0; i < P.count; i++) P.setY(i, P.getY(i) + gy(P.getX(i)));
+      P.needsUpdate = true; m.geometry.computeBoundingSphere();
+    }
   }
   return { group, mats, geos, walls: [wallMat.altbau, wallMat.modern], far };
 }
@@ -435,8 +517,16 @@ function update() {
     }
   }
   lastNight = night;
-  const c = ensureCredit(); if (c) c.style.display = anyVisible ? 'block' : 'none';
+  const c = ensureCredit(); if (c) c.style.display = (anyVisible || globalThis.__lineOsmVisible) ? 'block' : 'none';
 }
+
+/** Avondramen + nevel voor een los gebouwd pakket (LineSurroundings). */
+export function tintPack(built, night, sky, daylight) {
+  for (const m of built.walls) m.emissiveIntensity = night * 1.15;
+  for (const m of built.far) { m.material.color.setRGB(1, 1, 1); if (sky) m.material.color.lerp(sky, m.userData.haze).multiplyScalar(0.9 + 0.1 * daylight); }
+}
+export function osmCredit() { return ensureCredit(); }
+export function disposePack(built) { built.group.removeFromParent(); for (const g of built.geos) g.dispose(); for (const m of built.mats) m.dispose(); }
 
 export const Surroundings = {
   version: VERSION,
