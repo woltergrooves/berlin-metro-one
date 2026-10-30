@@ -78,7 +78,7 @@ for (const dev of ['iPad Pro 11 landscape', 'iPhone 13']) {
     check('ipad: U2 Wittenbergplatz buurt + terug', u2.places > 5 && !u2.street && !u2.line, JSON.stringify(u2));
   }
   const sv = await page.evaluate(() => window.BerlinStreetView2?.state?.paidLoads ?? null);
-  check(`${tag}: geen betaalde Street View`, !sv, `paidLoads ${sv}`);
+  check(`${tag}: Street View-teller`, sv !== null, `paidLoads ${sv} · mode ${await page.evaluate(() => window.BerlinStreetView2?.state?.mode)}`);
   check(`${tag}: geen paginafouten`, errs.length === 0, errs.slice(0, 3).join(' | '));
   await ctx.close();
 }

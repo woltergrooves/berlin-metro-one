@@ -136,8 +136,8 @@ Praktijktests op iPhone/iPad horen bij iedere release.
 **Google Maps API-sleutel.** `src/systems/ProgrammableStreetViewV2.js` bevat een browsersleutel. Beperk hem
 in Google Cloud Console tot de eigen domeinen (*HTTP referrers*: `berlin-metro-one.vercel.app/*`,
 `berlin-metro-one-wolter1.vercel.app/*`) en tot de Maps JavaScript API. Het GOD-menu toont of Street View
-nu gratis (embed) of betaald draait. **Standaard staat de betaalde API uit** (U1e); aanzetten kan alleen bewust
-met `localStorage.setItem('berlin-sv-paid', '1')`.
+nu gratis (embed) of betaald draait. **De betaalde API staat standaard aan** (keuze speler 30 okt; loads in de gaten houden via het
+GOD-menu). Uitzetten: `localStorage.setItem('berlin-sv-paid', '0')`. Bij een fout valt hij terug op de embed.
 
 ## Bekende punten
 

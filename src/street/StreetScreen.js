@@ -115,6 +115,11 @@ const atPlace = i => here && here.place === i;
 function svUrl(lat, lng, heading = 0) { return `https://maps.google.com/maps?layer=c&cbll=${lat},${lng}&cbp=12,${Math.round(heading)},,0,0&source=embed&output=svembed`; }
 function showAt(lat, lng, heading) {
   if (!ov?.frame) return;
+  // Betaalde Street View actief? Dan het bestaande panorama verplaatsen (geen nieuwe instantie, geen iframe).
+  const sv = globalThis.BerlinStreetView2, pano = sv?.getPanorama?.();
+  if (sv?.state?.mode === 'programmable' && pano?.setPosition) {
+    try { pano.setPosition({ lat, lng }); pano.setPov?.({ heading: heading || 0, pitch: 0 }); sv.state.paidLoads = (sv.state.paidLoads || 0) + 1; return; } catch {}
+  }
   const canvas = ov.root.querySelector('#berlin-programmable-streetview'); if (canvas) canvas.style.display = 'none';
   ov.frame.style.display = 'block'; ov.frame.src = svUrl(lat, lng, heading);
 }
