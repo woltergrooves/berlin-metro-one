@@ -36,8 +36,10 @@ function enter(index, { side = 1, dx = -10, at = null } = {}) {
   const cs = crossSection(st.layout), band = cs.walk.length === 1 ? cs.walk[0] : cs.walk[side > 0 ? 1 : 0];
   p.__line = line.id; p.__lineStation = st.index; p.__lineOpenAir = st.kind === 'viaduct';
   // Na een overstap: naast het overstaptrapgat (het perron op kijkend).
-  const tz = at === 'transfer' ? transferZ(cs) : (band[0] + band[1]) / 2;
+  const ez = at === 'exit' ? transferZ(cs) : null;
+  const tz = at === 'transfer' ? transferZ(cs) : at === 'exit' ? ez : (band[0] + band[1]) / 2;
   if (at === 'transfer') dx = TRANSFER_X + 6.5;   // tussen de kapstaanders (−15, −7) en zuilen (−13,5)
+  if (at === 'exit') dx = EXIT_X + 4.6;           // net naast de open kant van de uitgangstrap
   p.position.set(st.x + dx, line.origin.y + CONFIG.player.eyeHeight, line.origin.z + tz);
   p.yaw = -Math.PI / 2; p.pitch = 0;                     // kijkt langs het perron, richting Warschauer Straße
   world.prime(st.index);
@@ -47,7 +49,7 @@ function enter(index, { side = 1, dx = -10, at = null } = {}) {
   for (const t of trains) if (t.timeline.recenterNear(st.index, t.direction > 0 ? 3 : 9)) { t.door = 0; t.lastRecenter = now; t.place(); }
   status.enters++;
   saveLocation(st.index);
-  if (at !== 'transfer') game.ui?.notify?.(`U1 · ${st.name}`);
+  if (!at) game.ui?.notify?.(`U1 · ${st.name}`);
 }
 // Midden van het tweede perron (zijperrons) of het middenperron: daar liggen uitgang- en overstaptrap.
 const transferZ = cs => (cs.walk.length === 1 ? 0 : (cs.plat[1][0] + cs.plat[1][1]) / 2);
@@ -110,8 +112,22 @@ function move(p, delta) {
   const nx = clamp(p.position.x - st.x + mx, -HALF + 0.8, HALF - 0.8), nz = clamp(lz + mz, band[0], band[1]);
   const ez = transferZ(cs);
   if (st.transfer && Math.abs(nx - TRANSFER_X) < 3 && Math.abs(nz - ez) < 1.0) { fromLine(st); return; }   // overstaptrap (U1c)
-  if (Math.abs(nx - EXIT_X) < 3.4 && Math.abs(nz - ez) < 1.3) return;   // trapgat (uitgang, U1e)
+  if (Math.abs(nx - EXIT_X) < 3.4 && Math.abs(nz - ez) < 1.3) {         // uitgangstrap (U1e)
+    // Alleen via de open kant (+x, richting Warschauer Straße) de trap op; de leuningen houden je verder tegen.
+    const lx = p.position.x - st.x;
+    if (lx > EXIT_X + 2.4 && Math.abs(nz - ez) < 0.95 && nx < lx) toStreet(st);
+    return;
+  }
   p.position.x = st.x + nx; p.position.z = line.origin.z + nz; p.position.y = line.origin.y + CONFIG.player.eyeHeight;
+}
+
+// Uitgang (U1e): de trap op → Street View (gratis embed) op de echte haltecoördinaten uit src/data/u1.js.
+// Terug ('← U-Bahn') zet je boven aan de trap op het perron, met je rug naar de trap.
+function toStreet(st) {
+  const ov = game.__allStreetOverlay; if (!ov?.open || game.player.__streetMode) return;
+  status.exits = (status.exits || 0) + 1;
+  ov.open({ line: line.id, name: st.name, returnKind: 'line', lineId: line.id, stationIndex: st.index, lat: st.lat, lng: st.lon, heading: 0,
+    onReturn: () => { enter(st.index, { at: 'exit' }); status.returns = (status.returns || 0) + 1; } });
 }
 
 // Meerijden: je loopt in de trein (lokale plek ox/oz), de trein neemt je mee. Uitstappen bij een open deur.
@@ -335,7 +351,7 @@ function board(index, dir = 1) {
 }
 
 export const U1 = {
-  line, stations, enter, leave, board, surroundings: () => surround?.status() ?? null,
+  line, stations, enter, leave, board, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
   get trains() { return trains; },
   status: () => ({
     ...status, onLine: onLine(game?.player), station: game?.player?.__lineStation ?? null, world: world?.status() ?? null,

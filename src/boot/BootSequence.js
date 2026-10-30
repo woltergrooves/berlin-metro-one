@@ -200,6 +200,7 @@ await import('../systems/Phase16Foundations.js');
 // ── 10. Stadssystemen en centrale Game State (laatste) ─────────────────────────────────────
 await import('../systems/CityClean.js');
 await import('../systems/UiClean.js');
+import('../street/StreetScreen.js').catch(log('StreetScreen'));
 await import('../systems/CityEpisodesV1.js');
 await import('../systems/CityFlowV3.js');
 await import('../state/GameState.js'); // Game State 2.0 stap 1: alleen lezen, laadt na alle systemen
