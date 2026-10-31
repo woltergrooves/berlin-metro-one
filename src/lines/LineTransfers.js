@@ -103,7 +103,8 @@ function points() {
   return out;
 }
 
-const U1_SIGN = { line: 'U1', color: '#55a822', towards: 'Uhlandstraße · Warschauer Str.' };
+// U3c: de U3 stopt op alle overstapstations van de U1 (Wittenbergplatz … Kottbusser Tor) → beide lijnsymbolen.
+const U1_SIGN = { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' };
 function buildSigns(pts) {
   const sign = new THREE.MeshBasicMaterial({ map: transferSignTex(U1_SIGN), toneMapped: false });
   const floor = new THREE.MeshBasicMaterial({ color: 0x55a822, transparent: true, opacity: 0.55, toneMapped: false });
@@ -147,7 +148,7 @@ function frame(delta) {
       if (lx < -U8_END) hit = pt; else if (lx < -U8_END + 9) close = pt;
     }
   }
-  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`Übergang U1 · loop het trapgat in`); }
+  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`Übergang U1 · U3 · loop het trapgat in`); }
   if (!close && !hit) hinted = null;
   // Oude bewegingsbewakers zetten de speler soms een frame terug → niet meteen op 0 zetten, langzaam laten zakken.
   if (hit) lastHit = hit;

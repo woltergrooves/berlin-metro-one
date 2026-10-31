@@ -54,13 +54,23 @@ function exitSignTex() {
   }));
 }
 // Overstapbord (U1c): lijnsymbool van de doellijn + "Übergang" + eindpunten.
+// U3c: `also` = extra lijnsymbolen (U2/U8-perron: U1 + U3); `closed` = lijn nog niet in het spel (gesloten trapgat).
 export function transferSignTex(t) {
-  return tex('xfer:' + t.line + t.towards, () => canvasTex(768, 192, (x) => {
+  const badges = [t, ...(t.also || [])];
+  return tex('xfer:' + badges.map(b => b.line).join('+') + t.towards + (t.closed ? ':closed' : ''), () => canvasTex(768, 192, (x) => {
     x.fillStyle = '#1b4d9b'; x.fillRect(0, 0, 768, 192);
-    x.fillStyle = t.color; x.fillRect(22, 30, 132, 132);
-    x.fillStyle = '#fff'; x.font = '700 72px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(t.line, 88, 98);
-    x.textAlign = 'left'; x.font = '700 64px Arial'; x.fillText('Übergang  ↓', 182, 66, 560);
-    x.font = '700 40px Arial'; x.fillText(t.towards, 182, 140, 566);
+    const bw = badges.length > 1 ? 104 : 132;
+    badges.forEach((b, i) => {
+      const bx = 22 + i * (bw + 12), by = 30 + (132 - bw) / 2;
+      x.fillStyle = b.color; x.fillRect(bx, by, bw, bw);
+      if (b.line === 'S') { x.fillStyle = '#fff'; x.beginPath(); x.arc(bx + bw / 2, by + bw / 2, bw * 0.4, 0, Math.PI * 2); x.fill(); x.fillStyle = b.color; }
+      else x.fillStyle = '#fff';
+      x.font = `700 ${bw > 110 ? 72 : 58}px Arial`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(b.line, bx + bw / 2, by + bw / 2 + 4);
+    });
+    const tx = 22 + badges.length * (bw + 12) + 16;
+    x.fillStyle = '#fff'; x.textAlign = 'left'; x.font = '700 64px Arial'; x.fillText('Übergang  ↓', tx, 66, 746 - tx);
+    x.font = '700 40px Arial'; x.fillText(t.towards, tx, 140, 750 - tx);
+    if (t.closed) { x.fillStyle = '#c8102e'; x.fillRect(0, 176, 768, 16); }
   }));
 }
 function platformTex() {
@@ -251,6 +261,12 @@ function stationKit(line, st, m) {
       kit.box(m.steel, 0.04, 1.2, 0.04, TRANSFER_X + s * 3.12, 3.1, ez);
     }
     kit.box(m.steel, 0.06, 1.05, 2.0, TRANSFER_X - 3, 0.52, ez);   // open naar het stationsmidden
+    if (st.transfer.closed) {   // U3c: lijn nog niet in het spel → rood-wit hek over de open kant
+      const red = std('Line_Barrier_Red', '#c8102e', { roughness: 0.5 }), white = std('Line_Barrier_White', '#f2f2ee', { roughness: 0.5 });
+      for (let i = 0; i < 6; i++) kit.box(i % 2 ? white : red, 0.08, 0.16, 0.32, TRANSFER_X + 3, 0.95, ez - 0.8 + i * 0.32);
+      for (const s of [-1, 1]) kit.box(m.steel, 0.06, 1.0, 0.06, TRANSFER_X + 3, 0.5, ez + s * 0.92);
+      kit.box(m.steel, 0.04, 0.04, 1.9, TRANSFER_X + 3, 0.45, ez);
+    }
   }
 
   if (st.kind === 'tunnel') tunnelShell(kit, m, st, cs, -H, H, true);

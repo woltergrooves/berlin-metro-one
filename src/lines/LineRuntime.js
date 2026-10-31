@@ -121,6 +121,7 @@ function tryBoard(p, st, lz, nz) {
   return false;
 }
 
+let closedHinted = false;
 // Lopen: binnen het perron van het huidige station; sporen niet oversteken; trapgat ontwijken.
 function move(p, delta) {
   const mv = inputMove(p, delta); if (!mv) return;
@@ -131,7 +132,12 @@ function move(p, delta) {
   if ((lz + mz < band[0] || lz + mz > band[1]) && tryBoard(p, st, lz, lz + mz)) return ride(p, 0);
   const nx = clamp(p.position.x - st.x + mx, -HALF + 0.8, HALF - 0.8), nz = clamp(lz + mz, band[0], band[1]);
   const ez = transferZ(cs);
-  if (st.transfer && Math.abs(nx - TRANSFER_X) < 3 && Math.abs(nz - ez) < 1.0) { fromLine(st); return; }   // overstaptrap (U1c)
+  if (st.transfer && Math.abs(nx - TRANSFER_X) < 3.1 && Math.abs(nz - ez) < 1.0) {   // overstaptrap (U1c)
+    if (!st.transfer.closed) { fromLine(st); return; }
+    if (!closedHinted) { closedHinted = true; game.ui?.notify?.(`Übergang ${st.transfer.label || st.transfer.line} · die lijn komt later in het spel`); }
+    return;   // U3c: afgesloten (U7/U9/Ring nog niet gebouwd) → hek houdt je tegen
+  }
+  if (Math.abs(nx - TRANSFER_X) > 5) closedHinted = false;
   if (Math.abs(nx - EXIT_X) < 3.4 && Math.abs(nz - ez) < 1.3) {         // uitgangstrap (U1e)
     // Alleen via de open kant de trap op/af; de leuningen houden je verder tegen.
     // Tunnel/viaduct: trap omlaag, open kant +x. Ingraving (U3): trap omhoog, open kant −x.
@@ -288,6 +294,7 @@ function installHud() {
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || ID;
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
+      : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (nog niet in het spel) · wacht op de ${ID} of neem de trap naar buiten.`
       : st.transfer ? `Overstap ${st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`

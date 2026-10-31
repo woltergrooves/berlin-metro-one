@@ -52,8 +52,16 @@ Keuzes:
   - Test: `tools/consolidation/u3-trains.mjs <url> <map> [kwaliteit] [uur]` (Dahlem-Dorf instappen → Podbielskiallee,
     Augsburger Straße → overgang → Wittenbergplatz U1-perron, U3 terug naar Augsburger Straße, Kottbusser Tor, geen overlap).
   - Console: `BerlinLines.U3.board(i, dir)`, `.status().trains` (view/track per trein), `BerlinLines.U1.status().dfi`.
-- **U3c — Overstappen + afwerking:** U3 ⇄ U1/U2 bij Wittenbergplatz/Nollendorfplatz (gedeeld perron), borden voor U7
-  (Fehrbelliner Platz), U9 (Spichernstraße), Ring (Heidelberger Platz); eventueel OSM-omgeving voor de ingravingen.
+- **U3c — Overstappen + borden ✅ (31 okt):**
+  - U3 ⇄ U1/U2/U8: de U3 stopt op alle U1-overstapstations (Wittenbergplatz, Nollendorfplatz, Gleisdreieck, Kottbusser Tor).
+    Het overstappunt op het U2/U8-perron draagt nu beide symbolen (U1 + U3, "Warschauer Str. · Uhlandstr. · Krumme Lanke");
+    je komt uit op het gedeelde U1-perron, waar de DFI U1 én U3 toont. Overstappen U2 → U3 = via dat perron.
+  - Eigen tak: `U3_TRANSFERS` in `src/data/u3.js` — Heidelberger Platz (S41/S42/S46, S-Bahn-symbool), Fehrbelliner Platz (U7),
+    Spichernstraße (U9). Trapgat met echt overstapbord, maar `closed`: rood-wit hek, rode streep op het bord; erin lopen
+    houdt je tegen en de HUD meldt "die lijn komt later in het spel". Opengaan = `closed` weghalen + doel in `LineTransfers`.
+  - `transferSignTex` kent `also` (extra lijnsymbolen) en `closed`.
+  - Test: `tools/consolidation/u3c-test.mjs <url> <map> [kwaliteit] [uur]`.
+  - Nog niet: OSM-omgeving voor de ingravingen (later, eventueel samen met U3d).
 
 ## Bekend
 - Perronvormen deels geschat (eiland, behalve Onkel Toms Hütte); wandkleuren herkenbaar bedoeld, niet 1:1.

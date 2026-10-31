@@ -50,11 +50,19 @@ const RAW = [
 //   ladenstrasse — Onkel Toms Hütte: zijperrons met winkelarcade (Ladenstraße) langs beide kanten;
 //   thatch       — Dahlem-Dorf: vakwerk-ingangsgebouw met rieten dak boven de ingraving;
 //   vault        — Heidelberger Platz: hoge gewelfde hal ("kathedraal") met kroonluchters.
+// U3c — overstappen op de eigen tak. U7, U9 en de Ringbahn bestaan nog niet in het spel: het trapgat is er,
+// met het echte overstapbord, maar afgesloten (closed) — de HUD zegt dat die lijn later komt.
+export const U3_TRANSFERS = {
+  'heidelberger-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
+  'fehrbelliner-platz': { line: 'U7', color: '#3690c0', towards: 'Rathaus Spandau · Rudow', closed: true },
+  spichernstrasse:      { line: 'U9', color: '#ff7300', towards: 'Osloer Straße · Rathaus Steglitz', closed: true },
+};
+
 export const U3_PROFILES = Object.fromEntries(RAW.filter(r => r[9]).map(r => [r[0], { kind: r[9] }]));
 
 const branch = RAW.map(([id, name, lat, lon, kind, layout, transfers, wall, accent, profile], index) => ({
   line: 'U3', id, name, index, lat, lon, kind, layout, realLayout: layout, elev: 0, transfers,
-  wall: '#' + wall, accent: '#' + accent, transfer: null, profile: profile ? { kind: profile } : null, bridge: null, surroundings: null,
+  wall: '#' + wall, accent: '#' + accent, transfer: U3_TRANSFERS[id] || null, profile: profile ? { kind: profile } : null, bridge: null, surroundings: null,
   x: U3_LINE.origin.x + index * U3_LINE.spacing,
 }));
 
