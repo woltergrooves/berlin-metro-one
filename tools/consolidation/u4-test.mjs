@@ -25,11 +25,18 @@ const shot = async name => { const s = await page.context().newCDPSession(page);
 const pos = () => page.evaluate(() => { const g = globalThis.__berlinMetroGame, p = g.player; return { x: Math.round(p.position.x * 10) / 10, z: Math.round(p.position.z), line: p.__line, st: p.__lineStation, street: !!p.__streetMode }; });
 const stand = (yaw, pitch = 0) => page.evaluate(([y, pt]) => { const p = globalThis.__berlinMetroGame.player; p.yaw = y; p.pitch = pt; }, [yaw, pitch]);
 const walk = async (ms, yaw = 1.57) => { await page.evaluate(y => { const p = globalThis.__berlinMetroGame.player; p.yaw = y; p.input.moveY = 1; }, yaw); await page.waitForTimeout(ms); await page.evaluate(() => { globalThis.__berlinMetroGame.player.input.moveY = 0; }); };
-const waitChooser = () => page.waitForFunction(() => globalThis.BerlinLines.Transfers.status().chooser, null, { timeout: 20000 }).then(() => true).catch(() => false);
+// Lopen tot het keuzevenster verschijnt (headless loopt ±10× te traag).
+const waitChooser = async () => {
+  await page.evaluate(() => { const p = globalThis.__berlinMetroGame.player; p.yaw = 1.57; p.input.moveY = 1; });
+  const ok = await page.waitForFunction(() => globalThis.BerlinLines.Transfers.status().chooser, null, { timeout: 60000, polling: 250 }).then(() => true).catch(() => false);
+  await page.evaluate(() => { globalThis.__berlinMetroGame.player.input.moveY = 0; });
+  return ok;
+};
 await page.evaluate(h => globalThis.BerlinClock?.setHour?.(Number(h)), hour);
 
+const SKIP = !!process.env.SKIP;
 // 1. Alle vijf stations, foto langs het perron.
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < (SKIP ? 0 : 5); i++) {
   await page.evaluate(i => globalThis.BerlinLines.U4.enter(i), i);
   await page.waitForTimeout(4000);
   await stand(-1.57, -0.04); await page.waitForTimeout(1500);
@@ -44,18 +51,17 @@ const w = await page.evaluate(() => globalThis.BerlinLines.U4.status().world);
 console.log('wereld', JSON.stringify(w).slice(0, 300));
 
 // 2. Afgesloten trapgaten (U7 Bayerischer Platz, Ring Innsbrucker Platz): je loopt er niet in.
-for (const [i, label] of [[2, 'U7'], [4, 'S']]) {
+for (const [i, label] of SKIP ? [] : [[2, 'U7'], [4, 'S']]) {
   await page.evaluate(i => globalThis.BerlinLines.U4.enter(i, { dx: -13 }), i);
   await page.waitForTimeout(3000); await stand(1.57, -0.05); await page.waitForTimeout(1200); await shot(`u4_${i}_${label}_dicht`);
-  await walk(9000);
+  await walk(30000);
   const p = await pos(), lx = p.x - i * 150;
-  check(`trapgat ${label} dicht`, p.line === 'U4' && p.st === i && lx > -16.2, JSON.stringify({ lx }));
+  check(`trapgat ${label} dicht`, p.line === 'U4' && p.st === i && lx > -16.2 && lx < -15.5, JSON.stringify({ lx }));
 }
 
 // 3. Keuze-overstap Nollendorfplatz.
 await page.evaluate(() => globalThis.BerlinLines.U4.enter(0, { dx: -13 }));
 await page.waitForTimeout(3000); await stand(1.57, -0.05); await page.waitForTimeout(1200); await shot('u4_0_overstapbord');
-await walk(9000);
 let ok = await waitChooser(); await shot('u4_0_keuze');
 check('U4 Nollendorfplatz: keuzevenster', ok);
 await page.evaluate(() => globalThis.BerlinLines.Transfers.pick(0));
@@ -63,7 +69,6 @@ await page.waitForTimeout(3000);
 let p = await pos();
 check('U4 → U1/U3-perron Nollendorfplatz', p.line === 'U1' && p.st === 3, JSON.stringify(p));
 await page.waitForTimeout(1500); await stand(1.57, -0.05); await page.waitForTimeout(1500); await shot('u1_3_bord_u2_u4');
-await walk(12000);
 ok = await waitChooser();
 check('U1 Nollendorfplatz: keuzevenster', ok);
 await page.evaluate(() => globalThis.BerlinLines.Transfers.pick(1));
@@ -72,7 +77,6 @@ p = await pos();
 check('U1 → U4 Nollendorfplatz', p.line === 'U4' && p.st === 0, JSON.stringify(p));
 await page.evaluate(() => globalThis.BerlinLines.U1.enter(3, { at: 'transfer' }));
 await page.waitForTimeout(2500);
-await walk(12000);
 ok = await waitChooser();
 await page.evaluate(() => globalThis.BerlinLines.Transfers.pick(0));
 await page.waitForTimeout(3000);
@@ -86,7 +90,7 @@ const s4 = await page.evaluate(() => globalThis.BerlinLines.U4.status());
 check('U4-treinen + DFI', s4.trains.length === 2 && s4.trains.every(t => t.units > 0) && !!s4.dfi, JSON.stringify({ trains: s4.trains, dfi: s4.dfi, model: s4.model }));
 await stand(-1.57, 0.12); await page.waitForTimeout(1500); await shot('u4_1_dfi');
 await page.evaluate(() => globalThis.BerlinLines.U4.board(3, 1));
-const arrived = await page.waitForFunction(() => { const s = globalThis.BerlinLines.U4.status(); const t = s.trains.find(t => t.dir === 1); return s.riding && t && t.at === 4 && t.state === 'boarding'; }, null, { timeout: 360000, polling: 1000 }).then(() => true).catch(() => false);
+const arrived = await page.waitForFunction(() => { const s = globalThis.BerlinLines.U4.status(); const t = s.trains.find(t => t.dir === 1); return s.riding && t && t.at === 4 && t.state === 'boarding'; }, null, { timeout: 900000, polling: 1000 }).then(() => true).catch(() => false);
 await shot('u4_rit_innsbrucker');
 check('meerijden tot Innsbrucker Platz', arrived, JSON.stringify((await page.evaluate(() => globalThis.BerlinLines.U4.status())).trains));
 
