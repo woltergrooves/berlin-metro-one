@@ -8,13 +8,14 @@ Gebruik:
   python3 -I tools/places/osm2places.py fetch <repo> <cachemap>      # haalt OSM-uitsneden op (api.openstreetmap.org)
   python3 -I tools/places/osm2places.py build <repo> <cachemap>      # schrijft public/assets/places/<key>.json
 
-Stations: U1 uit src/data/u1.js, U2 en U8 uit src/systems/Phase67RestoreV2.js (zelfde coördinaten als Street View).
+Stations: U1/U3 uit src/data/u1.js en u3.js, U2 en U8 uit src/systems/Phase67RestoreV2.js (zelfde coördinaten als Street View).
 <key> = genormaliseerde stationsnaam (zoals StreetCoreClean: kleine letters, zonder accenten, ß→ss, alleen a-z0-9).
 Kaartgegevens © OpenStreetMap-bijdragers (ODbL).
 """
 import json, math, os, re, sys, time, unicodedata, urllib.request
 import xml.etree.ElementTree as ET
 
+ONLY = set(filter(None, os.environ.get('ONLY_LINES', '').split(',')))   # bv. ONLY_LINES=U3: alleen die lijnen
 R = 230          # straal van de kaart (m)
 POI_R = 260      # zoekstraal plekken (m)
 
@@ -27,9 +28,10 @@ def norm(s):
 
 def stations(repo):
     out = {}
-    u1 = open(os.path.join(repo, 'src/data/u1.js'), encoding='utf-8').read()
-    for name, lat, lon in re.findall(r"\['[a-z-]+',\s*'([^']+)',\s*([\d.]+),\s*([\d.]+)", u1):
-        out.setdefault(norm(name), {'name': name, 'lat': float(lat), 'lon': float(lon), 'lines': set()})['lines'].add('U1')
+    for line in ('U1', 'U3'):
+        src = open(os.path.join(repo, 'src/data/%s.js' % line.lower()), encoding='utf-8').read()
+        for name, lat, lon in re.findall(r"\['[a-z-]+',\s*'([^']+)',\s*([\d.]+),\s*([\d.]+)", src):
+            out.setdefault(norm(name), {'name': name, 'lat': float(lat), 'lon': float(lon), 'lines': set()})['lines'].add(line)
     p67 = open(os.path.join(repo, 'src/systems/Phase67RestoreV2.js'), encoding='utf-8').read()
     for line in ('U2', 'U8'):
         m = re.search(r'const %s=\{(.*?)\};' % line, p67, re.S)
@@ -51,6 +53,8 @@ def bbox(st, r=max(R, POI_R) + 40):
 def fetch(repo, cache):
     os.makedirs(cache, exist_ok=True)
     for k, st in sorted(stations(repo).items()):
+        if ONLY and not st['lines'] <= ONLY:
+            continue
         path = os.path.join(cache, k + '.osm')
         if os.path.exists(path) and os.path.getsize(path) > 1000:
             continue
@@ -102,6 +106,8 @@ def build(repo, cache):
     os.makedirs(outdir, exist_ok=True)
     index = {}
     for k, st in sorted(stations(repo).items()):
+        if ONLY and not st['lines'] <= ONLY:
+            continue
         path = os.path.join(cache, k + '.osm')
         if not os.path.exists(path):
             print('mist', k)
@@ -200,6 +206,16 @@ def build(repo, cache):
             json.dump(pack, f, ensure_ascii=False, separators=(',', ':'))
         index[k] = {'name': st['name'], 'lines': sorted(st['lines']), 'places': len(places)}
         print(k, len(places), 'plekken', len(roads), 'straten', os.path.getsize(os.path.join(outdir, k + '.json')) // 1024, 'kB')
+    if ONLY:   # alleen een deel opnieuw gemaakt: de rest van de index behouden (lijnen bijwerken)
+        try:
+            old = json.load(open(os.path.join(outdir, 'index.json'), encoding='utf-8'))
+        except (OSError, ValueError):
+            old = {}
+        all_st = stations(repo)
+        for k, v in old.items():
+            if k not in index:
+                index[k] = {**v, 'lines': sorted(all_st[k]['lines']) if k in all_st else v.get('lines', [])}
+        index = dict(sorted(index.items()))
     with open(os.path.join(outdir, 'index.json'), 'w', encoding='utf-8') as f:
         json.dump(index, f, ensure_ascii=False, separators=(',', ':'))
 
