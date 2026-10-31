@@ -45,7 +45,12 @@ const RAW = [
 const U2X = { line: 'U2', color: '#da421e', towards: 'Pankow · Ruhleben' };
 export const U1_TRANSFERS = {
   wittenbergplatz: { ...U2X, station: 'wittenbergplatz' },
-  nollendorfplatz: { ...U2X, station: 'nollendorfplatz' },
+  // Nollendorfplatz: één trapgat, keuze tussen U2 (boven) en U4 (eigen perron).
+  nollendorfplatz: { ...U2X, station: 'nollendorfplatz', also: [{ line: 'U4', color: '#ffd900', text: '#1a1a1a' }], towards: 'Pankow · Ruhleben · Innsbrucker Pl.', label: 'U2 · U4',
+    options: [
+      { line: 'U2', station: 'nollendorfplatz', name: 'U2', sub: 'Pankow · Ruhleben', color: '#da421e' },
+      { line: 'U4', station: 'nollendorfplatz', name: 'U4', sub: 'Innsbrucker Platz', color: '#ffd900', text: '#1a1a1a' },
+    ] },
   gleisdreieck:    { ...U2X, station: 'gleisdreieck' },
   'kottbusser-tor': { line: 'U8', color: '#224f86', towards: 'Wittenau · Hermannstraße', station: 18 },
 };

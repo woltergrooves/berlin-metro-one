@@ -80,10 +80,47 @@ function toU1(index) {
   return go(`U1 ${api.stations[index].name}`, () => { resetU8(game.player); api.enter(index, { at: 'transfer' }); });
 }
 
-/** Vanaf het U1-perron: aangeroepen door U1Line als je het overstaptrapgat inloopt. */
+/** U4: naar het perron van een andere nieuwe lijn (U1/U3/U4 …), naast het overstaptrapgat. */
+function toLine(id, stationId) {
+  const L = globalThis.BerlinLines?.[id]; if (!L?.enter) return false;
+  const i = L.stations.findIndex(s => s.id === stationId && !s.shared); if (i < 0) return false;
+  return go(`${id} ${L.stations[i].name}`, () => { resetU8(game.player); L.enter(i, { at: 'transfer' }); });
+}
+function goTo(o) {
+  if (o.line === 'U2') return toU2(o.station);
+  if (o.line === 'U8') return toU8(o.station);
+  return toLine(o.line, o.station);
+}
+
+// Keuze bij een trapgat met meerdere doelen (Nollendorfplatz: U2 · U4 vanaf de U1, U1/U3 · U2 vanaf de U4).
+let chooser = null, chooserAt = null;
+function choose(t) {
+  if (chooser) return;
+  chooser = document.createElement('div');
+  chooser.id = 'lineTransferChooser';
+  chooser.style.cssText = 'position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:8000;display:flex;flex-direction:column;gap:8px;'
+    + 'padding:12px;border-radius:14px;background:#0d1a2ee8;border:1px solid #ffffff30;color:#fff;font:700 14px Arial;width:min(340px,86vw);box-shadow:0 8px 30px #0008';
+  const btn = (o, i) => `<button data-i="${i}" style="display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 10px;border-radius:10px;border:1px solid #ffffff30;background:#1b4d9b;color:#fff;font:700 14px Arial;text-align:left">`
+    + `<span style="min-width:34px;padding:4px 6px;border-radius:5px;background:${o.color};color:${o.text || '#fff'};text-align:center">${o.line}</span><span>${o.name}<br><span style="font-weight:400;font-size:12px;opacity:.8">${o.sub || ''}</span></span></button>`;
+  chooser.innerHTML = `<div>Übergang · waar wil je heen?</div>${t.options.map(btn).join('')}`
+    + '<button data-i="x" style="min-height:40px;border-radius:10px;border:1px solid #ffffff30;background:#ffffff18;color:#fff;font:700 13px Arial">Blijf op dit perron</button>';
+  const close = () => { chooser?.remove(); chooser = null; };
+  chooser.querySelectorAll('button').forEach(b => {
+    const pick = ev => { ev.preventDefault(); ev.stopPropagation(); const i = b.dataset.i; close(); if (i !== 'x') goTo(t.options[+i]); };
+    b.addEventListener('click', pick); b.addEventListener('touchend', pick, { passive: false });
+    b.addEventListener('touchstart', ev => ev.stopPropagation(), { passive: true });
+  });
+  chooserAt = game.player.position.clone();
+  document.body.appendChild(chooser);
+  status.choices = (status.choices || 0) + 1;
+}
+
+/** Vanaf het perron van een nieuwe lijn: aangeroepen door LineRuntime als je het overstaptrapgat inloopt. */
 export function fromLine(st) {
-  const t = st.transfer; if (!t || busy) return false;
-  if (t.line === 'U2') toU2(t.station); else if (t.line === 'U8') toU8(t.station);
+  const t = st.transfer; if (!t || busy || chooser) return false;
+  game = game || globalThis.__berlinMetroGame;
+  if (t.options?.length) { choose(t); return true; }
+  goTo(t);
   return true;
 }
 
@@ -133,6 +170,7 @@ function frame(delta) {
       : p.__u8FullStation === pt.index;
     g.visible = !p.__line && !p.__streetMode && near;
   }
+  if (chooser && (!p.__line || p.__streetMode || p.__lineTrain || p.position.distanceTo(chooserAt) > 5)) { chooser.remove(); chooser = null; }
   if (off || busy) { dwell = 0; lastHit = null; return; }
   const pushing = Math.hypot(p.input?.moveX || 0, p.input?.moveY || 0) > 0.02;
   let hit = null, close = null;
@@ -167,7 +205,9 @@ export function installTransfers(g, lineApi) {
 }
 
 export const LineTransfers = {
-  status: () => ({ ...status, busy, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
+  toLine, choose: id => { const st = Object.values(globalThis.BerlinLines || {}).flatMap(L => L.stations || []).find(s => s.transfer?.options && s.line === id); return st ? fromLine(st) : false; },
+  pick: i => { const b = chooser?.querySelector(`button[data-i="${i}"]`); b?.click(); return !!b; },
+  status: () => ({ ...status, busy, chooser: !!chooser, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
   flags: () => { const p = game.player; return { line: p.__line, street: p.__streetMode, train: !!p.activeTrain, u8a: p.__u8Active, u8area: p.__u8Area, u8: p.__u8FullStation, y: p.position.y, st: p.currentStation?.id }; },
 };
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), Transfers: LineTransfers };

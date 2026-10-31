@@ -64,7 +64,7 @@ export function transferSignTex(t) {
       const bx = 22 + i * (bw + 12), by = 30 + (132 - bw) / 2;
       x.fillStyle = b.color; x.fillRect(bx, by, bw, bw);
       if (b.line === 'S') { x.fillStyle = '#fff'; x.beginPath(); x.arc(bx + bw / 2, by + bw / 2, bw * 0.4, 0, Math.PI * 2); x.fill(); x.fillStyle = b.color; }
-      else x.fillStyle = '#fff';
+      else x.fillStyle = b.text || '#fff';
       x.font = `700 ${bw > 110 ? 72 : 58}px Arial`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(b.line, bx + bw / 2, by + bw / 2 + 4);
     });
     const tx = 22 + badges.length * (bw + 12) + 16;
@@ -284,6 +284,10 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
     const ceil = std('Ceiling', '#ffffff', { map: MaterialBase.station.ceiling({ t: 'flat', c: '#e9e6dc' }), roughness: 0.9 });
     ceil.userData.g3b = 'ceiling';
     if (st.profile?.kind === 'vault') vault(kit, m, st, W, x0, x1); else kit.flat(ceil, x0, x1, -W, W, TUNNEL_TOP, false, 3);
+    if (st.profile?.kind === 'park') {   // U4 Rathaus Schöneberg: grote ramen naar het park, aan beide kanten
+      const win = std('Line_ParkWindow', '#ffffff', { map: parkWindowTex(), emissive: '#ffffff', emissiveMap: parkWindowTex(), emissiveIntensity: 0.55, roughness: 0.25 });
+      for (let x = x0 + 4; x + 6 <= x1 - 4; x += 7) for (const s of [-1, 1]) kit.plane(win, 6.2, 2.5, M4(x + 3, 2.25, s * (W - 0.04), s > 0 ? Math.PI : 0));
+    }
     // Wandborden met de naam, naar het spoor (eilandperron) of achter het perron (zijperrons).
     const ws = std('Line_WallSign_' + st.id, '#ffffff', { map: wallSignTex(st.name, st.accent), roughness: 0.4 });
     for (const x of [-24, 0, 24]) for (const s of [-1, 1]) kit.plane(ws, 4.2, 0.82, M4(x, 1.85, s * (W - 0.02), s > 0 ? Math.PI : 0));
@@ -304,6 +308,23 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
 const cutW = cs => cs.wall + 0.6;
 const LOW = 1.4, SLOPE = 5.4;            // lage keerwand tot 1,4 m, daarboven een grastalud (±35°) tot het maaiveld
 const cutTop = (st) => st.profile?.kind === 'ladenstrasse' ? 0 : SLOPE;   // breedte talud (Ladenstraße: rechte wand)
+// U4 Rathaus Schöneberg: raamstroken naar het Rudolph-Wilde-Park (gras, bomen, vijver, lucht), groene stalen roeden.
+function parkWindowTex() {
+  return tex('parkwin', () => canvasTex(512, 256, (x, w, h) => {
+    const sky = x.createLinearGradient(0, 0, 0, h * 0.55); sky.addColorStop(0, '#9fc3dc'); sky.addColorStop(1, '#d9e6ea');
+    x.fillStyle = sky; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 26; i++) {   // boomkruinen
+      const cx = Math.random() * w, cy = h * (0.28 + Math.random() * 0.22), r = 22 + Math.random() * 38, g = 70 + Math.random() * 50 | 0;
+      x.fillStyle = `rgb(${g - 30},${g + 30},${g - 40})`; x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.fill();
+    }
+    x.fillStyle = '#6f9a4e'; x.fillRect(0, h * 0.58, w, h * 0.42);           // gazon
+    x.fillStyle = '#4f7f8c'; x.beginPath(); x.ellipse(w * 0.55, h * 0.8, w * 0.32, h * 0.09, 0, 0, Math.PI * 2); x.fill();   // vijver
+    x.fillStyle = 'rgba(255,255,255,0.35)'; for (let i = 0; i < 40; i++) x.fillRect(w * 0.3 + Math.random() * w * 0.5, h * 0.76 + Math.random() * h * 0.08, 10, 1.5);
+    x.fillStyle = '#2f4a3a';                                                   // roeden + kozijn
+    for (let i = 0; i <= 4; i++) x.fillRect(i * w / 4 - 5, 0, 10, h);
+    x.fillRect(0, 0, w, 10); x.fillRect(0, h - 10, w, 10); x.fillRect(0, h * 0.4, w, 6);
+  }));
+}
 function vakwerkTex() {
   return tex('vakwerk', () => canvasTex(256, 256, (c) => {
     c.fillStyle = '#efe7d6'; c.fillRect(0, 0, 256, 256);

@@ -269,7 +269,7 @@ function installHud() {
     const st = stations[player.__lineStation];
     const t = player.__lineTrain, L = t ? t.line : line;
     const badge = el.hud?.querySelector?.('.station-chip .u-badge');
-    if (badge) { badge.textContent = L.id; badge.style.background = L.color; }
+    if (badge) { badge.textContent = L.id; badge.style.background = L.color; badge.style.color = L.textColor || '#fff'; }
     el.routeProgress?.classList?.toggle('hidden', !t);
     if (t) {
       // Meerijden: voortgang naar de volgende halte (zelfde balk als bij de U2).
@@ -295,7 +295,7 @@ function installHud() {
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
       : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (nog niet in het spel) · wacht op de ${ID} of neem de trap naar buiten.`
-      : st.transfer ? `Overstap ${st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
+      : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : st.kind === 'cutting' ? `Open ingraving · wacht op de ${ID} of neem de trap omhoog naar buiten (Ausgang).`
@@ -310,7 +310,7 @@ function installGod() {
     if (!panel || !tools || document.querySelector(`#${ID}God`)) return;
     const d = document.createElement('div'); d.id = `${ID}God`;
     d.style.cssText = 'margin:6px 10px;padding:8px 10px;border-radius:10px;background:#ffffff12;border:1px solid #ffffff22;color:#fff;font:700 12px Arial;line-height:1.45;display:block;text-align:left';
-    d.innerHTML = `<div style="display:block"><span style="background:${line.color};color:#fff;border-radius:4px;padding:1px 6px;margin-right:6px">${ID}</span>${label}</div>` +
+    d.innerHTML = `<div style="display:block"><span style="background:${line.color};color:${line.textColor || '#fff'};border-radius:4px;padding:1px 6px;margin-right:6px">${ID}</span>${label}</div>` +
       `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">${godStations.map(s => `<button data-u1="${s.index}" style="min-height:34px;padding:4px 8px;border-radius:8px;border:1px solid #ffffff33;background:#ffffff18;color:#fff;font:700 11px Arial">${s.name}</button>`).join('')}` +
       `<button data-u1="back" style="min-height:34px;padding:4px 8px;border-radius:8px;border:1px solid #ffffff33;background:#d43131;color:#fff;font:700 11px Arial">↩ U2 Wittenbergplatz</button></div>`;
     d.querySelectorAll('button[data-u1]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); if (b.dataset.u1 === 'back') leave(); else enter(Number(b.dataset.u1)); panel.classList.remove('on'); }; });

@@ -104,7 +104,8 @@ import('../systems/U8TunnelDetailV1.js').catch(log('U8 tunnel detail'));
 
 // ── 4b. Nieuwe lijnen (Mijlpaal 1): U1 — eigen gebied, eigen beweging/HUD (src/lines/) ─────
 import('../lines/U1Line.js').catch(log('U1'));
-import('../lines/U3Line.js').catch(log('U3'));     // U3a: eigen tak Krumme Lanke … Augsburger Straße (Mijlpaal 2)
+import('../lines/U3Line.js').catch(log('U3'));
+import('../lines/U4Line.js').catch(log('U4'));     // U4: Nollendorfplatz ⇄ Innsbrucker Platz     // U3a: eigen tak Krumme Lanke … Augsburger Straße (Mijlpaal 2)
 
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────
 await import('../systems/StreetCoreClean.js').catch(log('all-station Street View V4.1'));

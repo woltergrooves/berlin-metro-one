@@ -216,7 +216,7 @@ function renderHud() {
   const tk = !s?.ticket ? '🎫 —' : s.ticket.type === 'AB' ? `🎫 ${Math.max(0, Math.ceil(s.ticket.remainingMinutes || 0))}m` : `🎫 ${Math.max(0, s.ticket.remainingStops || 0)}`;
   const key = [lines.join(), ctx?.name, placeName, c?.hhmm, c?.weekdayName, s?.balanceCents, s?.pfand, tk].join('|');
   if (key === lastHud) return; lastHud = key;
-  ui.q('.badges').innerHTML = [...new Set(lines)].map(l => `<span class="badge" style="background:${LINE_COLORS[l] || '#555'}">${esc(l)}</span>`).join('');
+  ui.q('.badges').innerHTML = [...new Set(lines)].map(l => `<span class="badge" style="background:${LINE_COLORS[l] || '#555'};color:${l === 'U4' ? '#1a1a1a' : '#fff'}">${esc(l)}</span>`).join('');
   ui.q('.name').textContent = ctx?.name || 'Berlijn';
   ui.q('.sub').textContent = placeName ? `📍 bij ${placeName}` : 'Buiten bij de halte';
   ui.q('.clk').textContent = `${c?.weekdayName ? c.weekdayName.slice(0, 2) + ' ' : ''}${c?.hhmm || '--:--'}`;

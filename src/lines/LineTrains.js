@@ -67,12 +67,12 @@ export function blocked(t, trains) {
 
 export const DOOR_OFFSETS = UNITS.flatMap(u => DOOR_CENTERS.map(d => u + d));
 
-function destinationBoard(text, color) {
+function destinationBoard(text, color, fg = '#fff') {
   const c = document.createElement('canvas'); c.width = 768; c.height = 100;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#080b0b'; ctx.fillRect(0, 0, 768, 100);
   ctx.fillStyle = color; ctx.fillRect(14, 16, 96, 68);
-  ctx.fillStyle = '#fff'; ctx.font = '800 54px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text.split(' ')[0], 62, 52);
+  ctx.fillStyle = fg; ctx.font = '800 54px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text.split(' ')[0], 62, 52);
   ctx.fillStyle = '#ffd05b'; ctx.textAlign = 'left'; ctx.font = '600 60px monospace'; ctx.fillText(text.split(' ').slice(1).join(' '), 128, 54, 620);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
   return new THREE.MeshBasicMaterial({ map: tex, toneMapped: false });
@@ -134,7 +134,7 @@ export class LineTrain {
       u.offset = off; this.group.add(u.group); this.units.push(u);
     }
     const term = this.timeline.terminusName.replace('straße', 'str.').replace('Straße', 'Str.');
-    const mat = destinationBoard(`${this.line.id} ${term}`, this.line.color), geo = new THREE.PlaneGeometry(1.62, 0.215);
+    const mat = destinationBoard(`${this.line.id} ${term}`, this.line.color, this.line.textColor), geo = new THREE.PlaneGeometry(1.62, 0.215);
     // Richtingfilm voorop en achterop (boven de cabineruit).
     for (const end of [-1, 1]) {
       const u = this.units[end < 0 ? 0 : 1], mesh = new THREE.Mesh(geo, mat);
@@ -235,7 +235,7 @@ export class DepartureBoards {
     rows.forEach(([line, term, time], i) => {
       const y = 34 + i * 62;
       ctx.fillStyle = line.color; ctx.fillRect(12, y - 21, 52, 40);
-      ctx.fillStyle = '#fff'; ctx.font = '800 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(line.id, 38, y);
+      ctx.fillStyle = line.textColor || '#fff'; ctx.font = '800 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(line.id, 38, y);
       ctx.fillStyle = '#ffb627'; ctx.font = '600 30px monospace'; ctx.textAlign = 'left'; ctx.fillText(term, 76, y, 300);
       ctx.textAlign = 'right'; ctx.fillText(time, 500, y);
     });
