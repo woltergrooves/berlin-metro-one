@@ -14,7 +14,7 @@ import { LineWorld, HALF, EXIT_X, TRANSFER_X, crossSection } from './LineWorld.j
 import { installTransfers, fromLine } from './LineTransfers.js';
 import { LineSurroundings } from './LineSurroundings.js';
 import { readSection, writeSection } from '../state/Store.js';
-import { LineTrain, DepartureBoards, trackZ, platformSide, DOOR_OFFSETS, HALF_LEN, INSIDE_W } from './LineTrains.js';
+import { LineTrain, DepartureBoards, trackZ, platformSide, DOOR_OFFSETS, HALF_LEN, INSIDE_W, ALL_TRAINS, WORLDS, blocked, trackClear } from './LineTrains.js';
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
@@ -22,8 +22,16 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
  * Runtime voor één lijn. stations = de stations van de lijnwereld (LineWorld); godStations = welke het GOD-menu
  * toont (U3: alleen de eigen tak); withTrains/transfers/surroundings schakelen U1b/U1c/U1d-onderdelen in.
  */
-export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}` }) {
+export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}`,
+  route = stations, zones = null, dfiRows = 2 }) {
+// U3b: route = de haltes van de eigen treinen (U3: 24, ook over het U1-spoor); zones = de lijnwerelden waar ze
+// doorheen rijden. Treinen van andere lijnen die door déze wereld rijden ("gasten") stoppen hier ook.
 const ID = line.id;
+/** Alle treinen die door deze lijnwereld rijden: eigen treinen + gasten (U3-treinen op de U1). */
+const relevant = () => ALL_TRAINS.filter(t => t.zones.some(z => z.id === ID));
+const isGuest = t => t.line.id !== ID;
+/** Het station van deze wereld waar de trein nu staat (of null). */
+const localStation = t => { const r = t.stations[t.currentIndex]; return stations.find(s => s.id === r?.id && !s.shared) || null; };
 let game = null, world = null, trains = [], boards = null, surround = null;
 const status = { installed: false, enters: 0, leaves: 0, hud: false, god: false, model: withTrains ? 'laden' : 'geen treinen', boardings: 0, alightings: 0 };
 
@@ -53,7 +61,11 @@ function enter(index, { side = 1, dx = -10, at = null } = {}) {
   stopRide(p);
   // Treinen naar dit station halen, zodat je niet lang hoeft te wachten (eindpunt: alleen de vertrekkende).
   const now = performance.now() / 1000;
-  for (const t of trains) if (t.timeline.recenterNear(st.index, t.direction > 0 ? 3 : 9)) { t.door = 0; t.lastRecenter = now; t.place(); }
+  for (const t of relevant()) {
+    const ri = t.routeIndex(st.id); if (ri < 0) continue;
+    if (!trackClear(t, st.x - t.direction * CONFIG.train.approachDistance, relevant())) continue;
+    if (t.timeline.recenterNear(ri, (t.direction > 0 ? 3 : 9) + (isGuest(t) ? 26 : 0))) { t.door = 0; t.lastRecenter = now; t.place(); }
+  }
   status.enters++;
   saveLocation(st.index);
   if (!at) game.ui?.notify?.(`${ID} · ${st.name}`);
@@ -94,8 +106,8 @@ const nearDoor = (ox, w = 0.75) => DOOR_OFFSETS.some(d => Math.abs(ox - d) < w);
 // Instappen: vanaf de perronrand richting spoor lopen, terwijl daar een trein met open deuren staat.
 function tryBoard(p, st, lz, nz) {
   const cs = crossSection(st.layout);
-  for (const t of trains) {
-    if (!t.boardableAt(st.index)) continue;
+  for (const t of relevant()) {
+    if (!t.boardableAtStation(st)) continue;
     const tz = cs.tracks[t.direction > 0 ? 1 : 0], side = platformSide(st, t.direction);
     // Duw je over de rand richting dit spoor?
     if (!(side > 0 ? nz < lz && tz < lz : nz > lz && tz > lz)) continue;
@@ -103,7 +115,7 @@ function tryBoard(p, st, lz, nz) {
     if (Math.abs(ox) > HALF_LEN || !nearDoor(ox)) continue;
     p.__lineTrain = t; t.rider = true; p.__lineRide = { ox, oz: side * (INSIDE_W - 0.05) };
     status.boardings++;
-    game.ui?.notify?.(`${ID} richting ${t.timeline.terminusName}`);
+    game.ui?.notify?.(`${t.line.id} richting ${t.timeline.terminusName}`);
     return true;
   }
   return false;
@@ -144,8 +156,8 @@ function ride(p, delta) {
   const t = p.__lineTrain, r = p.__lineRide, mv = delta > 0 ? inputMove(p, delta) : null;
   if (mv) {
     const nz = r.oz + mv[1];
-    const st = stations[t.currentIndex];
-    if (Math.abs(nz) > INSIDE_W && t.boardableAt(st.index) && Math.sign(nz) === platformSide(st, t.direction) && nearDoor(r.ox, 0.8)) {
+    const st = localStation(t);
+    if (st && Math.abs(nz) > INSIDE_W && t.boardableAtStation(st) && Math.sign(nz) === platformSide(st, t.direction) && nearDoor(r.ox, 0.8)) {
       // Uitstappen: op de perronrand naast deze deur.
       const cs = crossSection(st.layout), tz = cs.tracks[t.direction > 0 ? 1 : 0], side = Math.sign(nz);
       const band = cs.walk.reduce((b, w) => (Math.abs(tz - (side > 0 ? w[0] : w[1])) < Math.abs(tz - (side > 0 ? b[0] : b[1])) ? w : b));
@@ -159,17 +171,32 @@ function ride(p, delta) {
     r.ox = clamp(r.ox + mv[0], -HALF_LEN + 0.7, HALF_LEN - 0.7);
     r.oz = clamp(nz, -INSIDE_W, INSIDE_W);
   }
-  const x = t.x + r.ox;
-  p.position.x = x; p.position.z = line.origin.z + trackZ(stations, x, t.direction) + r.oz;
-  p.position.y = line.origin.y + CONFIG.player.eyeHeight;
+  // Rijdt de trein een andere lijnwereld in (U3 → U1-spoor bij x = 262 en terug)? Dan neemt die lijn de speler over.
+  const zone = t.trackZone(t.x), x = t.x + r.ox, origin = zone.origin || line.origin;
+  if (zone.id !== ID && WORLDS[zone.id]?.api) WORLDS[zone.id].api.adopt(p, x);
+  p.position.x = x; p.position.z = origin.z + t.zoneZ(zone, x) + r.oz;
+  p.position.y = origin.y + CONFIG.player.eyeHeight;
+}
+
+/** Een meerijder komt vanuit een andere lijnwereld deze wereld binnen (U3b). */
+function adopt(p, x) {
+  const i = world.indexOf(x);
+  p.__line = ID; p.__lineStation = i; p.__lineOpenAir = openAir(stations[i]);
+  world.prime(i);
+  status.adopted = (status.adopted || 0) + 1;
 }
 
 // Treinen bewegen in dezelfde stap als de speler (eerst de trein, dan de meerijder → geen schokken).
+// Alleen de actieve lijn beweegt treinen (één speler, één lijn tegelijk) → elke trein precies één keer per frame.
 function updateTrains(p, delta) {
-  for (const t of trains) t.update(delta, { rider: p.__lineTrain === t });
+  const list = relevant();
+  for (const t of list) {
+    if (p.__lineTrain !== t && blocked(t, list)) { t.place(); continue; }   // wacht op de trein ervoor
+    t.update(delta, { rider: p.__lineTrain === t });
+  }
   if (!p.__lineTrain) {
-    const now = performance.now() / 1000;
-    for (const t of trains) t.maintain(p.__lineStation, now, { waiting: true });
+    const now = performance.now() / 1000, st = stations[p.__lineStation];
+    for (const t of list) t.maintain(t.routeIndex(st?.id), now, isGuest(t) ? { waiting: true, lead: 22, maxEta: 70, others: list } : { waiting: true, others: list });
   }
 }
 
@@ -204,7 +231,8 @@ function installAudio() {
       base();
       const p = game.player; if (!this.unlocked || !onLine(p)) return;
       let near = 0, speed = 0;
-      for (const t of trains) {
+      for (const t of relevant()) {
+        if (!t.visibleIn(ID) && p.__lineTrain !== t) continue;
         const v = Math.abs(t.x - (lastX.get(t) ?? t.x)) * 60; lastX.set(t, t.x);
         const d = Math.abs(t.x - p.position.x), n = p.__lineTrain === t ? 1 : Math.max(0, 1 - d / 90);
         if (n > near) { near = n; speed = v; }
@@ -233,9 +261,9 @@ function installHud() {
     base(player, ...args);
     if (!onLine(player)) return;
     const st = stations[player.__lineStation];
+    const t = player.__lineTrain, L = t ? t.line : line;
     const badge = el.hud?.querySelector?.('.station-chip .u-badge');
-    if (badge) { badge.textContent = line.id; badge.style.background = line.color; }
-    const t = player.__lineTrain;
+    if (badge) { badge.textContent = L.id; badge.style.background = L.color; }
     el.routeProgress?.classList?.toggle('hidden', !t);
     if (t) {
       // Meerijden: voortgang naar de volgende halte (zelfde balk als bij de U2).
@@ -245,7 +273,7 @@ function installHud() {
       if (el.routeStartLabel) el.routeStartLabel.textContent = tl.originName;
       if (el.routeEndLabel) el.routeEndLabel.textContent = end ? 'Endstation' : tl.destinationName;
       if (el.stationName) el.stationName.textContent = tl.state === 'cruising' ? 'Unterwegs' : tl.originName;
-      if (el.trainStatus) el.trainStatus.textContent = `${ID} richting ${tl.terminusName}`;
+      if (el.trainStatus) el.trainStatus.textContent = `${L.id} richting ${tl.terminusName}`;
       if (el.hint) el.hint.textContent = end ? `${tl.originName} · eindpunt. Stap uit bij een open deur.`
         : tl.state === 'boarding' ? `Deuren open · uitstappen kan nu · volgende halte ${tl.destinationName}.`
         : `Nächster Halt: ${tl.destinationName}.`;
@@ -253,10 +281,12 @@ function installHud() {
     }
     if (el.stationName) el.stationName.textContent = st.name;
     const fmt = s => !Number.isFinite(s) ? '—' : s <= 0.9 ? 'nu' : `${Math.floor(Math.ceil(s) / 60)}:${String(Math.ceil(s) % 60).padStart(2, '0')}`;
-    const deps = trains.filter(tr => st.index + tr.direction >= 0 && st.index + tr.direction < stations.length)
-      .map(tr => `${tr.timeline.terminusName} ${fmt(tr.etaToStation(st.index))}`);
+    const here = relevant().map(tr => [tr, tr.routeIndex(st.id)]).filter(([tr, i]) => i >= 0 && i + tr.direction >= 0 && i + tr.direction < tr.stations.length);
+    const multi = new Set(here.map(([tr]) => tr.line.id)).size > 1;
+    const deps = here.sort((a, b) => b[0].direction - a[0].direction || a[0].etaToStation(a[1]) - b[0].etaToStation(b[1]))
+      .map(([tr, i]) => `${multi ? tr.line.id + ' ' : ''}${tr.timeline.terminusName} ${fmt(tr.etaToStation(i))}`);
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || ID;
-    if (el.hint) el.hint.textContent = trains.some(tr => tr.boardableAt(st.index))
+    if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
       : st.transfer ? `Overstap ${st.transfer.line}: trapgat aan de kant van ${stations[Math.max(0, st.index - 1)].name}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
@@ -309,8 +339,18 @@ function frame() {
   const active = onLine(p);
   world.update(p.position.x, active);
   surround?.update(p, active, p.position.x);
-  for (const t of trains) t.group.visible = active && Math.abs(t.x - p.position.x) < 260;
-  boards?.update(active && !p.__lineTrain ? p.__lineStation : -1, trains, active);
+  if (active) {
+    const list = relevant();
+    for (const t of list) t.group.visible = t.visibleIn(ID) && Math.abs(t.x - p.position.x) < 260;
+    // Meerijden richting een andere lijnwereld: die alvast opbouwen, zodat de overgang naadloos is.
+    const rt = p.__lineTrain;
+    if (rt) for (const z of rt.zones) {
+      if (z.id === ID) continue;
+      const edge = Number.isFinite(z.from) ? z.from : z.to;
+      if (Math.abs(rt.x - edge) < 170) WORLDS[z.id]?.world?.warm(edge);
+    }
+    boards?.update(p.__lineTrain ? null : stations[p.__lineStation], list, true);
+  } else boards?.update(null, [], false);
 }
 
 async function install() {
@@ -319,17 +359,19 @@ async function install() {
     if (g?.player && g.scene && g.renderer && Array.isArray(g.u8Trains)) {
       const flag = '__line' + ID; if (g[flag]) return; g[flag] = true; game = g;
       world = new LineWorld(g.scene, line, stations);
+      WORLDS[ID] = { world, line, api: { adopt } };
       if (surroundings) surround = new LineSurroundings(world, line, stations);
       if (withTrains) {
         trains = [
-          new LineTrain({ line, stations, direction: 1, startIndex: 0, delay: 4 }),
-          new LineTrain({ line, stations, direction: -1, startIndex: stations.length - 1, delay: 10 }),
+          new LineTrain({ line, stations: route, zones, direction: 1, startIndex: 0, delay: 4 }),
+          new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1, delay: 10 }),
         ];
-        for (const t of trains) world.root.add(t.group);
-        boards = new DepartureBoards(line, stations, world.root);
+        for (const t of trains) { world.root.add(t.group); ALL_TRAINS.push(t); }
       }
+      if (withTrains || dfiRows > 2) boards = new DepartureBoards(line, world.root, dfiRows);
       installMovement(); installHud(); installGod(); installSky(); installAudio();
       if (withTrains) loadTrains();
+      for (const t of trains) t.place();
       Tick.frame(ID + 'Line', { before: frame });
       if (transfers) installTransfers(g, { stations, enter, detach: () => { if (onLine(g.player)) clearLine(g.player); } });
       restoreLocation();
@@ -357,7 +399,8 @@ function board(index, dir = 1) {
   enter(index);
   const t = trains.find(x => x.direction === dir), st = stations[game.player.__lineStation];
   if (!t) return false;
-  t.timeline.resetToApproachAt(st.index, 0);
+  const ri = t.routeIndex(st.id); if (ri < 0) return false;
+  t.timeline.resetToApproachAt(ri, 0);
   t.timeline.z = st.x; t.timeline.state = 'boarding'; t.timeline.stateTime = 0; t.timeline.doorsOpen = true; t.door = 1;
   t.openSide = platformSide(st, dir); t.place();
   const p = game.player; p.__lineTrain = t; t.rider = true; p.__lineRide = { ox: -2.7, oz: 0 }; ride(p, 0);
@@ -366,11 +409,11 @@ function board(index, dir = 1) {
 
 return {
   line, stations, enter, leave, board, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
-  get trains() { return trains; },
+  get trains() { return trains; }, get world() { return world; }, relevant, adopt,
   status: () => ({
     ...status, onLine: onLine(game?.player), station: game?.player?.__lineStation ?? null, world: world?.status() ?? null,
-    riding: game?.player?.__lineTrain?.id ?? null, surroundings: surround?.status() ?? null,
-    trains: trains.map(t => ({ id: t.id, dir: t.direction, x: Math.round(t.x), state: t.state, at: t.currentIndex, door: +t.door.toFixed(2), visible: t.group.visible, units: t.units.length })),
+    riding: game?.player?.__lineTrain?.id ?? null, dfi: boards?.key || null, line: game?.player?.__line ?? null, surroundings: surround?.status() ?? null,
+    trains: relevant().map(t => ({ id: t.id, line: t.line.id, view: t.viewZoneId, track: t.trackZone(t.x).id, dir: t.direction, x: Math.round(t.x), state: t.state, at: t.currentIndex, door: +t.door.toFixed(2), visible: t.group.visible, units: t.units.length })),
   }),
   install: () => install().catch(e => console.error(`[Metro] ${ID} failed`, e)),
 };

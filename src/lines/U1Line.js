@@ -3,6 +3,6 @@
 import { U1_LINE, U1_STATIONS } from '../data/u1.js';
 import { createLine } from './LineRuntime.js';
 
-export const U1 = createLine({ line: U1_LINE, stations: U1_STATIONS, withTrains: true, transfers: true, surroundings: true, label: 'Nieuw: U1 met treinen' });
+export const U1 = createLine({ line: U1_LINE, stations: U1_STATIONS, withTrains: true, transfers: true, surroundings: true, dfiRows: 4, label: 'Nieuw: U1 met treinen' });   // DFI: U1 én U3 (U3b)
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U1 };
 U1.install();

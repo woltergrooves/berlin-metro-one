@@ -739,6 +739,14 @@ export class LineWorld {
     if (todo.length) this.buildOne(...todo[0]);
     return idx;
   }
+  /** Vooruit bouwen terwijl de lijn nog niet actief is (U3b: meerijder komt zo uit een andere lijnwereld). Eén stap per aanroep. */
+  warm(x) {
+    this.lastActive = performance.now();
+    const idx = this.indexOf(x), w = this.wanted(idx);
+    const todo = [...[...w.st].filter(i => !this.stationGroups.has(i)).map(i => ['st', i]), ...[...w.seg].filter(i => !this.segmentGroups.has(i)).map(i => ['seg', i])];
+    if (todo.length) this.buildOne(...todo[0]);
+    return todo.length;
+  }
   /** Synchroon alles om index heen bouwen (bij teleport, zodat je niet in het niets staat). */
   prime(index) { const w = this.wanted(index); for (const i of [index, ...w.st]) if (!this.stationGroups.has(i)) this.buildOne('st', i); }
   buildOne(kind, i) {

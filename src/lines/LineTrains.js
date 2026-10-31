@@ -38,6 +38,33 @@ export function platformSide(st, dir) {
 }
 
 /** Wereld-x van alle deuren (relatief aan het treinmidden). */
+// ── Gedeelde registers (U3b) ─────────────────────────────────────────────────────────────────────
+// ALL_TRAINS = alle treinen van alle nieuwe lijnen; WORLDS[lijn] = { world, line, api } per lijnwereld.
+// Een trein kan door meer dan één lijnwereld rijden (U3: eigen gebied tot x = 262, daarna het U1-gebied).
+export const ALL_TRAINS = [];
+export const WORLDS = {};
+export const isMoving = s => s === 'approaching' || s === 'cruising';
+/** Is het spoor rond lijnpositie `x` (richting `dir`, spoor van `t`) vrij van andere treinen? Voor terugzetten. */
+export function trackClear(t, x, trains) {
+  const key = t.trackZone(x).id;
+  return !trains.some(o => o !== t && o.direction === t.direction && Math.abs(o.x - x) < 2 * HALF_LEN + 8 && o.trackZone(o.x).id === key);
+}
+/**
+ * Blokbeveiliging op gedeeld spoor: staat er vóór deze trein (zelfde richting, zelfde spoor) een andere
+ * trein binnen één treinlengte + marge? Dan wacht hij (de U3 rijdt niet in een U1-trein en andersom).
+ */
+export function blocked(t, trains) {
+  if (!isMoving(t.state)) return false;
+  const dir = t.direction, front = t.x + dir * (HALF_LEN + 6), key = t.trackZone(front).id;
+  for (const o of trains) {
+    if (o === t || o.direction !== dir) continue;
+    const ahead = dir * (o.x - t.x);
+    if (ahead <= 0 || ahead > 2 * HALF_LEN + 6) continue;
+    if (o.trackZone(o.x - dir * HALF_LEN).id === key) return true;
+  }
+  return false;
+}
+
 export const DOOR_OFFSETS = UNITS.flatMap(u => DOOR_CENTERS.map(d => u + d));
 
 function destinationBoard(text, color) {
@@ -69,8 +96,11 @@ function modelUnit(template) {
 
 let serial = 0;
 export class LineTrain {
-  constructor({ line, stations, direction, startIndex, delay = 0 }) {
-    this.line = line; this.stations = stations; this.id = `${line.id}-${direction > 0 ? 'A' : 'B'}-${++serial}`;
+  constructor({ line, stations, direction, startIndex, delay = 0, zones = null }) {
+    this.line = line; this.stations = stations;
+    // Lijnwerelden waar deze trein doorheen rijdt: {id, stations, origin, from, to (rijden), viewMin, viewMax (zien)}.
+    this.zones = (zones || [{ id: line.id, stations, origin: line.origin }]).map(z => ({ from: -Infinity, to: Infinity, viewMin: -Infinity, viewMax: Infinity, ...z }));
+    this.viewZoneId = null; this.id = `${line.id}-${direction > 0 ? 'A' : 'B'}-${++serial}`;
     const route = stations.map(s => ({ id: s.id, name: s.name, index: s.index, z: s.x }));
     this.timeline = new TrainTimeline({ id: this.id, line: line.id, stations: route, direction, startStationIndex: startIndex, initialDelaySeconds: delay });
     this.door = 0; this.lastRecenter = -Infinity; this.rider = false;
@@ -83,6 +113,16 @@ export class LineTrain {
   get state() { return this.timeline.state; }
   get canUseDoors() { return this.timeline.doorsOpen && this.timeline.state === 'boarding' && this.door > 0.82; }
   /** Staat de trein stil aan het perron van station `index`, deuren open? */
+  /** Index van een station (id) in de route van deze trein, of −1. */
+  routeIndex(id) { return this.stations.findIndex(s => s.id === id); }
+  /** Staat de trein met open deuren aan het perron van dit station (object uit een lijnwereld)? */
+  boardableAtStation(st) { const i = this.routeIndex(st.id); return i >= 0 && this.boardableAt(i) && Math.abs(this.x - st.x) < 0.5; }
+  /** Op welk spoor (lijnwereld) rijdt de trein op lijnpositie x? */
+  trackZone(x) { return this.zones.find(z => x >= z.from && x < z.to) || this.zones[0]; }
+  /** Spoorligging z (lokaal in de lijnwereld van `zone`). */
+  zoneZ(zone, x, dir = this.direction) { return trackZ(zone.stations, x, dir); }
+  /** Wordt de trein nu getekend in lijnwereld `id`? */
+  visibleIn(id) { return this.viewZoneId === id; }
   boardableAt(index) { return this.canUseDoors && this.currentIndex === index && Math.abs(this.x - this.stations[index].x) < 0.5; }
   etaToStation(index) { return this.timeline.etaToStation(index); }
 
@@ -115,19 +155,29 @@ export class LineTrain {
   }
 
   /** Lokale dienst rond een wachtende speler (zelfde regels als U8Service.maintain). */
-  maintain(index, now, { waiting = false } = {}) {
-    if (this.rider || !waiting || !Number.isInteger(index)) return false;
+  // lead/maxEta: een tweede lijn op hetzelfde perron (U3 op de U1) komt later, niet tegelijk met de eigen trein.
+  maintain(index, now, { waiting = false, lead = 1.5, maxEta = 24, others = null } = {}) {
+    if (this.rider || !waiting || !Number.isInteger(index) || index < 0) return false;
     if (index + this.direction < 0 || index + this.direction >= this.stations.length) return false;
-    if (this.timeline.stopsUntilStation(index) > CONFIG.train.maxLocalStopsAway) { this.timeline.recenterNear(index, CONFIG.train.localLoopDelaySeconds); this.door = 0; }
-    if (this.etaToStation(index) > 24 && now - this.lastRecenter > 14) { this.timeline.recenterNear(index, 1.5); this.door = 0; this.lastRecenter = now; return true; }
+    // Niet terugzetten op een plek waar al een andere trein staat of rijdt (gedeeld spoor U1/U3).
+    if (others && !trackClear(this, this.stations[index].x - this.direction * CONFIG.train.approachDistance, others)) return false;
+    if (this.timeline.stopsUntilStation(index) > CONFIG.train.maxLocalStopsAway) { this.timeline.recenterNear(index, Math.max(lead, CONFIG.train.localLoopDelaySeconds)); this.door = 0; }
+    if (this.etaToStation(index) > maxEta && now - this.lastRecenter > 14) { this.timeline.recenterNear(index, lead); this.door = 0; this.lastRecenter = now; return true; }
     return false;
   }
 
   place() {
-    const dir = this.direction, x = this.x, side = this.openSide > 0 ? 'p' : 'n', first = this.stations[0].x, last = this.stations.at(-1).x;
+    const dir = this.direction, x = this.x, side = this.openSide > 0 ? 'p' : 'n';
+    // In welke lijnwereld tekenen? Die van de speler als de trein daar te zien is, anders die van het spoor.
+    const view = globalThis.__berlinMetroGame?.player?.__line;
+    const vz = this.zones.find(z => z.id === view && x >= z.viewMin && x <= z.viewMax) || null;
+    const zone = vz || this.trackZone(x), S = zone.stations, first = S[0].x, last = S.at(-1).x;
+    this.viewZoneId = vz?.id ?? null;
+    const root = WORLDS[zone.id]?.world?.root;
+    if (root && this.group.parent !== root) root.add(this.group);
     for (const u of this.units) {
-      const ux = x + u.offset, z = trackZ(this.stations, ux, dir);
-      const dz = trackZ(this.stations, ux + 6, dir) - trackZ(this.stations, ux - 6, dir);
+      const ux = x + u.offset, z = trackZ(S, ux, dir);
+      const dz = trackZ(S, ux + 6, dir) - trackZ(S, ux - 6, dir);
       u.group.position.set(ux, 0, z); u.group.rotation.y = -Math.atan2(dz, 12);
       // Voorbij het eindpunt is er geen tunnel/viaduct: eenheid daar niet tekenen.
       u.group.visible = ux > first - HALF + 10 && ux < last + HALF - 10;
@@ -136,53 +186,57 @@ export class LineTrain {
   }
 }
 
-// ── Vertrekbord (DFI) boven het perron: beide richtingen met minuten ─────────────────────────────
+// ── Vertrekbord (DFI) boven het perron: alle lijnen en richtingen met minuten (U3b: U1 én U3) ────
 export class DepartureBoards {
-  constructor(line, stations, root) {
-    this.line = line; this.stations = stations; this.index = -1; this.key = '';
-    const c = this.canvas = document.createElement('canvas'); c.width = 512; c.height = 128;
+  constructor(line, root, rows = 2) {
+    this.line = line; this.key = ''; this.at = null; this.rows = rows;
+    const H = 64 * rows;
+    const c = this.canvas = document.createElement('canvas'); c.width = 512; c.height = H;
     this.ctx = c.getContext('2d');
     this.tex = new THREE.CanvasTexture(c); this.tex.colorSpace = THREE.SRGBColorSpace; this.tex.minFilter = THREE.LinearFilter; this.tex.generateMipmaps = false;
     const face = new THREE.MeshBasicMaterial({ map: this.tex, toneMapped: false });
     const box = new THREE.MeshStandardMaterial({ color: 0x1d2226, roughness: 0.5, metalness: 0.6 });
     this.group = new THREE.Group(); this.group.name = `${line.id}:DFI`; this.group.userData.line = line.id; root.add(this.group);
     this.boards = [];
+    const fh = 2.16 * H / 512;
     for (let i = 0; i < 2; i++) {
       const b = new THREE.Group();
-      const housing = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.62, 2.3), box); b.add(housing);
-      for (const s of [-1, 1]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(2.16, 0.54), face); f.position.x = s * 0.085; f.rotation.y = s * Math.PI / 2; b.add(f); }
-      for (const s of [-1, 1]) { const rod = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, 0.04), box); rod.position.set(0, 0.56, s * 0.9); b.add(rod); }
+      const housing = new THREE.Mesh(new THREE.BoxGeometry(0.16, fh + 0.08, 2.3), box); b.add(housing);
+      for (const s of [-1, 1]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(2.16, fh), face); f.position.x = s * 0.085; f.rotation.y = s * Math.PI / 2; b.add(f); }
+      for (const s of [-1, 1]) { const rod = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.5, 0.04), box); rod.position.set(0, fh / 2 + 0.29, s * 0.9); b.add(rod); }
       this.group.add(b); this.boards.push(b);
     }
+    this.y = 3.27 - fh / 2;
   }
-  /** Bord bij station `index` hangen en elke seconde de vertrektijden tekenen. */
-  update(index, trains, visible) {
-    this.group.visible = visible && index >= 0;
+  /** Bord bij station `st` hangen en de vertrektijden van alle treinen die hier stoppen tekenen. */
+  update(st, trains, visible) {
+    this.group.visible = !!(visible && st);
     if (!this.group.visible) return;
-    const st = this.stations[index];
-    if (index !== this.index) {
-      this.index = index;
+    if (st !== this.at) {
+      this.at = st;
       const cs = crossSection(st.layout), zs = cs.plat.length === 1 ? [0] : cs.plat.map(p => (p[0] + p[1]) / 2);
-      this.boards.forEach((b, i) => { b.visible = i < zs.length; b.position.set(st.x - 4, 3.0, zs[i] ?? 0); });
+      this.boards.forEach((b, i) => { b.visible = i < zs.length; b.position.set(st.x - 4, this.y, zs[i] ?? 0); });
     }
-    const rows = [1, -1].map(dir => {
-      if (index + dir < 0 || index + dir >= this.stations.length) return null;
-      const t = trains.find(tr => tr.direction === dir);
-      const term = (dir > 0 ? this.stations.at(-1) : this.stations[0]).name;
-      const s = t ? t.etaToStation(index) : Infinity;
-      const here = t && t.currentIndex === index && Math.abs(t.x - st.x) < 1 && t.timeline.state !== 'cruising';
-      return [term, here ? 'sofort' : !Number.isFinite(s) ? '—' : s < 50 ? '1 min' : `${Math.round(s / 60)} min`];
-    }).filter(Boolean);
-    const key = rows.map(r => r.join('|')).join('/');
+    const best = new Map();
+    for (const t of trains) {
+      const i = t.routeIndex(st.id), dir = t.direction;
+      if (i < 0 || i + dir < 0 || i + dir >= t.stations.length) continue;
+      const s = t.etaToStation(i), here = t.currentIndex === i && Math.abs(t.x - st.x) < 1 && t.state !== 'cruising';
+      const k = `${t.line.id}${dir}`, v = { line: t.line, dir, term: t.timeline.terminusName, s: here ? -1 : s };
+      if (!best.has(k) || v.s < best.get(k).s) best.set(k, v);
+    }
+    const rows = [...best.values()].sort((a, b) => b.dir - a.dir || a.s - b.s).slice(0, this.rows)
+      .map(r => [r.line, r.term, r.s < 0 ? 'sofort' : !Number.isFinite(r.s) ? '—' : r.s < 50 ? '1 min' : `${Math.round(r.s / 60)} min`]);
+    const key = rows.map(r => r[0].id + r[1] + r[2]).join('/');
     if (key === this.key) return;
     this.key = key;
     const { ctx } = this;
-    ctx.fillStyle = '#0a0c0d'; ctx.fillRect(0, 0, 512, 128);
-    rows.forEach(([term, time], i) => {
-      const y = 36 + i * 56;
-      ctx.fillStyle = this.line.color; ctx.fillRect(12, y - 20, 50, 38);
-      ctx.fillStyle = '#fff'; ctx.font = '800 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.line.id, 37, y);
-      ctx.fillStyle = '#ffb627'; ctx.font = '600 30px monospace'; ctx.textAlign = 'left'; ctx.fillText(term, 74, y, 300);
+    ctx.fillStyle = '#0a0c0d'; ctx.fillRect(0, 0, 512, this.canvas.height);
+    rows.forEach(([line, term, time], i) => {
+      const y = 34 + i * 62;
+      ctx.fillStyle = line.color; ctx.fillRect(12, y - 21, 52, 40);
+      ctx.fillStyle = '#fff'; ctx.font = '800 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(line.id, 38, y);
+      ctx.fillStyle = '#ffb627'; ctx.font = '600 30px monospace'; ctx.textAlign = 'left'; ctx.fillText(term, 76, y, 300);
       ctx.textAlign = 'right'; ctx.fillText(time, 500, y);
     });
     this.tex.needsUpdate = true;

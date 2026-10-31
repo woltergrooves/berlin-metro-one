@@ -70,4 +70,7 @@ export const U3_BRANCH = branch;
 /** De hele U3-route (24 haltes): eigen tak + de gedeelde U1-stations Wittenbergplatz … Warschauer Straße. */
 export const U3_ROUTE = [...branch, ...U1_STATIONS.slice(U1_STATIONS.indexOf(join))];
 
+/** U3b: lijnpositie waar U3-treinen van het U3-spoor op het U1-spoor overgaan (tunnel Augsburger Str. → Wittenbergplatz). */
+export const U3_SPLIT_X = 262;
+
 if (joinCopy.x !== join.x) console.warn('[Metro] U3: Wittenbergplatz ligt niet op dezelfde x als op de U1');
