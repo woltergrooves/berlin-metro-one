@@ -34,6 +34,19 @@ for i in range(1, len(U1)):
     sid, la, lo, el = U1[i][:4]
     LINE_STATIONS[U1[i][4] if len(U1[i]) > 4 else sid] = dict(line='U1', id=sid, at=(la, lo), prev=U1[i - 1][1:3],
                                                                next=U1[i + 1][1:3] if i + 1 < len(U1) else None, elev=float(el))
+# U5 oost: bovengrondse stations (aarden baan). Coördinaten = src/data/u5.js; elev = straat onder het spoor.
+# Uitvoer: <dst>/u5/<id>.json, uitsnede osm/u5-<id>.osm.
+U5 = [('tierpark', 52.4972665, 13.5231233, 0), ('biesdorf-sued', 52.4995098, 13.5464812, 1.4),
+      ('elsterwerdaer-platz', 52.5054484, 13.5611929, 3.5), ('wuhletal', 52.5125803, 13.5760855, 1.4),
+      ('kaulsdorf-nord', 52.5211222, 13.5890346, 0), ('louis-lewin-strasse', 52.5389923, 13.6190831, 0),
+      ('hoenow', 52.5382584, 13.6336218, 1.4)]
+for i in range(1, len(U5)):
+    sid, la, lo, el = U5[i]
+    if not el: continue
+    LINE_STATIONS['u5-' + sid] = dict(line='U5', id=sid, at=(la, lo), prev=U5[i - 1][1:3],
+                                      next=U5[i + 1][1:3] if i + 1 < len(U5) else (la + (la - U5[i - 1][1]), lo + (lo - U5[i - 1][2])), elev=float(el))
+# Wuhletal: het spoor loopt bij het station oost-west (de lijn buigt daarna naar het noorden) → lokale richting.
+LINE_STATIONS['u5-wuhletal'].update(prev=(52.51260, 13.5700), next=(52.51262, 13.5830))
 RADIUS = 260.0          # m rond het station
 CORRIDOR = 12.5         # |z| < dit = spoorstrook van het spel (zijwanden G3b op ±9,08)
 LEVEL = 3.4             # verdiepingshoogte Berlijnse Altbau

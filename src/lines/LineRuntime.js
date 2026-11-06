@@ -23,7 +23,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
  * toont (U3: alleen de eigen tak); withTrains/transfers/surroundings schakelen U1b/U1c/U1d-onderdelen in.
  */
 export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}`,
-  route = stations, zones = null, dfiRows = 2 }) {
+  route = stations, zones = null, dfiRows = 2, trainsPerDir = 1 }) {
 // U3b: route = de haltes van de eigen treinen (U3: 24, ook over het U1-spoor); zones = de lijnwerelden waar ze
 // doorheen rijden. Treinen van andere lijnen die door déze wereld rijden ("gasten") stoppen hier ook.
 const ID = line.id;
@@ -297,6 +297,7 @@ function installHud() {
       : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (nog niet in het spel) · wacht op de ${ID} of neem de trap naar buiten.`
       : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : 'het tunneleinde'}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
+      : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : st.kind === 'cutting' ? `Open ingraving · wacht op de ${ID} of neem de trap omhoog naar buiten (Ausgang).`
       : `Ondergronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`;
@@ -369,10 +370,13 @@ async function install() {
       WORLDS[ID] = { world, line, api: { adopt } };
       if (surroundings) surround = new LineSurroundings(world, line, stations);
       if (withTrains) {
-        trains = [
-          new LineTrain({ line, stations: route, zones, direction: 1, startIndex: 0, delay: 4 }),
-          new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1, delay: 10 }),
-        ];
+        // U5 oost: lange lijn → meer treinen per richting, gelijk verdeeld over de route (blokbeveiliging houdt afstand).
+        trains = [];
+        for (let k = 0; k < trainsPerDir; k++) {
+          const off = Math.round(k * (route.length - 1) / trainsPerDir);
+          trains.push(new LineTrain({ line, stations: route, zones, direction: 1, startIndex: off, delay: 4 + k * 3 }));
+          trains.push(new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1 - off, delay: 10 + k * 3 }));
+        }
         for (const t of trains) { world.root.add(t.group); ALL_TRAINS.push(t); }
       }
       if (withTrains || dfiRows > 2) boards = new DepartureBoards(line, world.root, dfiRows);

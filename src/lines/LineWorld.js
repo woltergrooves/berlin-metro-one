@@ -272,6 +272,13 @@ function stationKit(line, st, m) {
   if (st.kind === 'tunnel') tunnelShell(kit, m, st, cs, -H, H, true);
   else if (st.kind === 'cutting') cuttingShell(kit, m, st, cs, -H, H, true, city);
   else viaductShell(kit, m, st, cs, -H, H, true, st.elev, st.elev, true, city);
+  if (st.end) {   // U5 Hönow: bovengronds eindpunt — korte kopsporen met stootjukken, straat loopt door
+    tracks(kit, m, cs, H, H + 16);
+    if (st.embank) embankment(kit, m, H, H + 18, cs.wall * 2, st.elev, st.elev);
+    const red = std('Line_Barrier_Red', '#c8102e', { roughness: 0.5 });
+    for (const tz of cs.tracks) { kit.box(m.steel, 0.5, 1.1, 2.4, H + 15.5, RAIL_Y + 0.55, tz); kit.box(red, 0.12, 0.4, 2.0, H + 15.2, RAIL_Y + 0.95, tz); }
+    street(city, m, st, H, H + 90, st.elev, st.elev);
+  }
   return { kit, city };
 }
 
@@ -291,6 +298,10 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
     if (st.profile?.kind === 'photos') {   // U5 Brandenburger Tor: historische foto's (sepia) tussen de naamborden
       const ph = std('Line_Photos', '#ffffff', { map: photoWallTex(), roughness: 0.5 });
       for (const x of [-36, -12, 12, 36]) for (const s of [-1, 1]) kit.plane(ph, 14, 1.9, M4(x, 2.55, s * (W - 0.03), s > 0 ? Math.PI : 0));
+    }
+    if (st.profile?.kind === 'murals') {   // U5 Magdalenenstraße / Tierpark: wandschilderingen tussen de naamborden
+      const mu = std('Line_Mural_' + st.profile.style, '#ffffff', { map: muralTex(st.profile.style), roughness: 0.6 });
+      for (const x of [-36, -12, 12, 36]) for (const s of [-1, 1]) kit.plane(mu, 14, 2.2, M4(x, 2.6, s * (W - 0.03), s > 0 ? Math.PI : 0));
     }
     // Wandborden met de naam, naar het spoor (eilandperron) of achter het perron (zijperrons).
     const ws = std('Line_WallSign_' + st.id, '#ffffff', { map: wallSignTex(st.name, st.accent), roughness: 0.4 });
@@ -400,7 +411,8 @@ function cuttingShell(kit, m, st, cs, x0, x1, isStation, city = kit) {
       city.box(m.trunk, 0.4, hh, 0.4, tx, CUT_TOP + hh / 2, tz);
       const crown = new THREE.IcosahedronGeometry(3.1, 1); crown.scale(1, 1.25, 1); crown.translate(tx, CUT_TOP + hh + 2.6, tz); city.add(m.tree, crown);
     }
-    for (let vx = x0 + 12 + (seed % 9); vx < x1 - 6; vx += 26 + (seed % 7)) villa(city, m, vx, s * (T + 20 + (vx % 7)), seed + Math.round(vx));
+    if (st.profile?.city === 'platte') for (let vx = x0 + 16 + (seed % 9); vx < x1 - 6; vx += 44 + (seed % 9)) plattenbau(city, m, vx, s * (T + 26 + (vx % 9)), seed + Math.round(vx), ((seed + vx) | 0) % 3 !== 0);
+    else for (let vx = x0 + 12 + (seed % 9); vx < x1 - 6; vx += 26 + (seed % 7)) villa(city, m, vx, s * (T + 20 + (vx % 7)), seed + Math.round(vx));
   }
   if (!isStation) return;
   // Perronkappen (lichte staalconstructie, dak in accentkleur) + lampen.
@@ -515,6 +527,8 @@ function vault(kit, m, st, W, x0, x1) {
 // Viaduct: dek, stalen liggers, kolommen tot de straat, leuningen; bij een station perronkappen.
 function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 = st.elev, withStreet = true, city = kit) {
   const len = x1 - x0, cx = (x0 + x1) / 2, deckW = isStation || cs.wide ? cs.wall * 2 : 9.4;   // breed naast een middenperron
+  if (st.embank) embankment(kit, m, x0, x1, deckW, elev0, elev1);   // U5 oost: bovengronds op een (lage) aarden baan
+  else {
   kit.box(m.steel, len, 0.9, deckW, cx, RAIL_Y - 0.75, 0);                    // dek + hoofdliggers
   for (const s of [-1, 1]) kit.box(m.steel, len, 0.5, 0.3, cx, RAIL_Y - 1.4, s * (deckW / 2 - 0.4));
   for (let x = x0 + 6; x < x1; x += 12) {
@@ -523,7 +537,9 @@ function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 
     if (h > 0.5) for (const s of [-1, 1]) kit.box(m.steel, 0.5, h, 0.5, x, g + h / 2, s * 3.6);
     if (h > 0.5) kit.box(m.steel, 0.4, 0.5, 8.2, x, RAIL_Y - 1.45, 0);
   }
-  if (!isStation) { const rz = deckW / 2 - 0.1; for (const s of [-1, 1]) { kit.box(m.steel, len, 0.06, 0.06, cx, 0.1, s * rz); kit.box(m.steel, len, 0.5, 0.05, cx, -0.15, s * rz); } }
+  }
+  if (!isStation && st.embank) { const rz = deckW / 2 + 0.3; for (const s of [-1, 1]) { kit.box(m.steel, len, 0.05, 0.05, cx, RAIL_Y + 1.1, s * rz); for (let x = x0 + 1.5; x < x1; x += 3) kit.box(m.steel, 0.05, 1.2, 0.05, x, RAIL_Y + 0.5, s * rz); } }
+  else if (!isStation) { const rz = deckW / 2 - 0.1; for (const s of [-1, 1]) { kit.box(m.steel, len, 0.06, 0.06, cx, 0.1, s * rz); kit.box(m.steel, len, 0.5, 0.05, cx, -0.15, s * rz); } }
   if (isStation && st.profile?.hall) stationHall(kit, m, st, cs, x0, x1);
   else if (isStation) {
     // Perronkappen: staanders + licht hellend dak per perron; buitenleuning met glas.
@@ -544,6 +560,60 @@ function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 
     }
   }
   if (withStreet) street(city, m, st, x0, x1, elev0, elev1);
+}
+
+// ── U5 oost: aarden baan (Biesdorf, Elsterwerdaer Platz, Wuhletal, Hönow) — ballastbed, grastaluds tot de straat ──
+function embankment(kit, m, x0, x1, w, elev0, elev1) {
+  const top = RAIL_Y - 0.3, len = x1 - x0;
+  kit.flat(m.ballast, x0, x1, -w / 2, w / 2, RAIL_Y - 0.29, true, 3);
+  for (let x = x0; x < x1 - 0.01; x += 12) {
+    const xe = Math.min(x1, x + 12), t = ((x + xe) / 2 - x0) / len, g = -(elev0 + (elev1 - elev0) * t), h = top - g;
+    for (const s of [-1, 1]) {
+      kit.box(m.concrete, xe - x, 0.35, 0.3, (x + xe) / 2, top + 0.05, s * (w / 2 + 0.15));      // randbalk
+      if (h > 0.15) slab(kit, m.grass, x, xe, s * (w / 2 + 0.3), top, s * (w / 2 + 0.3 + Math.max(1, h * 1.6)), g - 0.05, 0.12);
+    }
+  }
+}
+// U5 oost: Plattenbau (WBS 70, Hellersdorf/Kaulsdorf) boven de ingraving — lange schijven met panelen en balkons.
+function plattenTex(v) {
+  return tex('platte' + v, () => canvasTex(512, 512, (c, w, h) => {
+    const base = ['#d9d2c3', '#cfd6d6', '#e3d7bf', '#d6cfd9'][v % 4], acc = ['#c4683a', '#4f7fa6', '#6f9a4e', '#b8913a'][v % 4];
+    c.fillStyle = base; c.fillRect(0, 0, w, h);
+    for (let fy = 0; fy < 8; fy++) for (let fx = 0; fx < 4; fx++) {
+      const x = fx * 128, y = fy * 64;
+      c.strokeStyle = 'rgba(60,60,60,0.35)'; c.lineWidth = 2; c.strokeRect(x + 1, y + 1, 126, 62);   // paneelvoegen
+      c.fillStyle = '#3a4248'; c.fillRect(x + 22, y + 16, 40, 32);                                     // raam
+      c.fillStyle = 'rgba(200,220,235,0.35)'; c.fillRect(x + 24, y + 18, 18, 28);
+      if (fx % 2) { c.fillStyle = acc; c.fillRect(x + 72, y + 34, 48, 26); c.fillStyle = '#2d3236'; c.fillRect(x + 76, y + 14, 22, 20); }   // loggia
+    }
+  }));
+}
+function plattenbau(kit, m, x, z, seed, alongX = true) {
+  const floors = [5, 6, 11, 6][seed % 4], hgt = floors * 2.8, len = 24 + (seed % 3) * 12, dep = 12;
+  const f = std('Line_Platte_' + (seed % 4), '#ffffff', { map: plattenTex(seed % 4), roughness: 0.85 });
+  const b = kit.box(f, alongX ? len : dep, hgt, alongX ? dep : len, x, CUT_TOP + hgt / 2, z);
+  const uv = b.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * len / 12, uv.getY(i) * floors / 8);
+  kit.box(m.dark, (alongX ? len : dep) + 0.4, 0.5, (alongX ? dep : len) + 0.4, x, CUT_TOP + hgt + 0.25, z);
+}
+// U5: wandschilderingen (Magdalenenstraße: geschiedenis van Lichtenberg; Tierpark: dieren) — gestileerd, geen kopie.
+function muralTex(style) {
+  return tex('mural:' + style, () => canvasTex(1024, 160, (c, w, h) => {
+    if (style === 'tierpark') {
+      c.fillStyle = '#e7dcc0'; c.fillRect(0, 0, w, h);
+      const ani = ['🦒', '🐘', '🦓', '🐻', '🦩', '🐪', '🦁', '🐧'];
+      c.font = '92px serif'; c.textBaseline = 'middle'; c.textAlign = 'center';
+      ani.forEach((a, i) => { c.fillStyle = ['#c48a3a', '#7d8a6a', '#3a3a3a', '#7a5230'][i % 4]; c.fillRect(i * 128 + 8, 132, 112, 10); c.fillText(a, i * 128 + 64, 78); });
+      return;
+    }
+    const g = c.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#2f4a6a'); g.addColorStop(0.5, '#7a4a3a'); g.addColorStop(1, '#3f6a4a');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 18; i++) {   // figuren en gebouwen in vlakken, zoals de wandbeelden van 1986
+      const x = i * 58 + 10, hh = 40 + (i * 37) % 70;
+      c.fillStyle = ['#d9b98a', '#b8473a', '#e3e0d4', '#5a7a9a', '#c9a23a'][i % 5]; c.fillRect(x, h - hh - 10, 34, hh);
+      c.beginPath(); c.arc(x + 17, h - hh - 24, 12, 0, Math.PI * 2); c.fill();
+    }
+    c.fillStyle = 'rgba(255,255,255,0.15)'; c.fillRect(0, 0, w, 18);
+  }));
 }
 
 // ── U1d: stationsprofielen (hal / kappen) ───────────────────────────────────────────────────────────
@@ -680,8 +750,9 @@ function street(kit, m, st, x0, x1, elev0, elev1) {
     const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, (x0 + uv.getX(i) * len) / 4, (z0 + uv.getY(i) * (z1 - z0)) / 4);
     g.computeVertexNormals(); g.translate(cx, 0, (z0 + z1) / 2); kit.add(mat, g);
   };
-  geoGround(m.asphalt, -18, 18, 0);                 // middenberm + rijbanen
-  geoGround(m.pavement, -26, -18, 0.15); geoGround(m.pavement, 18, 26, 0.15);
+  if (st.embank) { geoGround(m.grass, -15, 15, -0.02); geoGround(m.asphalt, -24, -15, 0); geoGround(m.asphalt, 15, 24, 0); geoGround(m.pavement, -26, -24, 0.15); geoGround(m.pavement, 24, 26, 0.15); }
+  else geoGround(m.asphalt, -18, 18, 0);                 // middenberm + rijbanen
+  if (!st.embank) { geoGround(m.pavement, -26, -18, 0.15); geoGround(m.pavement, 18, 26, 0.15); }
   geoGround(m.asphalt, -130, -26, 0.05); geoGround(m.asphalt, 26, 130, 0.05);   // achter de gevels (zijstraten, binnenplaatsen)
   // Gevels aan beide kanten (straatblokken, af en toe een gat voor een zijstraat).
   const seed = st.index * 31;
@@ -724,6 +795,16 @@ function segmentKit(line, a, b, m) {
       for (const s of [-0.72, 0.72]) kit.box(m.rail, len, 0.12, 0.07, mid, RAIL_Y + 0.12, (za + zb) / 2 + s, 0, -ang);
       kit.box(m.bed, len, 0.3, 3.0, mid, RAIL_Y - 0.15, (za + zb) / 2, 0, -ang);
     }
+  }
+  shells(kit, city, m, a, b, cs, x0, x1);
+  return { kit, city };
+}
+function shells(kit, city, m, a, b, cs, x0, x1) {
+  const open = k => k === 'viaduct';
+  if ((a.kind === 'cutting' && open(b.kind)) || (open(a.kind) && b.kind === 'cutting')) {
+    // U5 oost (Wuhletal ⇄ Kaulsdorf-Nord, Louis-Lewin-Straße ⇄ Hönow): korte tunnel onder de straat in het midden.
+    const mid = (x0 + x1) / 2, T = { ...(a.kind === 'cutting' ? b : a), kind: 'tunnel', profile: null, embank: false };
+    shells(kit, city, m, a, T, cs, x0, mid); shells(kit, city, m, T, b, cs, mid, x1); return;
   }
   if (a.kind === 'tunnel' && b.kind === 'tunnel') tunnelShell(kit, m, a, cs, x0, x1, false);
   else if (a.kind === 'cutting' && b.kind === 'cutting') cuttingShell(kit, m, a, cs, x0, x1, false, city);
@@ -772,7 +853,6 @@ function segmentKit(line, a, b, m) {
     viaductShell(kit, m, vst, { ...cs }, vA, vB, false, eAt(vA), eAt(vB), false);
     street(city, m, vst, sA, sB, e0, e1);
   }
-  return { kit, city };
 }
 // Rivier van een brug in het tussenstuk (lokale x van station a).
 function riverOf(a, x0, x1) { const c = (x0 + x1) / 2, h = (a.bridge?.width || 52) / 2; return [c - h, c + h]; }
