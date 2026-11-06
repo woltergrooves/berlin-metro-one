@@ -70,7 +70,9 @@ function toU8(index) {
   return go(`U8 ${U8_STOPS[index].name}`, () => {
     const p = game.player;
     for (const a of apis) a.detach(); resetU8(p);
-    p.position.set(stopX(index) - U8_END + 4, CONFIG.player.eyeHeight - 4, alex.z + U8_Z_REL);
+    // Alexanderplatz zelf: het westeinde is de voet van de trap naar de hal (x ≤ 43 = hal-gebied) → verderop landen.
+    const lx = index === U8_ALEX_INDEX ? -12 : -U8_END + 4;
+    p.position.set(stopX(index) + lx, CONFIG.player.eyeHeight - 4, alex.z + U8_Z_REL + (index === U8_ALEX_INDEX ? 2.2 : 0));
     p.__u8FullStation = index; p.__u8Area = true; p.yaw = -Math.PI / 2; p.pitch = 0;
     for (const s of U8_STOPS) { if (s.id === U8_ALEX_INDEX) continue; const q = game.scene.getObjectByName(`U8:${s.name}`); if (q) q.visible = s.id === index; }
   });

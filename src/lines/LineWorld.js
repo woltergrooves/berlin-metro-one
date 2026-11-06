@@ -469,10 +469,10 @@ function exitUp(kit, m, st, cs, ez, exitMat) {
 const isVault = st => st.profile?.kind === 'vault' || st.profile?.kind === 'stars';
 // U5 Museumsinsel: donkerblauw gewelf met ±6000 lichtpunten (Schinkels sterrenhemel uit 'Die Zauberflöte').
 function starTex() {
-  return tex('stars', () => { const t = canvasTex(1024, 512, (c, w, h) => {
+  return tex('stars', () => { const t = canvasTex(1024, 1024, (c, w, h) => {
     c.fillStyle = '#0b1a44'; c.fillRect(0, 0, w, h);
-    for (let i = 0; i < 1500; i++) { const r = Math.random() < 0.08 ? 2.4 : 1.2 + Math.random(); c.fillStyle = `rgba(255,${235 + Math.random() * 20 | 0},${190 + Math.random() * 50 | 0},${0.6 + Math.random() * 0.4})`; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, r, 0, Math.PI * 2); c.fill(); }
-  }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 1); return t; });
+    for (let i = 0; i < 2200; i++) { const r = Math.random() < 0.08 ? 2.4 : 1.2 + Math.random(); c.fillStyle = `rgba(255,${235 + Math.random() * 20 | 0},${190 + Math.random() * 50 | 0},${0.6 + Math.random() * 0.4})`; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, r, 0, Math.PI * 2); c.fill(); }
+  }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 8); return t; });   // u = rond het gewelf (±20 m), v = langs het perron (±84 m) → ronde sterren
 }
 // U5 Brandenburger Tor: fotostrook met sepia-beelden (Tor, Linden, Mauer, 1989) — geschilderd, herkenbaar.
 function photoWallTex() {

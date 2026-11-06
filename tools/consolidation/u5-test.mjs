@@ -87,6 +87,7 @@ const u8 = await page.evaluate(() => globalThis.__berlinMetroGame.player.__u8Ful
 check('U5 → U8 Alexanderplatz (keuze)', ok && !p.line && u8 === 14, JSON.stringify({ p, u8 }));
 await stand(-1.57, -0.02); await page.waitForTimeout(1500); await shot('u8_alex_na_overstap');
 
+if (process.env.NORIDE) { console.log('resultaat', pass, '/', pass + fail); console.log('fouten', errors.length, errors.slice(0, 8)); console.log('done'); await browser.close(); process.exit(0); }
 // 4. Treinen + DFI + meerijden Museumsinsel → Rotes Rathaus.
 await page.evaluate(() => globalThis.BerlinLines.U5.enter(4));
 await page.waitForTimeout(8000);
