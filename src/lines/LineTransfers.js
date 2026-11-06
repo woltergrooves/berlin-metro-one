@@ -16,7 +16,8 @@ import { transferSignTex } from './LineWorld.js';
 
 const U2_END = -32.5;          // rz waar het overstappunt op een U2-perron begint (beweging klemt op −34)
 const U8_END = 22.0;           // afstand tot het stationsmidden (beweging klemt op ±24)
-let game = null, api = null, busy = false, fade = null;
+let game = null, busy = false, fade = null;
+const apis = [];   // lijnen met overstappunten op U2/U8 (U1 sinds U1c, U5 sinds U5 west)
 const signs = [];
 const status = { installed: false, transfers: 0, last: null, signs: 0 };
 
@@ -57,7 +58,7 @@ function toU2(id) {
   const s = game.stations.find(x => x.id === id); if (!s) return false;
   return go(`U2 ${s.name}`, () => {
     const p = game.player;
-    api.detach(); resetU8(p);
+    for (const a of apis) a.detach(); resetU8(p);
     p.position.set(2.7, CONFIG.player.eyeHeight, s.z - 30.4); p.yaw = Math.PI; p.pitch = 0;
     game.world?.update?.(s.z);
   });
@@ -68,16 +69,16 @@ function toU8(index) {
   const alex = game.stations.find(s => s.id === 'alexanderplatz'); if (!alex) return false;
   return go(`U8 ${U8_STOPS[index].name}`, () => {
     const p = game.player;
-    api.detach(); resetU8(p);
+    for (const a of apis) a.detach(); resetU8(p);
     p.position.set(stopX(index) - U8_END + 4, CONFIG.player.eyeHeight - 4, alex.z + U8_Z_REL);
     p.__u8FullStation = index; p.__u8Area = true; p.yaw = -Math.PI / 2; p.pitch = 0;
     for (const s of U8_STOPS) { if (s.id === U8_ALEX_INDEX) continue; const q = game.scene.getObjectByName(`U8:${s.name}`); if (q) q.visible = s.id === index; }
   });
 }
 
-/** Van U2/U8 naar de U1 (bij het overstaptrapgat). */
-function toU1(index) {
-  return go(`U1 ${api.stations[index].name}`, () => { resetU8(game.player); api.enter(index, { at: 'transfer' }); });
+/** Van U2/U8 naar de U1 (of een andere lijn met overstappunten, zoals de U5) bij het overstaptrapgat. */
+function toU1(index, a = apis.find(x => x.id === 'U1') || apis[0]) {
+  return go(`${a.id} ${a.stations[index].name}`, () => { resetU8(game.player); a.enter(index, { at: 'transfer' }); });
 }
 
 /** U4: naar het perron van een andere nieuwe lijn (U1/U3/U4 …), naast het overstaptrapgat. */
@@ -125,30 +126,31 @@ export function fromLine(st) {
 }
 
 // ── Overstappunten op U2- en U8-perrons ─────────────────────────────────────────────────────────
-function points() {
+function points(api) {
   const out = [];
   const alex = game.stations.find(s => s.id === 'alexanderplatz');
   for (const st of api.stations) {
     const t = st.transfer; if (!t) continue;
     if (t.line === 'U2') {
       const s = game.stations.find(x => x.id === t.station); if (!s) continue;
-      out.push({ kind: 'U2', u1: st.index, s, name: s.name });
+      out.push({ kind: 'U2', u1: st.index, api, s, name: s.name });
     } else if (t.line === 'U8' && alex) {
-      out.push({ kind: 'U8', u1: st.index, index: t.station, cx: stopX(t.station), zc: alex.z + U8_Z_REL, name: U8_STOPS[t.station].name });
+      out.push({ kind: 'U8', u1: st.index, api, index: t.station, cx: stopX(t.station), zc: alex.z + U8_Z_REL, name: U8_STOPS[t.station].name });
     }
   }
   return out;
 }
 
 // U3c: de U3 stopt op alle overstapstations van de U1 (Wittenbergplatz … Kottbusser Tor) → beide lijnsymbolen.
-const U1_SIGN = { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' };
-function buildSigns(pts) {
-  const sign = new THREE.MeshBasicMaterial({ map: transferSignTex(U1_SIGN), toneMapped: false });
-  const floor = new THREE.MeshBasicMaterial({ color: 0x55a822, transparent: true, opacity: 0.55, toneMapped: false });
+const U1_SIGN = { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke', hint: 'Übergang U1 · U3' };
+function buildSigns(pts, info = U1_SIGN) {
+  const sign = new THREE.MeshBasicMaterial({ map: transferSignTex(info), toneMapped: false });
+  const floor = new THREE.MeshBasicMaterial({ color: new THREE.Color(info.color), transparent: true, opacity: 0.55, toneMapped: false });
   const steel = new THREE.MeshStandardMaterial({ color: 0x3a3d40, roughness: 0.5, metalness: 0.5 });
   const plane = new THREE.PlaneGeometry(2.0, 0.5), stripe = new THREE.PlaneGeometry(3.6, 0.5), rod = new THREE.BoxGeometry(0.04, 1.0, 0.04);
   for (const pt of pts) {
-    const g = new THREE.Group(); g.name = `Transfer:U1@${pt.kind}:${pt.name}`; g.userData.line = 'U1';
+    pt.hint = info.hint || `Übergang ${info.line}`;
+    const g = new THREE.Group(); g.name = `Transfer:${info.line}@${pt.kind}:${pt.name}`; g.userData.line = info.line;
     const a = new THREE.Mesh(plane, sign), b = new THREE.Mesh(stripe, floor), r = new THREE.Mesh(rod, steel);
     a.position.y = 2.45; r.position.y = 3.45; b.rotation.x = -Math.PI / 2; b.position.y = 0.015;
     g.add(a, b, r);
@@ -186,19 +188,21 @@ function frame(delta) {
       if (lx < -U8_END) hit = pt; else if (lx < -U8_END + 9) close = pt;
     }
   }
-  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`Übergang U1 · U3 · loop het trapgat in`); }
+  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`${close.hint} · loop het trapgat in`); }
   if (!close && !hit) hinted = null;
   // Oude bewegingsbewakers zetten de speler soms een frame terug → niet meteen op 0 zetten, langzaam laten zakken.
   if (hit) lastHit = hit;
   dwell = Math.max(0, dwell + (hit && pushing ? delta : -delta * 0.25));
-  if (dwell > 0.2 && lastHit) { dwell = 0; toU1(lastHit.u1); }
+  if (dwell > 0.2 && lastHit) { dwell = 0; toU1(lastHit.u1, lastHit.api); }
 }
 
-/** Wordt door U1Line aangeroepen zodra de lijn klaar is. */
+/** Wordt door een lijn met overstappunten op U2/U8 (U1, U5) aangeroepen zodra de lijn klaar is. */
 export function installTransfers(g, lineApi) {
+  game = g;
+  if (apis.some(a => a.id === lineApi.id)) return;
+  apis.push(lineApi);
+  buildSigns(points(lineApi), lineApi.sign || U1_SIGN);
   if (status.installed) return;
-  game = g; api = lineApi;
-  buildSigns(points());
   let last = performance.now();
   Tick.frame('LineTransfers', { before: () => { const now = performance.now(); frame(Math.min(0.1, (now - last) / 1000)); last = now; } });
   status.installed = true;
@@ -207,7 +211,8 @@ export function installTransfers(g, lineApi) {
 export const LineTransfers = {
   toLine, choose: id => { const st = Object.values(globalThis.BerlinLines || {}).flatMap(L => L.stations || []).find(s => s.transfer?.options && s.line === id); return st ? fromLine(st) : false; },
   pick: i => { const b = chooser?.querySelector(`button[data-i="${i}"]`); b?.click(); return !!b; },
-  status: () => ({ ...status, busy, chooser: !!chooser, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
+  toU5: i => { const a = apis.find(x => x.id === 'U5'); return a ? toU1(i, a) : false; },
+  status: () => ({ ...status, lines: apis.map(a => a.id), busy, chooser: !!chooser, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
   flags: () => { const p = game.player; return { line: p.__line, street: p.__streetMode, train: !!p.activeTrain, u8a: p.__u8Active, u8area: p.__u8Area, u8: p.__u8FullStation, y: p.position.y, st: p.currentStation?.id }; },
 };
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), Transfers: LineTransfers };

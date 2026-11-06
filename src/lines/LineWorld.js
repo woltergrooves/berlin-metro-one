@@ -211,7 +211,7 @@ function tracks(kit, m, cs, x0, x1) {
 // ── Station ──────────────────────────────────────────────────────────────────────────────────────
 function stationKit(line, st, m) {
   const kit = new Kit(), city = new Kit(), cs = crossSection(st.layout), H = HALF, viaduct = st.kind !== 'tunnel';   // viaduct én ingraving: perronkappen
-  const rodTop = st.profile?.kind === 'vault' ? 6.6 : viaduct ? 3.45 : TUNNEL_TOP;
+  const rodTop = isVault(st) ? 6.6 : viaduct ? 3.45 : TUNNEL_TOP;
   tracks(kit, m, cs, -H, H);
   // Perrons met witte veiligheidslijn en geleidestrook.
   for (const [z0, z1] of cs.plat) {
@@ -283,16 +283,20 @@ function tunnelShell(kit, m, st, cs, x0, x1, isStation) {
     for (const s of [-1, 1]) kit.wallX(wall, x0, x1, RAIL_Y - 0.3, TUNNEL_TOP, s * W, -s);
     const ceil = std('Ceiling', '#ffffff', { map: MaterialBase.station.ceiling({ t: 'flat', c: '#e9e6dc' }), roughness: 0.9 });
     ceil.userData.g3b = 'ceiling';
-    if (st.profile?.kind === 'vault') vault(kit, m, st, W, x0, x1); else kit.flat(ceil, x0, x1, -W, W, TUNNEL_TOP, false, 3);
+    if (isVault(st)) vault(kit, m, st, W, x0, x1); else kit.flat(ceil, x0, x1, -W, W, TUNNEL_TOP, false, 3);
     if (st.profile?.kind === 'park') {   // U4 Rathaus Schöneberg: grote ramen naar het park, aan beide kanten
       const win = std('Line_ParkWindow', '#ffffff', { map: parkWindowTex(), emissive: '#ffffff', emissiveMap: parkWindowTex(), emissiveIntensity: 0.55, roughness: 0.25 });
       for (let x = x0 + 4; x + 6 <= x1 - 4; x += 7) for (const s of [-1, 1]) kit.plane(win, 6.2, 2.5, M4(x + 3, 2.25, s * (W - 0.04), s > 0 ? Math.PI : 0));
+    }
+    if (st.profile?.kind === 'photos') {   // U5 Brandenburger Tor: historische foto's (sepia) tussen de naamborden
+      const ph = std('Line_Photos', '#ffffff', { map: photoWallTex(), roughness: 0.5 });
+      for (const x of [-36, -12, 12, 36]) for (const s of [-1, 1]) kit.plane(ph, 14, 1.9, M4(x, 2.55, s * (W - 0.03), s > 0 ? Math.PI : 0));
     }
     // Wandborden met de naam, naar het spoor (eilandperron) of achter het perron (zijperrons).
     const ws = std('Line_WallSign_' + st.id, '#ffffff', { map: wallSignTex(st.name, st.accent), roughness: 0.4 });
     for (const x of [-24, 0, 24]) for (const s of [-1, 1]) kit.plane(ws, 4.2, 0.82, M4(x, 1.85, s * (W - 0.02), s > 0 ? Math.PI : 0));
     // Zuilen (eilandperron: middenrij), geklonken staal in accentkleur.
-    if (cs.plat.length === 1 && st.profile?.kind !== 'vault') { const col = std('Line_Col_' + st.id, st.accent, { roughness: 0.5, metalness: 0.4 }); for (let x = -HALF + 4.5; x < HALF; x += 9) { kit.box(col, 0.42, TUNNEL_TOP, 0.42, x, TUNNEL_TOP / 2, 0); kit.box(col, 0.9, 0.28, 0.5, x, TUNNEL_TOP - 0.14, 0); } }
+    if (cs.plat.length === 1 && !isVault(st)) { const col = std('Line_Col_' + st.id, st.accent, { roughness: 0.5, metalness: 0.4 }); for (let x = -HALF + 4.5; x < HALF; x += 9) { kit.box(col, 0.42, TUNNEL_TOP, 0.42, x, TUNNEL_TOP / 2, 0); kit.box(col, 0.9, 0.28, 0.5, x, TUNNEL_TOP - 0.14, 0); } }
     // TL-buizen.
     for (let x = x0 + 2; x < x1; x += 4) for (const z of cs.plat.length === 1 ? [-1.8, 1.8] : [-5.2, 5.2]) kit.box(m.lamp, 1.5, 0.06, 0.12, x, TUNNEL_TOP - 0.06, z);
   } else {
@@ -462,13 +466,43 @@ function exitUp(kit, m, st, cs, ez, exitMat) {
   }
   kit.plane(exitMat, 1.6, 0.4, M4(EXIT_X - 3.6, 2.6, ez, -Math.PI / 2));
 }
+const isVault = st => st.profile?.kind === 'vault' || st.profile?.kind === 'stars';
+// U5 Museumsinsel: donkerblauw gewelf met ±6000 lichtpunten (Schinkels sterrenhemel uit 'Die Zauberflöte').
+function starTex() {
+  return tex('stars', () => { const t = canvasTex(1024, 512, (c, w, h) => {
+    c.fillStyle = '#0b1a44'; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 1500; i++) { const r = Math.random() < 0.08 ? 2.4 : 1.2 + Math.random(); c.fillStyle = `rgba(255,${235 + Math.random() * 20 | 0},${190 + Math.random() * 50 | 0},${0.6 + Math.random() * 0.4})`; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, r, 0, Math.PI * 2); c.fill(); }
+  }); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 1); return t; });
+}
+// U5 Brandenburger Tor: fotostrook met sepia-beelden (Tor, Linden, Mauer, 1989) — geschilderd, herkenbaar.
+function photoWallTex() {
+  return tex('photos', () => canvasTex(1024, 140, (c, w, h) => {
+    c.fillStyle = '#2b2620'; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 6; i++) {
+      const x0 = 10 + i * 169, pw = 155, ph = h - 20, y0 = 10;
+      const g = c.createLinearGradient(0, y0, 0, y0 + ph); g.addColorStop(0, '#d9c9a8'); g.addColorStop(1, '#8a7656'); c.fillStyle = g; c.fillRect(x0, y0, pw, ph);
+      c.fillStyle = '#4a3c2a';
+      if (i % 3 === 0) { for (let k = 0; k < 6; k++) c.fillRect(x0 + 20 + k * 22, y0 + 40, 9, ph - 45); c.fillRect(x0 + 12, y0 + 30, pw - 24, 12); c.fillRect(x0 + 60, y0 + 14, 34, 16); }   // het Tor
+      else if (i % 3 === 1) { c.fillRect(x0, y0 + ph - 38, pw, 38); for (let k = 0; k < 9; k++) c.fillRect(x0 + 6 + k * 17, y0 + ph - 58 - (k % 3) * 6, 8, 22); }   // menigte 1989
+      else { for (let k = 0; k < 5; k++) { c.beginPath(); c.arc(x0 + 18 + k * 30, y0 + 50, 16, 0, Math.PI * 2); c.fill(); c.fillRect(x0 + 15 + k * 30, y0 + 60, 6, ph - 60); } }   // Linden
+      c.fillStyle = 'rgba(255,255,255,0.1)'; c.fillRect(x0, y0, pw, 4);
+    }
+  }));
+}
 // U3: Heidelberger Platz — hoog tongewelf boven het perron, ribben, kroonluchters.
 function vault(kit, m, st, W, x0, x1) {
-  const vmat = std('Line_Vault_' + st.id, '#e4d8c0', { map: concreteTex(), roughness: 0.85, side: THREE.DoubleSide });
+  const stars = st.profile?.kind === 'stars';
+  const vmat = stars ? std('Line_Stars', '#ffffff', { map: starTex(), emissive: '#ffffff', emissiveMap: starTex(), emissiveIntensity: 0.9, roughness: 0.9, side: THREE.DoubleSide })
+    : std('Line_Vault_' + st.id, '#e4d8c0', { map: concreteTex(), roughness: 0.85, side: THREE.DoubleSide });
   const rib = std('Line_VaultRib_' + st.id, st.accent, { roughness: 0.7 });
   const SY = 0.62, len = x1 - x0, cx = (x0 + x1) / 2;
   const g = new THREE.CylinderGeometry(W, W, len, 24, 1, true, 0, Math.PI);
   g.rotateZ(Math.PI / 2); g.scale(1, SY, 1); g.translate(cx, TUNNEL_TOP, 0); kit.add(vmat, g);
+  if (stars) {   // geen ribben/kroonluchters; lichtlijnen langs de voet van het gewelf
+    for (const s of [-1, 1]) kit.box(m.lamp, len - 2, 0.08, 0.1, cx, TUNNEL_TOP + 0.05, s * (W - 0.25));
+    for (const xe of [x0, x1]) { const c = new THREE.CircleGeometry(W, 24, 0, Math.PI); c.scale(1, SY, 1); c.rotateY(xe === x0 ? Math.PI / 2 : -Math.PI / 2); c.translate(xe, TUNNEL_TOP, 0); kit.add(vmat, c); }
+    return;
+  }
   for (let x = x0 + 4.5; x < x1; x += 9) { const t = new THREE.TorusGeometry(W - 0.05, 0.16, 6, 20, Math.PI); t.rotateY(Math.PI / 2); t.scale(1, SY, 1); t.translate(x, TUNNEL_TOP, 0); kit.add(rib, t); }
   for (const xe of [x0, x1]) { const c = new THREE.CircleGeometry(W, 24, 0, Math.PI); c.scale(1, SY, 1); c.rotateY(xe === x0 ? Math.PI / 2 : -Math.PI / 2); c.translate(xe, TUNNEL_TOP, 0); kit.add(vmat, c); }
   for (const x of [-18, 0, 18]) {

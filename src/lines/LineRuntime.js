@@ -380,7 +380,7 @@ async function install() {
       if (withTrains) loadTrains();
       for (const t of trains) t.place();
       Tick.frame(ID + 'Line', { before: frame });
-      if (transfers) installTransfers(g, { stations, enter, detach: () => { if (onLine(g.player)) clearLine(g.player); } });
+      if (transfers) installTransfers(g, { id: ID, stations, enter, sign: typeof transfers === 'object' ? transfers : null, detach: () => { if (onLine(g.player)) clearLine(g.player); } });   // U5: transfers = bord voor U2/U8
       restoreLocation();
       status.installed = true;
       console.info(`[Metro] ${ID} ready`);
