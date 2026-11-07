@@ -39,7 +39,7 @@ for (let i = 7; i < 26; i++) {
   check(`station ${i}`, p.line === 'U5' && p.st === i, JSON.stringify(p));
   for (const [y, pt, n] of SHOTS[i] || []) { await page.waitForTimeout(3000); await stand(y, pt); await page.waitForTimeout(1500); await shot(`u5o_${i}_${n}`); }
   if ([17, 18, 19, 25].includes(i)) {
-    const ok = await page.waitForFunction(i => { const s = globalThis.BerlinLines.U5.surroundings(); return s?.built?.includes(globalThis.BerlinLines.U5.stations[i].id) && s.visible; }, i, { timeout: 60000, polling: 500 }).then(() => true).catch(() => false);
+    const ok = await page.waitForFunction(i => { const s = globalThis.BerlinLines.U5.surroundings(); return s?.visible === globalThis.BerlinLines.U5.stations[i].id; }, i, { timeout: 60000, polling: 500 }).then(() => true).catch(() => false);
     check(`OSM-omgeving ${i}`, ok, JSON.stringify(await page.evaluate(() => globalThis.BerlinLines.U5.surroundings())));
     await shot(`u5o_${i}_osm`);
   }

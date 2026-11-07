@@ -272,12 +272,12 @@ function stationKit(line, st, m) {
   if (st.kind === 'tunnel') tunnelShell(kit, m, st, cs, -H, H, true);
   else if (st.kind === 'cutting') cuttingShell(kit, m, st, cs, -H, H, true, city);
   else viaductShell(kit, m, st, cs, -H, H, true, st.elev, st.elev, true, city);
-  if (st.end) {   // U5 Hönow: bovengronds eindpunt — korte kopsporen met stootjukken, straat loopt door
-    tracks(kit, m, cs, H, H + 16);
-    if (st.embank) embankment(kit, m, H, H + 18, cs.wall * 2, st.elev, st.elev);
+  if (st.end) {   // U5 Hönow: bovengronds eindpunt — kopsporen voorbij het perron (keren + aanrijden, CONFIG.train.approachDistance 58 m), stootjukken
+    tracks(kit, m, cs, H, H + 96);
+    if (st.embank) embankment(kit, m, H, H + 98, cs.wall * 2, st.elev, st.elev);
     const red = std('Line_Barrier_Red', '#c8102e', { roughness: 0.5 });
-    for (const tz of cs.tracks) { kit.box(m.steel, 0.5, 1.1, 2.4, H + 15.5, RAIL_Y + 0.55, tz); kit.box(red, 0.12, 0.4, 2.0, H + 15.2, RAIL_Y + 0.95, tz); }
-    street(city, m, st, H, H + 90, st.elev, st.elev);
+    for (const tz of cs.tracks) { kit.box(m.steel, 0.5, 1.1, 2.4, H + 95.5, RAIL_Y + 0.55, tz); kit.box(red, 0.12, 0.4, 2.0, H + 95.2, RAIL_Y + 0.95, tz); }
+    street(city, m, st, H, H + 110, st.elev, st.elev);
   }
   return { kit, city };
 }

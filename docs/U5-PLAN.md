@@ -1,4 +1,19 @@
-# U5 west — Hauptbahnhof ⇄ Alexanderplatz (✅ 7 nov 2026)
+# U5 — Hauptbahnhof ⇄ Hönow (west ✅ 7 nov 2026, oost ✅ 7 nov 2026)
+
+## U5 oost — Schillingstraße ⇄ Hönow (19 stations)
+- `src/data/u5.js` uitgebreid tot 26 stations (x tot 3750, Hönow = eindpunt). Liggingen uit de OSM-wegen van relatie 2227743: tunnel t/m Tierpark; **bovengronds** Biesdorf-Süd, Elsterwerdaer Platz (dijk, 3,5 m), Wuhletal (naast de S5), Hönow; **open ingraving** Kaulsdorf-Nord, Kienberg (Gärten der Welt), Cottbusser Platz, Hellersdorf, Louis-Lewin-Straße.
+- Bovengronds = ligging `viaduct` met `embank: true` → `LineWorld.embankment()` (ballastbed, randbalk, grastaluds, laag hek) i.p.v. stalen dek + pijlers; straat met grasberm i.p.v. middenrijbaan; HUD 'Bovengronds station'.
+- Overgang bovengronds ⇄ ingraving (Wuhletal → Kaulsdorf-Nord, Louis-Lewin-Straße → Hönow): korte tunnel in het midden (`shells()` splitst het tussenstuk met een virtueel tunnelstation).
+- Ingravingen: profiel `{ city: 'platte' }` → Plattenbau-schijven (WBS 70, panelen + loggia's) i.p.v. villa's.
+- Tunnelstations: eigen tegelkleur per 1930-station; profiel `murals` (Magdalenenstraße: gestileerde wandbeelden, Tierpark: dieren).
+- Hönow: kopsporen tot 96 m voorbij het perron (keren/aanrijden) met stootjukken.
+- Echte OSM-omgeving voor de 4 bovengrondse stations (`public/assets/surroundings/u5/`, `osm2pack.py` lijst `U5`; Wuhletal met lokale spoorrichting).
+- Treinen: `trainsPerDir: 3` (nieuwe optie in `createLine`), gelijk verdeeld over de route.
+- Dicht: Frankfurter Allee (Ring), Lichtenberg (S5/S7/S75), Wuhletal (S5). 19 nieuwe buurtpakketten.
+- Test: `tools/consolidation/u5o-test.mjs <url> <map>` (env `NORIDE=1`) → stations 19/19, OSM-omgeving 4/4, 6 treinen + DFI, meerijden Tierpark → Biesdorf-Süd (tunnelmond), uitgang Hönow → Street View (8 plekken).
+- Bekend: Tierpark-wand gebruikt emoji-dieren (iOS toont Apple-emoji); maaiveld boven de tunnelmond bij Biesdorf-Süd stijgt tot tunnelhoogte; geen OSM-omgeving boven de ingravingen (procedurele Plattenbau).
+
+## U5 west
 
 Eerste deel van Mijlpaal 3. 7 stations, volledig ondergronds. Bron: OSM-relatie 2227743 (U Hauptbahnhof ⇒ U Hönow).
 
