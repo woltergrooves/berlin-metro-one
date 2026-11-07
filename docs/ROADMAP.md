@@ -1,6 +1,6 @@
 🚇 BERLIN LIFE — ROADMAP 3.0
 
-Bijgewerkt: 28 oktober 2026
+Bijgewerkt: 7 november 2026
 
 Hoofddoel: Eerst een groot, authentiek en leuk te verkennen Berlijn bouwen. Daarna die wereld steeds levendiger maken met economie, personages, banen, verhalen en keuzes die echte gevolgen hebben.
 
@@ -58,7 +58,9 @@ HOOFDSTUK 2 — BERLIJN UITBREIDEN
 
 Dit krijgt nu de hoogste ontwikkelprioriteit.
 
-⬜ Fase 43 — U1 en U3
+Stand 7 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie) en U8. Bezig: U7a (Rudow ⇄ Möckernbrücke).
+
+✅ Fase 43 — U1 en U3 (U1 30 okt, U3 31 okt 2026; U4 als extra 1 nov)
 
 Eerst U1, daarna U3.
 
@@ -79,22 +81,22 @@ U3:
 
 Doel: Het bestaande netwerk voor het eerst substantieel uitbreiden.
 
-⬜ Fase 44 — U5, U6 en U7
+🟡 Fase 44 — U5, U6 en U7 (U5 ✅ 7 nov, U6 ✅ 7 nov, U7 bezig)
 
-U5
+U5 — ✅ volledig Hauptbahnhof ⇄ Hönow (26 stations, bovengronds oost met echte omgeving).
 
 * Alexanderplatz → Hauptbahnhof als eerste traject.
 * Museumsinsel, Unter den Linden, Brandenburger Tor.
 * Historische ontdekkingen en locaties.
 * Daarna uitbreiding naar het volledige tracé.
 
-U6
+U6 — ✅ Alt-Mariendorf ⇄ Kurt-Schumacher-Platz (24 stations). Noordstuk tot Alt-Tegel volgt na de echte heropening (zomer 2027).
 
 * Overstappen bij Stadtmitte.
 * Friedrichstraße, Checkpoint Charlie en Tempelhof.
 * Noord-zuidverbinding door de stad.
 
-U7
+U7 — 🟡 in twee helften: U7a Rudow ⇄ Möckernbrücke (17 stations, overstap U8 Hermannplatz, U6 Mehringdamm, U1/U3 Möckernbrücke) — bezig; U7b Yorckstraße ⇄ Rathaus Spandau (23 stations, overstap U4, U3, U2).
 
 * Overstappen op bestaande lijnen, waaronder Bismarckstraße en Hermannplatz.
 * Lange, herkenbare route door verschillende stadsdelen.
@@ -111,7 +113,7 @@ Iedere lijn wordt afzonderlijk gebouwd en getest.
 * Trams met herkenbare bovengrondse routes.
 * Bus 200 behouden en verder verbeteren.
 
-🟡 Fase 46 — Berlin Graphics & Audio Upgrade — ⏭️ EERSTVOLGENDE STAP (graphics-deel vóór U1)
+🟡 Fase 46 — Berlin Graphics & Audio Upgrade — graphics-deel ✅ (G1–G4), audio nog open
 
 * Meer authentieke stationsdetails.
 * Betere belichting, textures en materialen.
@@ -533,41 +535,41 @@ Samen reizen, werken en leven in verschillende steden.
 
 DE CONCRETE VOLGENDE MIJLPALEN
 
-Mijlpaal 0 — Graphics-upgrade (Fase 46, graphics-deel) ⏭️ NU
+Mijlpaal 0 — Graphics-upgrade (Fase 46, graphics-deel) ✅ G1–G4 (audio nog open)
 
 Berlin Life moet er minstens zo goed uitzien als Gods Are Made Not Born, met behoud van alle BVG-elementen (gele treinen, U2-rood en U8-blauw, stationstegels, borden, perronindeling). Eerst nu, zodat U1 en latere lijnen direct op de nieuwe grafische basis gebouwd worden.
 
-* G1 — Prestaties: dure frame-hooks lichter maken (Phase910V1, Phase1315V1, Phase125TexturesV2, GfxV3), zodat er ruimte is op iPhone/iPad.
-* G2 — Rendering-basis: tone mapping, kleurruimte, belichting, schaduw/ambient occlusion, mist en één centrale kwaliteitsinstelling voor iPhone/iPad.
-* G3 — Stations en treinen: materialen en textures.
+* G1 — Prestaties: dure frame-hooks lichter maken (Phase910V1, Phase1315V1, Phase125TexturesV2, GfxV3), zodat er ruimte is op iPhone/iPad. ✅
+* G2 — Rendering-basis: tone mapping, kleurruimte, belichting, schaduw/ambient occlusion, mist en één centrale kwaliteitsinstelling voor iPhone/iPad. ✅
+* G3 — Stations en treinen: materialen en textures. ✅
 * G4 — Straat en buiten. ✅ (29 okt 2026) 3D-omgeving bij de zeven buitenstations uit OpenStreetMap (© OpenStreetMap-bijdragers): gebouwen met Berlijnse gevels en 's avonds verlichte ramen, wegen, parken, bomen, eigen viaduct; U1-bovenhal Gleisdreieck, koepel Nollendorfplatz, Fernsehturm en Olympiastadion in de verte. Laadt alleen bij het station (`src/state/Surroundings.js`, pakketten in `public/assets/surroundings/`).
 
 Elke stap apart als preview, met vóór/na-screenshots. Audio (BVG-geluiden, aankondigingen) volgt later binnen Fase 46.
 
-Mijlpaal 1 — U1 volledig bouwen
+Mijlpaal 1 — U1 volledig bouwen ✅ (30 okt 2026)
 
 De eerstvolgende grote gameplay-uitbreiding.
 
 Een volledige U1 met stations, treinen, overstappen, Blender-modellen, Street View en ontdekkingen.
 
 Opgeknipt in vijf stappen (zie `docs/U1-PLAN.md`):
-* U1a — Lijnwereld + alle 13 stations begaanbaar (GOD-menu). 🟡 (29 okt 2026, in test)
-* U1b — Treinen in beide richtingen, instappen en meerijden.
-* U1c — Overstappen Wittenbergplatz, Nollendorfplatz, Gleisdreieck (U2) en Kottbusser Tor (U8).
-* U1d — Echte omgeving langs het viaduct (OSM), Oberbaumbrücke/Spree, stationsprofielen.
-* U1e — Uitgangen + Street View, ontdekkingen, ticketautomaat.
+* U1a — Lijnwereld + alle 13 stations begaanbaar (GOD-menu). ✅
+* U1b — Treinen in beide richtingen, instappen en meerijden. ✅
+* U1c — Overstappen Wittenbergplatz, Nollendorfplatz, Gleisdreieck (U2) en Kottbusser Tor (U8). ✅
+* U1d — Echte omgeving langs het viaduct (OSM), Oberbaumbrücke/Spree, stationsprofielen. ✅
+* U1e — Uitgangen + Street View, ontdekkingen, ticketautomaat. ✅
 
 Pas na een succesvolle test doorgaan.
 
-Mijlpaal 2 — U3 toevoegen
+Mijlpaal 2 — U3 toevoegen ✅ (31 okt 2026: U3a eigen tak, U3b treinen, U3c overstappen). Daarna U4 ✅ (1 nov).
 
 De U3 laten aansluiten op het bestaande netwerk en het gedeelde U1/U3-traject correct implementeren.
 
-Mijlpaal 3 — U5 uitbreiden
+Mijlpaal 3 — U5 uitbreiden ✅ (7 nov 2026: west en oost, Hauptbahnhof ⇄ Hönow)
 
 Begin bij Alexanderplatz richting Hauptbahnhof, met historische haltes zoals Museumsinsel en Brandenburger Tor. Daarna verdere uitbreiding.
 
-Mijlpaal 4 — U6 en U7
+Mijlpaal 4 — U6 en U7 🟡 ⏭️ NU — U6 ✅ (7 nov); U7a Rudow ⇄ Möckernbrücke bezig, daarna U7b Yorckstraße ⇄ Rathaus Spandau. Daarna U9.
 
 Nieuwe stadsdelen en belangrijke overstapstations speelbaar maken.
 

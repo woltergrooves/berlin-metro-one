@@ -61,7 +61,7 @@ const RAW = [
 //   S-Bahn, U7 en U9 bestaan nog niet in het spel → trapgat met echt bord, maar afgesloten (zoals U3c/U4/U5).
 export const U6_TRANSFERS = {
   tempelhof: { line: 'S', label: 'S41 S42 S45 S46', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
-  mehringdamm: { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', closed: true },
+  mehringdamm: { line: 'U7', color: '#528dba', station: 'mehringdamm', towards: 'Rathaus Spandau · Rudow' },
   'hallesches-tor': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'hallesches-tor', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
   stadtmitte: { line: 'U2', color: '#da421e', station: 'stadtmitte', towards: 'Pankow · Ruhleben' },
   'unter-den-linden': { line: 'U5', color: '#7e5330', station: 'unter-den-linden', towards: 'Hauptbahnhof · Hönow' },

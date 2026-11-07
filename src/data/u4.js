@@ -41,7 +41,7 @@ export const U4_TRANSFERS = {
       { line: 'U2', station: 'nollendorfplatz', name: 'U2', sub: 'Pankow · Ruhleben', color: '#da421e' },
     ],
   },
-  'bayerischer-platz': { line: 'U7', color: '#3690c0', towards: 'Rathaus Spandau · Rudow', closed: true },
+  'bayerischer-platz': { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', closed: true },
   'innsbrucker-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
 };
 

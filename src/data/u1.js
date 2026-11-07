@@ -55,6 +55,8 @@ export const U1_TRANSFERS = {
   'kottbusser-tor': { line: 'U8', color: '#224f86', towards: 'Wittenau · Hermannstraße', station: 18 },
   // Mijlpaal 4: Hallesches Tor → het U6-perron (onder het viaduct).
   'hallesches-tor': { line: 'U6', color: '#8c6dab', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf', station: 'hallesches-tor' },
+  // U7a: Möckernbrücke → het U7-perron (onder het viaduct).
+  moeckernbruecke: { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', station: 'moeckernbruecke' },
 };
 
 // U1d — stationsprofielen op het viaduct (herkenbaar, niet 1:1). Zonder profiel: perronkappen in de accentkleur.
