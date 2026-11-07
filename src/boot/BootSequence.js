@@ -106,7 +106,8 @@ import('../systems/U8TunnelDetailV1.js').catch(log('U8 tunnel detail'));
 import('../lines/U1Line.js').catch(log('U1'));
 import('../lines/U3Line.js').catch(log('U3'));
 import('../lines/U4Line.js').catch(log('U4'));     // U4: Nollendorfplatz ⇄ Innsbrucker Platz
-import('../lines/U5Line.js').catch(log('U5'));     // U5 west: Hauptbahnhof ⇄ Alexanderplatz (Mijlpaal 3)
+import('../lines/U5Line.js').catch(log('U5'));     // U5: Hauptbahnhof ⇄ Hönow (Mijlpaal 3)
+import('../lines/U6Line.js').catch(log('U6'));     // U6: Alt-Mariendorf ⇄ Kurt-Schumacher-Platz (Mijlpaal 4)
 
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────
 await import('../systems/StreetCoreClean.js').catch(log('all-station Street View V4.1'));

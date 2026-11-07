@@ -253,7 +253,7 @@ function stationKit(line, st, m) {
   }
   // Overstap (U1c): trapgat aan de andere kant, borden aan beide uiteinden. Erin lopen = overstappen.
   if (st.transfer) {
-    const xm = std('Line_Transfer_' + st.transfer.line, '#ffffff', { map: transferSignTex(st.transfer), roughness: 0.6 });
+    const xm = std('Line_Transfer_' + st.line + '_' + st.id, '#ffffff', { map: transferSignTex(st.transfer), roughness: 0.6 });
     kit.box(m.dark, 6, 0.02, 1.9, TRANSFER_X, 0.021, ez);
     for (const s of [-1, 1]) kit.box(m.steel, 6, 1.05, 0.06, TRANSFER_X, 0.52, ez + s * 1.0);
     for (const s of [-1, 1]) {
@@ -603,6 +603,39 @@ function muralTex(style) {
       const ani = ['🦒', '🐘', '🦓', '🐻', '🦩', '🐪', '🦁', '🐧'];
       c.font = '92px serif'; c.textBaseline = 'middle'; c.textAlign = 'center';
       ani.forEach((a, i) => { c.fillStyle = ['#c48a3a', '#7d8a6a', '#3a3a3a', '#7a5230'][i % 4]; c.fillRect(i * 128 + 8, 132, 112, 10); c.fillText(a, i * 128 + 64, 78); });
+      return;
+    }
+    if (style === 'checkpoint') {   // U6 Kochstraße: grensovergang Checkpoint Charlie — zwart-wit panelen, sectorbord, muur
+      c.fillStyle = '#1d1d1b'; c.fillRect(0, 0, w, h);
+      for (let i = 0; i < 4; i++) {
+        const x0 = 8 + i * 254, pw = 240, y0 = 8, ph = h - 16;
+        c.fillStyle = '#d8d6cf'; c.fillRect(x0, y0, pw, ph);
+        c.fillStyle = '#3a3a38';
+        if (i % 2 === 0) {   // wachthuisje met zandzakken en het grote sectorbord
+          c.fillRect(x0 + 90, y0 + 70, 60, 60); c.fillStyle = '#d8d6cf'; c.fillRect(x0 + 100, y0 + 82, 40, 22);
+          c.fillStyle = '#3a3a38'; c.fillRect(x0 + 84, y0 + 62, 72, 10); for (let k = 0; k < 6; k++) c.fillRect(x0 + 80 + k * 14, y0 + 128, 12, 8);
+          c.fillStyle = '#f2f0e8'; c.fillRect(x0 + 12, y0 + 10, pw - 24, 44); c.strokeStyle = '#3a3a38'; c.lineWidth = 3; c.strokeRect(x0 + 12, y0 + 10, pw - 24, 44);
+          c.fillStyle = '#1d1d1b'; c.font = '700 13px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText('YOU ARE LEAVING', x0 + pw / 2, y0 + 23); c.fillText('THE AMERICAN SECTOR', x0 + pw / 2, y0 + 41);
+        } else {             // de muur met wachttoren en prikkeldraad
+          c.fillRect(x0, y0 + ph - 60, pw, 60); c.fillStyle = '#8a8a86'; for (let k = 0; k < 8; k++) c.fillRect(x0 + k * 30, y0 + ph - 58, 2, 56);
+          c.fillStyle = '#3a3a38'; c.fillRect(x0 + 170, y0 + 18, 14, ph - 78); c.fillRect(x0 + 158, y0 + 10, 38, 22);
+          c.strokeStyle = '#3a3a38'; c.lineWidth = 1.5; c.beginPath(); for (let k = 0; k < 24; k++) { c.moveTo(x0 + k * 10, y0 + ph - 66); c.lineTo(x0 + k * 10 + 6, y0 + ph - 60); } c.stroke();
+        }
+      }
+      c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(0, 0, w, 6);
+      return;
+    }
+    if (style === 'luftbruecke') {   // U6 Platz der Luftbrücke: "Rosinenbomber" boven Tempelhof (1948/49)
+      const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#6f97b8'); g.addColorStop(1, '#c9d9e3'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#7a7f84'; c.fillRect(0, h - 26, w, 26);                                   // het vliegveld
+      c.fillStyle = '#5a5e62'; c.fillRect(260, h - 50, 500, 26); for (let k = 0; k < 20; k++) c.fillRect(270 + k * 25, h - 58, 12, 8);   // het hangargebouw
+      c.fillStyle = '#2d3135';
+      for (let i = 0; i < 7; i++) {   // vliegtuigen in een rij, in landing
+        const x = 60 + i * 140, y = 34 + (i % 3) * 14 + i * 4;
+        c.fillRect(x, y, 70, 9); c.fillRect(x + 26, y - 14, 12, 37); c.fillRect(x - 2, y - 7, 8, 14);
+        for (const dz of [-9, 9]) c.fillRect(x + 22, y + 4 + dz, 6, 4);
+      }
       return;
     }
     const g = c.createLinearGradient(0, 0, w, 0); g.addColorStop(0, '#2f4a6a'); g.addColorStop(0.5, '#7a4a3a'); g.addColorStop(1, '#3f6a4a');
