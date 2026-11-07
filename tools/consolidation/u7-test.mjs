@@ -92,7 +92,7 @@ ok = await walkUntil(() => !globalThis.__berlinMetroGame.player.__line);
 const u8 = await page.evaluate(() => globalThis.BerlinLines.Transfers.flags());
 check('U7 → U8 Hermannplatz', ok && u8.u8 === 20, JSON.stringify(u8));
 await stand(1.57, 0); await page.waitForTimeout(1500); await shot('u8_hermannplatz_bord_u7');
-ok = await walkUntil(() => globalThis.__berlinMetroGame.player.__line === 'U7', -1.57);
+ok = await walkUntil(() => globalThis.__berlinMetroGame.player.__line === 'U7', 1.57);   // westeinde = +yaw
 p = await pos();
 check('U8 Hermannplatz → U7 (blauw bord)', ok && p.st === 12, JSON.stringify(p));
 
