@@ -61,10 +61,29 @@ const S_TRANSFERS = {
 // Overstap naar een bestaande U-lijn: eigen tekst in de hint (de lijn bestaat al, alleen de doorgang nog niet).
 for (const t of Object.values(S_TRANSFERS)) if (t.line !== 'S') { t.note = 'overstap opent binnenkort'; t.label = [t, ...(t.also || [])].map(b => b.line).join(' · '); }
 
+// Uitgang naar Street View (fix 8 nov): de haltecoördinaten liggen op het viaduct; daar vindt Google geen straat of juist
+// perron-/hal-panorama's. Daarom per station een vast straatpunt (Google-straatpanorama met adres en ≥ 2 looprichtingen).
+const S_EXITS = {
+  westkreuz: [52.5007742, 13.2812438],          // Halenseestraße
+  charlottenburg: [52.5046115, 13.3058661],     // Gervinusstraße
+  savignyplatz: [52.5050615, 13.3199685],       // Bleibtreustraße
+  'zoologischer-garten': [52.5064590, 13.3325022], // Hardenbergplatz
+  tiergarten: [52.5142942, 13.3361273],         // Bachstraße
+  bellevue: [52.5202323, 13.3473335],           // Bartningallee
+  hauptbahnhof: [52.5241512, 13.3687702],       // Washingtonplatz
+  friedrichstrasse: [52.5197916, 13.3871268],   // Georgenstraße
+  'hackescher-markt': [52.5223470, 13.4026090], // Henriette-Herz-Platz
+  alexanderplatz: [52.5218452, 13.4113556],     // Dircksenstraße
+  jannowitzbruecke: [52.5148029, 13.4201183],   // Holzmarktstraße
+  ostbahnhof: [52.5106636, 13.4322449],         // Koppenstraße
+  'warschauer-strasse': [52.5050586, 13.4503490], // Rudolfstraße
+  ostkreuz: [52.5028862, 13.4700329],           // Kynaststraße
+};
+
 /** Stations van de Stadtbahnwereld. */
 export const S5_STATIONS = RAW.map(([id, name, lat, lon, elev, transfers, accent, profile], index) => ({
   line: 'S5', id, name, index, lat, lon, kind: 'viaduct', arches: true, layout: 'island', realLayout: 'island', elev, transfers,
-  wall: '#7a3b2e', accent: '#' + accent, transfer: S_TRANSFERS[id] || null,
+  wall: '#7a3b2e', accent: '#' + accent, transfer: S_TRANSFERS[id] || null, exit: S_EXITS[id] ? { lat: S_EXITS[id][0], lon: S_EXITS[id][1] } : null,
   profile: profile && profile.hall ? profile : null, fern: !!profile?.fern, bridge: null, surroundings: null,
   x: S5_LINE.origin.x + index * S5_LINE.spacing,
 }));

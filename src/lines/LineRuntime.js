@@ -153,7 +153,9 @@ function move(p, delta) {
 function toStreet(st) {
   const ov = game.__allStreetOverlay; if (!ov?.open || game.player.__streetMode) return;
   status.exits = (status.exits || 0) + 1;
-  ov.open({ line: line.id, name: st.name, returnKind: 'line', lineId: line.id, stationIndex: st.index, lat: st.lat, lng: st.lon, heading: 0,
+  const ex = st.exit, lat = ex?.lat ?? st.lat, lng = ex?.lon ?? st.lon;   // eigen straatpunt (S-Bahn: halte ligt op het viaduct)
+  const heading = ex ? (Math.atan2((st.lon - lng) * Math.cos(lat * Math.PI / 180), st.lat - lat) * 180 / Math.PI + 360) % 360 : 0;   // kijk naar het station
+  ov.open({ line: line.id, name: st.name, returnKind: 'line', lineId: line.id, stationIndex: st.index, lat, lng, heading,
     onReturn: () => { enter(st.index, { at: 'exit' }); status.returns = (status.returns || 0) + 1; } });
 }
 

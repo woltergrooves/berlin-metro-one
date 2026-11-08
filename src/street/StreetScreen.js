@@ -380,16 +380,19 @@ function walkTo(i) {
   notify(`${min} min gelopen · ${p.name}`);
   renderHud();
 }
+// Ingang = het straatpunt waar je naar buiten kwam (S-Bahn: eigen straatpunt), anders de halte uit het buurtpakket.
+const homeLat = () => Number.isFinite(ctx?.lat) ? ctx.lat : pack.lat;
+const homeLon = () => Number.isFinite(ctx?.lng) ? ctx.lng : pack.lon;
 function goHome() {
   if (!here || !pack) return;
   const min = walkMin(dist(here, { x: 0, y: 0 })); passTime(min);
   here = { x: 0, y: 0, place: -1 };
-  showAt(pack.lat, pack.lon, 0);
+  showAt(homeLat(), homeLon(), ctx?.heading || 0);
   notify(`Terug bij de ingang van ${ctx?.name}`); renderHud(); openList();
 }
 function nudge() {
   // Ander standpunt: kleine stap rond de huidige plek (Google kiest het dichtstbijzijnde panorama).
-  const base = here?.place >= 0 ? pack.places[here.place] : pack ? { lat: pack.lat, lon: pack.lon } : null;
+  const base = here?.place >= 0 ? pack.places[here.place] : pack ? { lat: homeLat(), lon: homeLon() } : null;
   if (!base) return;
   const n = (nudge.n = ((nudge.n || 0) + 1) % 6), a = n * Math.PI / 3, r = 28;
   const cur = globalThis.BerlinStreetView2?.getPanorama?.()?.getPano?.() || null;   // altijd een ánder, loopbaar panorama

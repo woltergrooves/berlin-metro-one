@@ -7,8 +7,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // StreetViewService een Google-panorama (bron GOOGLE, buiten) mét looprichtingen zoeken, in steeds grotere straal.
 const svStats={lookups:0,rejected:0,fallbacks:0,fixes:0,last:null};
 let placing=0;
+// Voorkeur voor een panorama met adres ("8 Bleibtreustraße, Berlin"); alleen "Berlin"/"Google" = vaak perron of hal.
+const addressLike=d=>/,/.test(d||'');
 async function findOutdoor(maps,lat,lng,exclude){
   const svc=new maps.StreetViewService(),SV=maps.StreetViewSource||{},PREF=maps.StreetViewPreference||{};
+  let weak=null;
   for(const radius of [40,80,160,320]){
     svStats.lookups++;
     let r=null;
@@ -16,9 +19,10 @@ async function findOutdoor(maps,lat,lng,exclude){
     const d=r?.data,id=d?.location?.pano;
     if(!id)continue;
     if(id===exclude||!(d.links?.length)){svStats.rejected++;continue}
+    if(!addressLike(d.location.description)){svStats.rejected++;weak=weak||{id,latLng:d.location.latLng};continue}
     return{id,latLng:d.location.latLng};
   }
-  return null;
+  return weak;
 }
 async function placeOutdoor(lat,lng,heading=0,opts={}){
   if(!pano)return false;
