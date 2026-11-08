@@ -104,7 +104,7 @@ U7 — ✅ volledig Rudow ⇄ Rathaus Spandau (40 stations): U7a Rudow ⇄ Möck
 
 Iedere lijn wordt afzonderlijk gebouwd en getest.
 
-⬜ Fase 45 — Tram en S-Bahn
+🟡 Fase 45 — Tram en S-Bahn (S-Bahn Stadtbahn deel a ✅ 8 nov: Westkreuz ⇄ Ostkreuz begaanbaar, treinen volgen)
 
 * Selectieve uitbreiding van het OV-netwerk.
 * Realistische overstappen.
