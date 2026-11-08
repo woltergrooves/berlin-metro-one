@@ -145,6 +145,7 @@ import('../systems/HomeUpgradesV1.js').catch(log('Home upgrades V1'));
 import('../systems/Phase16UXFixV1.js').catch(log('Phase16 UX fix'));
 import('../systems/Contacts.js').catch(log('Contacts'));
 import('../systems/Phone.js').catch(log('Phone'));
+import('../systems/PhoneSkin.js').catch(log('PhoneSkin'));   // telefoon als echte smartphone (8 nov 2026)
 import('../systems/Phase16StabilityV2.js').catch(log('Phase16 stability V2'));
 console.info('[Metro] Stable Street View rollback loaded');
 
