@@ -67,7 +67,7 @@ export const U6_TRANSFERS = {
   'unter-den-linden': { line: 'U5', color: '#7e5330', station: 'unter-den-linden', towards: 'Hauptbahnhof · Hönow' },
   friedrichstrasse: { line: 'S', label: 'S1 S2 S25 S26 · S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Nord-Süd-Tunnel', closed: true },
   wedding: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn', closed: true },
-  leopoldplatz: { line: 'U9', color: '#f3791d', towards: 'Osloer Str. · Rathaus Steglitz', closed: true },
+  leopoldplatz: { line: 'U9', color: '#f3791d', station: 'leopoldplatz', towards: 'Osloer Str. · Rathaus Steglitz' },
 };
 
 // Bord op het U2-perron Stadtmitte (terug naar de U6), zie LineTransfers.

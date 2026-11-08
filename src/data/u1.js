@@ -57,6 +57,8 @@ export const U1_TRANSFERS = {
   'hallesches-tor': { line: 'U6', color: '#8c6dab', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf', station: 'hallesches-tor' },
   // U7a: Möckernbrücke → het U7-perron (onder het viaduct).
   moeckernbruecke: { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', station: 'moeckernbruecke' },
+  // U9 (8 nov 2026): Kurfürstendamm → het U9-perron.
+  kurfuerstendamm: { line: 'U9', color: '#f3791d', towards: 'Osloer Str. · Rathaus Steglitz', station: 'kurfuerstendamm' },
 };
 
 // U1d — stationsprofielen op het viaduct (herkenbaar, niet 1:1). Zonder profiel: perronkappen in de accentkleur.

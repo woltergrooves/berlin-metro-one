@@ -109,6 +109,7 @@ import('../lines/U4Line.js').catch(log('U4'));     // U4: Nollendorfplatz ⇄ In
 import('../lines/U5Line.js').catch(log('U5'));     // U5: Hauptbahnhof ⇄ Hönow (Mijlpaal 3)
 import('../lines/U6Line.js').catch(log('U6'));     // U6: Alt-Mariendorf ⇄ Kurt-Schumacher-Platz (Mijlpaal 4)
 import('../lines/U7Line.js').catch(log('U7'));     // U7: Rudow ⇄ Rathaus Spandau (Mijlpaal 4)
+import('../lines/U9Line.js').catch(log('U9'));     // U9: Osloer Straße ⇄ Rathaus Steglitz
 
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────
 await import('../systems/StreetCoreClean.js').catch(log('all-station Street View V4.1'));

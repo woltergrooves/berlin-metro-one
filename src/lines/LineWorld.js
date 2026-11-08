@@ -660,6 +660,40 @@ function muralTex(style) {
       }
       return;
     }
+    if (style === 'westhafen') {   // U9 Westhafen: de haven met kranen, pakhuis en vrachtschepen
+      const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#9fb9cf'); g.addColorStop(0.62, '#d6e2ea'); g.addColorStop(0.63, '#3d5f7a'); g.addColorStop(1, '#22394d');
+      c.fillStyle = g; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#8a4a32'; c.fillRect(380, 40, 300, 60); for (let k = 0; k < 14; k++) { c.fillStyle = '#e6d39a'; c.fillRect(392 + k * 20, 52, 10, 14); c.fillRect(392 + k * 20, 76, 10, 14); }
+      c.fillStyle = '#5a3424'; c.fillRect(500, 18, 60, 24);                                            // klokkentoren pakhuis
+      c.strokeStyle = '#1f3a5a'; c.lineWidth = 6;
+      for (const x of [80, 240, 760, 920]) { c.beginPath(); c.moveTo(x, 100); c.lineTo(x, 22); c.lineTo(x + 70, 22); c.moveTo(x, 40); c.lineTo(x + 46, 22); c.stroke(); c.fillStyle = '#1f3a5a'; c.fillRect(x + 64, 22, 4, 30); }
+      for (let i = 0; i < 3; i++) { const x = 40 + i * 340; c.fillStyle = ['#b8473a', '#2f5a3a', '#3a3a3a'][i]; c.fillRect(x, 108, 230, 22); c.fillStyle = '#e8e2d0'; c.fillRect(x + 170, 92, 40, 16); }
+      c.fillStyle = 'rgba(255,255,255,0.25)'; for (let i = 0; i < 30; i++) c.fillRect((i * 71) % w, 136 + (i * 13) % 18, 26, 2);
+      return;
+    }
+    if (style === 'hansa') {   // U9 Hansaplatz: Hansaviertel / Interbau 1957 — kleurige mozaïekvlakken en hoogbouw
+      c.fillStyle = '#ece6d6'; c.fillRect(0, 0, w, h);
+      const col = ['#d8432f', '#f2b52a', '#2b6cb0', '#2f8a5a', '#1d1d1b', '#e8e2d0'];
+      for (let y = 0; y < h; y += 20) for (let x = 0; x < w; x += 20) { const k = ((x * 7 + y * 13) / 20 | 0) % 11; if (k < 6) { c.fillStyle = col[k]; c.fillRect(x + 1, y + 1, 18, 18); } }
+      for (let i = 0; i < 6; i++) { const x = 30 + i * 170; c.fillStyle = '#f5f2ea'; c.fillRect(x, 20, 70, 120); c.fillStyle = '#5a6a7a'; for (let r = 0; r < 9; r++) for (let k = 0; k < 4; k++) c.fillRect(x + 6 + k * 16, 26 + r * 12, 10, 7); }
+      return;
+    }
+    if (style === 'zoo') {   // U9 Zoologischer Garten: het Elefantentor en dieren
+      c.fillStyle = '#e9dfc6'; c.fillRect(0, 0, w, h);
+      for (let i = 0; i < 2; i++) {
+        const x = 120 + i * 560;
+        c.fillStyle = '#b8473a'; c.beginPath(); c.moveTo(x - 20, 40); c.lineTo(x + 100, 8); c.lineTo(x + 220, 40); c.fill();   // pagodedak
+        c.fillStyle = '#2f5a3a'; c.fillRect(x - 6, 40, 212, 10);
+        c.fillStyle = '#c9b08a'; c.fillRect(x + 20, 50, 30, 80); c.fillRect(x + 150, 50, 30, 80);                              // pijlers
+        c.fillStyle = '#3a2a22'; c.fillRect(x + 60, 70, 80, 60);
+        c.fillStyle = '#9a9a92';                                                                                                // stenen olifanten
+        for (const ex of [x - 30, x + 190]) { c.fillRect(ex, 104, 54, 30); c.fillRect(ex + (ex < x ? 44 : -10), 92, 20, 22); c.fillRect(ex + (ex < x ? 58 : -16), 104, 6, 26); for (let k = 0; k < 4; k++) c.fillRect(ex + 4 + k * 13, 134, 8, 14); }
+      }
+      c.font = '64px serif'; c.textBaseline = 'middle'; c.textAlign = 'center';
+      ['🐼', '🦍', '🦛', '🦒'].forEach((a, i) => c.fillText(a, [430, 520, 960, 1010][i] - (i > 1 ? 40 : 0), 92));
+      c.fillStyle = '#2f5a3a'; c.fillRect(0, h - 10, w, 10);
+      return;
+    }
     if (style === 'luftbruecke') {   // U6 Platz der Luftbrücke: "Rosinenbomber" boven Tempelhof (1948/49)
       const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#6f97b8'); g.addColorStop(1, '#c9d9e3'); c.fillStyle = g; c.fillRect(0, 0, w, h);
       c.fillStyle = '#7a7f84'; c.fillRect(0, h - 26, w, 26);                                   // het vliegveld

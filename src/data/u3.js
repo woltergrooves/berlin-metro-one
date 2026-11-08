@@ -55,7 +55,7 @@ const RAW = [
 export const U3_TRANSFERS = {
   'heidelberger-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
   'fehrbelliner-platz': { line: 'U7', color: '#528dba', station: 'fehrbelliner-platz', towards: 'Rathaus Spandau · Rudow' },
-  spichernstrasse:      { line: 'U9', color: '#ff7300', towards: 'Osloer Straße · Rathaus Steglitz', closed: true },
+  spichernstrasse:      { line: 'U9', color: '#f3791d', station: 'spichernstrasse', towards: 'Osloer Straße · Rathaus Steglitz' },
 };
 
 export const U3_PROFILES = Object.fromEntries(RAW.filter(r => r[9]).map(r => [r[0], { kind: r[9] }]));
