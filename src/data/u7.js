@@ -88,7 +88,7 @@ export const U7_TRANSFERS = {
   'bayerischer-platz': { line: 'U4', color: '#ffd900', text: '#1a1a1a', station: 'bayerischer-platz', towards: 'Nollendorfplatz · Innsbrucker Platz' },
   'berliner-strasse': { line: 'U9', color: '#f3791d', station: 'berliner-strasse', towards: 'Osloer Straße · Rathaus Steglitz' },
   'fehrbelliner-platz': { line: 'U3', color: '#16683d', station: 'fehrbelliner-platz', towards: 'Warschauer Str. · Krumme Lanke' },
-  'wilmersdorfer-strasse': { line: 'S', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · S3 S5 S7 S9', closed: true },
+  'wilmersdorfer-strasse': { line: 'S', to: 'S5', station: 'charlottenburg', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · S Charlottenburg' },   // open sinds S-Bahn deel c
   bismarckstrasse: { line: 'U2', color: '#da421e', station: 'bismarckstrasse', towards: 'Pankow · Ruhleben' },
   jungfernheide: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
   'rathaus-spandau': { line: 'S', label: 'S3 S9', color: '#008d4f', towards: 'Stadtbahn · S3 S9 · Regionalverkehr', closed: true },

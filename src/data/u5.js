@@ -70,18 +70,19 @@ export const U5_SURROUNDINGS = { 'biesdorf-sued': {}, 'elsterwerdaer-platz': {},
 // staat aan het −z-einde een bruin U5-bord (LineTransfers) → terug naar de U5.
 // S-Bahn en U6 bestaan nog niet in het spel → trapgat met echt bord, maar afgesloten (zoals U3c/U4).
 export const U5_TRANSFERS = {
-  hauptbahnhof: { line: 'S', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Fernbahn', closed: true },
+  hauptbahnhof: { line: 'S', to: 'S5', station: 'hauptbahnhof', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Westkreuz · Ostkreuz' },   // open sinds S-Bahn deel c
   'brandenburger-tor': { line: 'S', label: 'S1 S2 S25 S26', color: '#008d4f', towards: 'Oranienburg · Wannsee · Blankenfelde', closed: true },
   'unter-den-linden': { line: 'U6', color: '#8c6dab', station: 'unter-den-linden', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },   // U6: open sinds Mijlpaal 4
   'frankfurter-allee': { line: 'S', label: 'S41 S42 S8 S85', color: '#008d4f', towards: 'Ringbahn · Grünau · Pankow', closed: true },
   lichtenberg: { line: 'S', label: 'S5 S7 S75', color: '#008d4f', towards: 'Strausberg · Ahrensfelde · Wartenberg', closed: true },
   wuhletal: { line: 'S', label: 'S5', color: '#008d4f', towards: 'Strausberg Nord · Westkreuz', closed: true },
   alexanderplatz: {
-    line: 'U2', color: '#da421e', also: [{ line: 'U8', color: '#224f86' }], station: 'alexanderplatz',
-    towards: 'Pankow · Ruhleben · Wittenau · Hermannstr.', label: 'U2 · U8',
+    line: 'U2', color: '#da421e', also: [{ line: 'U8', color: '#224f86' }, { line: 'S', color: '#008d4f' }], station: 'alexanderplatz',
+    towards: 'Pankow · Ruhleben · Wittenau · Stadtbahn', label: 'U2 · U8 · S',
     options: [
       { line: 'U2', station: 'alexanderplatz', name: 'U2', sub: 'Pankow · Ruhleben', color: '#da421e' },
       { line: 'U8', station: 14, name: 'U8', sub: 'Wittenau · Hermannstraße', color: '#224f86' },
+      { line: 'S', to: 'S5', station: 'alexanderplatz', name: 'S-Bahn', sub: 'S3 S5 S7 S9 · Stadtbahn', color: '#008d4f' },
     ],
   },
 };

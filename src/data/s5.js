@@ -20,12 +20,21 @@ export const S5_LINE = {
   name: 'S5',
   color: '#eb7405',          // VBB-lijnkleur S5 (oranje)
   sbahn: true,               // S-Bahn: groene stationsborden met het S-logo
-  trainModel: 'bvg-481',     // deel b: BR 481/483 (nog niet in het spel)
+  trainModel: 'bvg-481',     // deel b: eigen model BR 481 (src/lines/SBahnTrains.js)
+  dest: ['Westkreuz', 'Strausberg Nord'],   // echte eindpunten [richting −1, richting +1]
   headwayMinutes: 5,
   spacing: 150,
   origin: { x: 0, y: 0, z: -6800 }, // 600 m naast de U9 (z −6200); ver van U2 (x≈0, z ≥ −1080) en U8 (z≈49)
   termini: ['westkreuz', 'ostkreuz'],
 };
+
+// Deel b: de andere lijnen op het Stadtbahnspoor (gasten in de S5-lijnwereld, zoals de U3 op de U1). VBB-lijnkleuren.
+// start = beginhalte van de eerste trein (verspreid tussen de twee eigen S5-treinen op 0 en 7).
+export const S5_GUESTS = [
+  { line: { id: 'S3', name: 'S3', color: '#0a4c99', sbahn: true, dest: ['Spandau', 'Erkner'], origin: S5_LINE.origin }, start: 3 },
+  { line: { id: 'S7', name: 'S7', color: '#816da6', sbahn: true, dest: ['Potsdam Hbf', 'Ahrensfelde'], origin: S5_LINE.origin }, start: 10 },
+  { line: { id: 'S9', name: 'S9', color: '#992746', sbahn: true, dest: ['Spandau', 'Flughafen BER'], origin: S5_LINE.origin }, start: 5 },
+];
 
 // [id, naam, lat, lon, hoogte (straat onder het perron), overstap, accent (kap), profiel]
 const RAW = [
@@ -45,21 +54,28 @@ const RAW = [
   ['ostkreuz',            'Ostkreuz',            52.5028203, 13.4701851, 5,  ['S41', 'S42', 'S8', 'S85', 'RE'],  '9aa2a6', { fern: true }],
 ];
 
-// Overstappen. Deel a: alle trapgaten met echt bord, maar nog afgesloten (rood-wit hek) — open in deel c.
+// Overstappen (deel c, 8 nov 2026): alle U-Bahntrapgaten open; bij meer doelen een keuzevenster (Zoo, Alexanderplatz).
+// Terug: op de U-lijnen wijzen de vroegere S-hekken naar de S5 (`to: 'S5'`), op U2 (Zoo, Alexanderplatz) en U8
+// (Jannowitzbrücke) staat een groen S-bord aan het perroneinde (S5_SIGN, LineTransfers). Ringbahn: nog dicht.
+const U2O = (st, sub = 'Pankow · Ruhleben') => ({ line: 'U2', station: st, name: 'U2', sub, color: '#da421e' });
 const S_TRANSFERS = {
   westkreuz: { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn', closed: true },
-  charlottenburg: { line: 'U7', color: '#528dba', towards: 'Rudow · Rathaus Spandau (Wilmersdorfer Str.)', closed: true },
-  'zoologischer-garten': { line: 'U2', color: '#da421e', also: [{ line: 'U9', color: '#f3791d' }], towards: 'Pankow · Ruhleben · Osloer Str.', closed: true },
-  hauptbahnhof: { line: 'U5', color: '#7e5330', towards: 'Hönow', closed: true },
-  friedrichstrasse: { line: 'U6', color: '#8c6dab', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf', closed: true },
-  alexanderplatz: { line: 'U2', color: '#da421e', also: [{ line: 'U5', color: '#7e5330' }, { line: 'U8', color: '#224f86' }], towards: 'Pankow · Hönow · Wittenau', closed: true },
-  jannowitzbruecke: { line: 'U8', color: '#224f86', towards: 'Wittenau · Hermannstraße', closed: true },
-  'warschauer-strasse': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], towards: 'Uhlandstr. · Krumme Lanke', closed: true },
+  charlottenburg: { line: 'U7', color: '#528dba', station: 'wilmersdorfer-strasse', towards: 'Rudow · Rathaus Spandau (Wilmersdorfer Str.)' },
+  'zoologischer-garten': { line: 'U2', color: '#da421e', also: [{ line: 'U9', color: '#f3791d' }], towards: 'Pankow · Ruhleben · Osloer Str.', station: 'zoologischer-garten',
+    options: [U2O('zoologischer-garten'), { line: 'U9', station: 'zoologischer-garten', name: 'U9', sub: 'Osloer Str. · Rathaus Steglitz', color: '#f3791d' }] },
+  hauptbahnhof: { line: 'U5', color: '#7e5330', station: 'hauptbahnhof', towards: 'Alexanderplatz · Hönow' },
+  friedrichstrasse: { line: 'U6', color: '#8c6dab', station: 'friedrichstrasse', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },
+  alexanderplatz: { line: 'U2', color: '#da421e', also: [{ line: 'U5', color: '#7e5330' }, { line: 'U8', color: '#224f86' }], towards: 'Pankow · Hönow · Wittenau', station: 'alexanderplatz',
+    options: [U2O('alexanderplatz'), { line: 'U5', station: 'alexanderplatz', name: 'U5', sub: 'Hauptbahnhof · Hönow', color: '#7e5330' }, { line: 'U8', station: 14, name: 'U8', sub: 'Wittenau · Hermannstraße', color: '#224f86' }] },
+  jannowitzbruecke: { line: 'U8', color: '#224f86', station: 15, towards: 'Wittenau · Hermannstraße' },
+  'warschauer-strasse': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'warschauer-strasse', towards: 'Uhlandstr. · Krumme Lanke' },
   ostkreuz: { line: 'S', label: 'S41 S42 S8 S85', color: '#008d4f', towards: 'Ringbahn · Pankow · Grünau', closed: true },
 };
+for (const t of Object.values(S_TRANSFERS)) if (t.line !== 'S') t.label = [t, ...(t.also || [])].map(b => b.line).join(' · ');
 
-// Overstap naar een bestaande U-lijn: eigen tekst in de hint (de lijn bestaat al, alleen de doorgang nog niet).
-for (const t of Object.values(S_TRANSFERS)) if (t.line !== 'S') { t.note = 'overstap opent binnenkort'; t.label = [t, ...(t.also || [])].map(b => b.line).join(' · '); }
+// Groen S-bord op de U2-perrons (Zoo, Alexanderplatz) en het U8-perron (Jannowitzbrücke): terug naar de S-Bahn.
+export const S5_SIGN = { line: 'S', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'S3 S5 S7 S9 · Stadtbahn', hint: 'Übergang S-Bahn' };
+
 
 // Uitgang naar Street View (fix 8 nov): de haltecoördinaten liggen op het viaduct; daar vindt Google geen straat of juist
 // perron-/hal-panorama's. Daarom per station een vast straatpunt (Google-straatpanorama met adres en ≥ 2 looprichtingen).

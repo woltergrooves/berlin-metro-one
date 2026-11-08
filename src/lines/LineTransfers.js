@@ -89,15 +89,17 @@ function toLine(id, stationId) {
   const i = L.stations.findIndex(s => s.id === stationId && !s.shared); if (i < 0) return false;
   return go(`${id} ${L.stations[i].name}`, () => { resetU8(game.player); L.enter(i, { at: 'transfer' }); });
 }
+// o.to = doellijn als het bord een ander symbool toont (S-Bahn: bord 'S', lijnwereld 'S5').
 function goTo(o) {
-  if (o.line === 'U2') return toU2(o.station);
-  if (o.line === 'U8') return toU8(o.station);
-  return toLine(o.line, o.station);
+  const L = o.to || o.line;
+  if (L === 'U2') return toU2(o.station);
+  if (L === 'U8') return toU8(o.station);
+  return toLine(L, o.station);
 }
 
 // Keuze bij een trapgat met meerdere doelen (Nollendorfplatz: U2 · U4 vanaf de U1, U1/U3 · U2 vanaf de U4).
-let chooser = null, chooserAt = null;
-function choose(t) {
+let chooser = null, chooserAt = null, chooserU = false;
+function choose(t, fromU = false) {
   if (chooser) return;
   chooser = document.createElement('div');
   chooser.id = 'lineTransferChooser';
@@ -113,7 +115,7 @@ function choose(t) {
     b.addEventListener('click', pick); b.addEventListener('touchend', pick, { passive: false });
     b.addEventListener('touchstart', ev => ev.stopPropagation(), { passive: true });
   });
-  chooserAt = game.player.position.clone();
+  chooserAt = game.player.position.clone(); chooserU = fromU;
   document.body.appendChild(chooser);
   status.choices = (status.choices || 0) + 1;
 }
@@ -132,12 +134,18 @@ function points(api) {
   const out = [];
   const alex = game.stations.find(s => s.id === 'alexanderplatz');
   for (const st of api.stations) {
-    const t = st.transfer; if (!t) continue;
-    if (t.line === 'U2') {
-      const s = game.stations.find(x => x.id === t.station); if (!s) continue;
-      out.push({ kind: 'U2', u1: st.index, api, s, name: s.name });
-    } else if (t.line === 'U8' && alex) {
-      out.push({ kind: 'U8', u1: st.index, api, index: t.station, cx: stopX(t.station), zc: alex.z + U8_Z_REL, name: U8_STOPS[t.station].name });
+    const t = st.transfer; if (!t || t.closed) continue;
+    // Ook keuze-overstappen (S-Bahn Zoo/Alexanderplatz, U9 Zoo): elk U2/U8-doel krijgt een punt terug (U8 Alexanderplatz
+    // niet: daar is het westeinde de trap naar de hal — terug via het U2-perron).
+    const seen = new Set();
+    for (const o of [t, ...(t.options || [])]) {
+      const L = o.to || o.line, opt = o !== t; if (o.station == null) continue;
+      if (L === 'U2' && !seen.has('U2')) {
+        const s = game.stations.find(x => x.id === o.station); if (!s) continue;
+        seen.add('U2'); out.push({ kind: 'U2', key: 'U2:' + s.id, u1: st.index, api, s, name: s.name });
+      } else if (L === 'U8' && alex && !seen.has('U8') && !(opt && o.station === U8_ALEX_INDEX)) {
+        seen.add('U8'); out.push({ kind: 'U8', key: 'U8:' + o.station, u1: st.index, api, index: o.station, cx: stopX(o.station), zc: alex.z + U8_Z_REL, name: U8_STOPS[o.station].name });
+      }
     }
   }
   return out;
@@ -151,11 +159,12 @@ function buildSigns(pts, info = U1_SIGN) {
   const steel = new THREE.MeshStandardMaterial({ color: 0x3a3d40, roughness: 0.5, metalness: 0.5 });
   const plane = new THREE.PlaneGeometry(2.0, 0.5), stripe = new THREE.PlaneGeometry(3.6, 0.5), rod = new THREE.BoxGeometry(0.04, 1.0, 0.04);
   for (const pt of pts) {
-    pt.hint = info.hint || `Übergang ${info.line}`;
+    pt.hint = info.hint || `Übergang ${info.line}`; pt.info = info;
+    pt.slot = signs.filter(x => x.pt.key === pt.key).length;   // tweede lijn op hetzelfde perroneinde: bord erboven
     const g = new THREE.Group(); g.name = `Transfer:${info.line}@${pt.kind}:${pt.name}`; g.userData.line = info.line;
     const a = new THREE.Mesh(plane, sign), b = new THREE.Mesh(stripe, floor), r = new THREE.Mesh(rod, steel);
-    a.position.y = 2.45; r.position.y = 3.45; b.rotation.x = -Math.PI / 2; b.position.y = 0.015;
-    g.add(a, b, r);
+    a.position.y = 2.45 + pt.slot * 0.56; r.position.y = 3.45 + pt.slot * 0.56; b.rotation.x = -Math.PI / 2; b.position.y = 0.015 + pt.slot * 0.003;
+    g.add(...(pt.slot ? [a, r] : [a, b, r]));
     if (pt.kind === 'U2') { g.position.set(2.7, 0, pt.s.z + U2_END - 0.2); }                 // kijkt naar +z (het perron op)
     else { g.position.set(pt.cx - U8_END - 0.2, -4, pt.zc); g.rotation.y = Math.PI / 2; }
     g.visible = false;
@@ -174,8 +183,8 @@ function frame(delta) {
       : p.__u8FullStation === pt.index;
     g.visible = !p.__line && !p.__streetMode && near;
   }
-  if (chooser && (!p.__line || p.__streetMode || p.__lineTrain || p.position.distanceTo(chooserAt) > 5)) { chooser.remove(); chooser = null; }
-  if (off || busy) { dwell = 0; lastHit = null; return; }
+  if (chooser && ((!chooserU && !p.__line) || (chooserU && p.__line) || p.__streetMode || p.__lineTrain || p.position.distanceTo(chooserAt) > 5)) { chooser.remove(); chooser = null; }
+  if (off || busy || chooser) { dwell = 0; lastHit = null; return; }
   const pushing = Math.hypot(p.input?.moveX || 0, p.input?.moveY || 0) > 0.02;
   let hit = null, close = null;
   for (const { pt } of signs) {
@@ -195,7 +204,13 @@ function frame(delta) {
   // Oude bewegingsbewakers zetten de speler soms een frame terug → niet meteen op 0 zetten, langzaam laten zakken.
   if (hit) lastHit = hit;
   dwell = Math.max(0, dwell + (hit && pushing ? delta : -delta * 0.25));
-  if (dwell > 0.2 && lastHit) { dwell = 0; toU1(lastHit.u1, lastHit.api); }
+  if (dwell > 0.2 && lastHit) {
+    dwell = 0;
+    // Meer lijnen op hetzelfde perroneinde (Zoo: U9 + S-Bahn, Alexanderplatz: U5 + S-Bahn) → keuzevenster.
+    const here = signs.map(s => s.pt).filter(pt => pt.key === lastHit.key);
+    if (here.length > 1) choose({ options: here.map(pt => ({ line: pt.info.line, to: pt.api.id, station: pt.api.stations[pt.u1].id, name: pt.info.hint.replace(/^Übergang\s*/, ''), sub: pt.info.towards, color: pt.info.color, text: pt.info.text })) }, true);
+    else toU1(lastHit.u1, lastHit.api);
+  }
 }
 
 /** Wordt door een lijn met overstappunten op U2/U8 (U1, U5) aangeroepen zodra de lijn klaar is. */
@@ -217,6 +232,7 @@ export const LineTransfers = {
   toU6: i => { const a = apis.find(x => x.id === 'U6'); return a ? toU1(i, a) : false; },
   toU7: i => { const a = apis.find(x => x.id === 'U7'); return a ? toU1(i, a) : false; },
   toU9: i => { const a = apis.find(x => x.id === 'U9'); return a ? toU1(i, a) : false; },
+  toS5: i => { const a = apis.find(x => x.id === 'S5'); return a ? toU1(i, a) : false; },
   status: () => ({ ...status, lines: apis.map(a => a.id), busy, chooser: !!chooser, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
   flags: () => { const p = game.player; return { line: p.__line, street: p.__streetMode, train: !!p.activeTrain, u8a: p.__u8Active, u8area: p.__u8Area, u8: p.__u8FullStation, y: p.position.y, st: p.currentStation?.id }; },
 };

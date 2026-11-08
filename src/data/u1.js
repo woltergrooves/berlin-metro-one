@@ -59,6 +59,8 @@ export const U1_TRANSFERS = {
   moeckernbruecke: { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', station: 'moeckernbruecke' },
   // U9 (8 nov 2026): Kurfürstendamm → het U9-perron.
   kurfuerstendamm: { line: 'U9', color: '#f3791d', towards: 'Osloer Str. · Rathaus Steglitz', station: 'kurfuerstendamm' },
+  // S-Bahn deel c (8 nov 2026): Warschauer Straße → het Stadtbahnperron (ook voor de U3).
+  'warschauer-strasse': { line: 'S', to: 'S5', station: 'warschauer-strasse', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Westkreuz · Ostkreuz' },
 };
 
 // U1d — stationsprofielen op het viaduct (herkenbaar, niet 1:1). Zonder profiel: perronkappen in de accentkleur.

@@ -65,7 +65,7 @@ export const U6_TRANSFERS = {
   'hallesches-tor': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'hallesches-tor', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
   stadtmitte: { line: 'U2', color: '#da421e', station: 'stadtmitte', towards: 'Pankow · Ruhleben' },
   'unter-den-linden': { line: 'U5', color: '#7e5330', station: 'unter-den-linden', towards: 'Hauptbahnhof · Hönow' },
-  friedrichstrasse: { line: 'S', label: 'S1 S2 S25 S26 · S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Nord-Süd-Tunnel', closed: true },
+  friedrichstrasse: { line: 'S', to: 'S5', station: 'friedrichstrasse', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Westkreuz · Ostkreuz' },   // open sinds S-Bahn deel c (Nord-Süd volgt)
   wedding: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn', closed: true },
   leopoldplatz: { line: 'U9', color: '#f3791d', station: 'leopoldplatz', towards: 'Osloer Str. · Rathaus Steglitz' },
 };

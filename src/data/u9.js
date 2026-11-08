@@ -57,7 +57,11 @@ export const U9_TRANSFERS = {
   'osloer-strasse': { line: 'U8', color: '#224f86', station: 7, towards: 'Wittenau · Hermannstraße' },
   leopoldplatz: { line: 'U6', color: '#8c6dab', station: 'leopoldplatz', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },
   westhafen: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
-  'zoologischer-garten': { line: 'U2', color: '#da421e', station: 'zoologischer-garten', towards: 'Pankow · Ruhleben' },
+  'zoologischer-garten': { line: 'U2', color: '#da421e', station: 'zoologischer-garten', also: [{ line: 'S', color: '#008d4f' }], label: 'U2 · S', towards: 'Pankow · Ruhleben · Stadtbahn',
+    options: [
+      { line: 'U2', station: 'zoologischer-garten', name: 'U2', sub: 'Pankow · Ruhleben', color: '#da421e' },
+      { line: 'S', to: 'S5', station: 'zoologischer-garten', name: 'S-Bahn', sub: 'S3 S5 S7 S9 · Stadtbahn', color: '#008d4f' },
+    ] },
   kurfuerstendamm: { line: 'U1', color: '#55a822', station: 'kurfuerstendamm', towards: 'Warschauer Str. · Uhlandstr.' },
   spichernstrasse: { line: 'U3', color: '#16683d', station: 'spichernstrasse', towards: 'Warschauer Str. · Krumme Lanke' },
   'berliner-strasse': { line: 'U7', color: '#528dba', station: 'berliner-strasse', towards: 'Rudow · Rathaus Spandau' },

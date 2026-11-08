@@ -103,6 +103,8 @@ export class LineTrain {
     this.viewZoneId = null; this.id = `${line.id}-${direction > 0 ? 'A' : 'B'}-${++serial}`;
     const route = stations.map(s => ({ id: s.id, name: s.name, index: s.index, z: s.x }));
     this.timeline = new TrainTimeline({ id: this.id, line: line.id, stations: route, direction, startStationIndex: startIndex, initialDelaySeconds: delay });
+    // S-Bahn (Fase 45b): de treinen rijden in het echt verder dan de lijnwereld → echte bestemming op film, bord en HUD.
+    if (line.dest) Object.defineProperty(this.timeline, 'terminusName', { get() { return line.dest[this.direction > 0 ? 1 : 0]; } });
     this.door = 0; this.lastRecenter = -Infinity; this.rider = false;
     this.group = new THREE.Group(); this.group.name = `LineTrain:${this.id}`; this.group.userData.line = line.id;
     this.units = []; this.openSide = 1;
@@ -129,19 +131,33 @@ export class LineTrain {
   /** Visuals bouwen (template = Blender-HK, of null → reserve-uiterlijk). */
   build(template) {
     if (this.units.length) return;
+    this.template = template;
     for (const off of UNITS) {
       const u = template ? modelUnit(template) : fallbackUnit();
       u.offset = off; this.group.add(u.group); this.units.push(u);
     }
+    // Eigen model met cabine aan beide kanten (BR 481): binnen het treinstel de overloop in plaats van de cabine.
+    if (template?.userData?.cabs) for (const u of this.units) {
+      const inner = u.offset < 0 ? '+' : '-';
+      u.group.traverse(o => { if (o.name === 'Cab' + inner) o.visible = false; if (o.name === 'Gang' + inner) o.visible = true; });
+    }
+    this.setDestination();
+    this.place();
+  }
+
+  /** Richtingfilm voorop en achterop (boven de cabineruit); opnieuw na keren aan het eindpunt (echte bestemming). */
+  setDestination() {
     const term = this.timeline.terminusName.replace('straße', 'str.').replace('Straße', 'Str.');
+    if (term === this.destText || !this.units.length) return;
+    this.destText = term;
+    for (const u of this.units) for (const o of [...u.group.children]) if (o.name === 'LineDestination') { u.group.remove(o); o.material.map?.dispose(); o.material.dispose(); }
     const mat = destinationBoard(`${this.line.id} ${term}`, this.line.color, this.line.textColor), geo = new THREE.PlaneGeometry(1.62, 0.215);
-    // Richtingfilm voorop en achterop (boven de cabineruit).
+    const ud = this.template?.userData || {}, dx = ud.destX ?? (12.147 - 2.675 * 0.23), dy = ud.destY ?? 2.675;
     for (const end of [-1, 1]) {
       const u = this.units[end < 0 ? 0 : 1], mesh = new THREE.Mesh(geo, mat);
-      mesh.name = 'LineDestination'; mesh.position.set(end * (12.147 - 2.675 * 0.23), 2.675, 0); mesh.rotation.y = end * Math.PI / 2;
+      mesh.name = 'LineDestination'; mesh.position.set(end * dx, dy, 0); mesh.rotation.y = end * Math.PI / 2;
       u.group.add(mesh);
     }
-    this.place();
   }
 
   update(delta, { rider = false } = {}) {
@@ -149,6 +165,7 @@ export class LineTrain {
     this.timeline.update(delta, { allowRecycle: !rider });
     // Deurkant vastleggen zodra de trein bij een station stopt.
     if (before !== this.timeline.state && /opening/.test(this.timeline.state)) this.openSide = platformSide(this.stations[this.currentIndex], this.direction);
+    if (this.line.dest && before !== this.timeline.state) this.setDestination();
     const target = this.timeline.doorsOpen ? 1 : 0, step = delta / (target > this.door ? 0.72 : 0.86);
     this.door = target > this.door ? Math.min(target, this.door + step) : Math.max(target, this.door - step);
     this.place();
@@ -225,7 +242,7 @@ export class DepartureBoards {
       const k = `${t.line.id}${dir}`, v = { line: t.line, dir, term: t.timeline.terminusName, s: here ? -1 : s };
       if (!best.has(k) || v.s < best.get(k).s) best.set(k, v);
     }
-    const rows = [...best.values()].sort((a, b) => b.dir - a.dir || a.s - b.s).slice(0, this.rows)
+    const rows = [...best.values()].sort((a, b) => this.line.sbahn ? a.s - b.s : b.dir - a.dir || a.s - b.s).slice(0, this.rows)
       .map(r => [r.line, r.term, r.s < 0 ? 'sofort' : !Number.isFinite(r.s) ? '—' : r.s < 50 ? '1 min' : `${Math.round(r.s / 60)} min`]);
     const key = rows.map(r => r[0].id + r[1] + r[2]).join('/');
     if (key === this.key) return;
@@ -234,7 +251,8 @@ export class DepartureBoards {
     ctx.fillStyle = '#0a0c0d'; ctx.fillRect(0, 0, 512, this.canvas.height);
     rows.forEach(([line, term, time], i) => {
       const y = 34 + i * 62;
-      ctx.fillStyle = line.color; ctx.fillRect(12, y - 21, 52, 40);
+      ctx.fillStyle = line.color;
+      if (line.sbahn || line.dest) { ctx.beginPath(); ctx.roundRect(12, y - 21, 52, 40, 18); ctx.fill(); } else ctx.fillRect(12, y - 21, 52, 40);
       ctx.fillStyle = line.textColor || '#fff'; ctx.font = '800 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(line.id, 38, y);
       ctx.fillStyle = '#ffb627'; ctx.font = '600 30px monospace'; ctx.textAlign = 'left'; ctx.fillText(term, 76, y, 300);
       ctx.textAlign = 'right'; ctx.fillText(time, 500, y);

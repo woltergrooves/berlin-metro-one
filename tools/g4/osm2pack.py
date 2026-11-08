@@ -47,6 +47,20 @@ for i in range(1, len(U5)):
                                       next=U5[i + 1][1:3] if i + 1 < len(U5) else (la + (la - U5[i - 1][1]), lo + (lo - U5[i - 1][2])), elev=float(el))
 # Wuhletal: het spoor loopt bij het station oost-west (de lijn buigt daarna naar het noorden) → lokale richting.
 LINE_STATIONS['u5-wuhletal'].update(prev=(52.51260, 13.5700), next=(52.51262, 13.5830))
+# S-Bahn Stadtbahn (Fase 45 deel d): 14 stations op het boogviaduct. Coördinaten = src/data/s5.js; elev = straat onder
+# het perron. Eigen spoor = railway=light_rail (S-Bahn) én de Fernbahn (railway=rail) in de strook van het viaduct.
+# Het spel heeft de Fernbahn aan de +z-kant (src/lines/LineWorld.js ARCH_Z): ligt die in het echt links, dan wordt het
+# pakket gespiegeld. Strook (na spiegelen): z −12 … 24. 'xing' = lijn-x-intervallen waar water het viaduct kruist.
+S5 = [('westkreuz', 52.5006843, 13.2843857, 7), ('charlottenburg', 52.5050590, 13.3052159, 6), ('savignyplatz', 52.5051098, 13.3189562, 7),
+      ('zoologischer-garten', 52.5069420, 13.3318108, 8), ('tiergarten', 52.5142085, 13.3364598, 7), ('bellevue', 52.5199303, 13.3480101, 7),
+      ('hauptbahnhof', 52.5251819, 13.3700300, 10), ('friedrichstrasse', 52.5203431, 13.3871988, 8), ('hackescher-markt', 52.5226166, 13.4023469, 7),
+      ('alexanderplatz', 52.5214176, 13.4113816, 8), ('jannowitzbruecke', 52.5140767, 13.4197527, 8), ('ostbahnhof', 52.5106059, 13.4350936, 7),
+      ('warschauer-strasse', 52.5059080, 13.4516857, 6), ('ostkreuz', 52.5028203, 13.4701851, 5)]
+for i, (sid, la, lo, el) in enumerate(S5):
+    pv = S5[i - 1][1:3] if i else (2 * la - S5[1][1], 2 * lo - S5[1][2])
+    nx = S5[i + 1][1:3] if i + 1 < len(S5) else (2 * la - S5[i - 1][1], 2 * lo - S5[i - 1][2])
+    LINE_STATIONS['s5-' + sid] = dict(line='S5', id=sid, at=(la, lo), prev=pv, next=nx, elev=float(el))
+BAND = {'S5': (-12.0, 24.0)}
 RADIUS = 260.0          # m rond het station
 CORRIDOR = 12.5         # |z| < dit = spoorstrook van het spel (zijwanden G3b op ±9,08)
 LEVEL = 3.4             # verdiepingshoogte Berlijnse Altbau
@@ -70,6 +84,20 @@ def seg_project(p, a, b):
 
 def area(poly):
     return 0.5 * sum(poly[i][0] * poly[i - 1][1] - poly[i - 1][0] * poly[i][1] for i in range(len(poly)))
+
+def seg_hits_band(poly, lo, hi):
+    # S5: raakt de veelhoek de strook lo < z < hi (punt erin, of een rand die de strook oversteekt)?
+    for i in range(len(poly)):
+        (x1, z1), (x2, z2) = poly[i - 1], poly[i]
+        if lo < z1 < hi: return True
+        if (z1 <= lo) != (z2 <= lo) or (z1 >= hi) != (z2 >= hi):
+            if min(z1, z2) < hi and max(z1, z2) > lo: return True
+    # strook helemaal binnen de veelhoek (groot gebouw over het viaduct)
+    inside = False
+    for i in range(len(poly)):
+        (x1, z1), (x2, z2) = poly[i - 1], poly[i]
+        if (z1 > (lo + hi) / 2) != (z2 > (lo + hi) / 2) and 0 < x1 + (x2 - x1) * ((lo + hi) / 2 - z1) / ((z2 - z1) or 1e-9): inside = not inside
+    return inside
 
 def seg_hits_corridor(poly, xr):
     # Raakt de veelhoek de strook |z| < CORRIDOR binnen |x| < xr?
@@ -123,7 +151,8 @@ def clip_square(pts, h):
         pts = out
     return pts
 
-def is_own_line(tg):
+def is_own_line(tg, line=None):
+    if line == 'S5': return tg.get('railway') == 'light_rail' and tg.get('tunnel') not in ('yes',)
     # U1-pakketten: alle bovengrondse metro behalve de U2 is "eigen spoor" (namen in OSM wisselen: U1, Hochbahn …).
     nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
     return tg.get('railway') == 'subway' and tg.get('tunnel') not in ('yes',) and 'U2' not in nm
@@ -151,10 +180,10 @@ def run(src, dst):
         dirv = (f0.en(*cfg['next'])[0] - f0.en(*cfg['prev'])[0], f0.en(*cfg['next'])[1] - f0.en(*cfg['prev'])[1]) if cfg['next'] else (p[0] - f0.en(*cfg['prev'])[0], p[1] - f0.en(*cfg['prev'])[1])
         own_layer = 1
         for wid, (nd, tg) in ways.items():
-            if tg.get('railway') != 'subway': continue
+            if tg.get('railway') != ('light_rail' if line == 'S5' else 'subway'): continue
             nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
             if line:
-                if not is_own_line(tg): continue
+                if not is_own_line(tg, line): continue
             elif any(k in nm for k in ('U1', 'U3', 'U5', 'U6', 'U7', 'U8', 'U9', 'U4')) and 'U2' not in nm: continue
             pts = [f0.en(*nodes[r]) for r in nd if r in nodes]
             for i in range(1, len(pts)):
@@ -176,6 +205,21 @@ def run(src, dst):
                    bearing=round(math.degrees(math.atan2(v[0], v[1])) % 360, 1), elev=cfg['elev'], radius=RADIUS,
                    b=[], r=[], g=[], w=[], rail=[], via=[], trees=[], scale=10)
         if line: out['line'] = line; out['ownLayer'] = own_layer
+        # S5: ligt de Fernbahn (railway=rail) rechts (+z)? Anders spiegelen. Strook in ruwe coördinaten.
+        mirror = False
+        if line in BAND:
+            zs = []
+            for wid, (nd, tg) in ways.items():
+                if tg.get('railway') != 'rail' or tg.get('tunnel') == 'yes': continue
+                for r in nd:
+                    if r in nodes:
+                        x, z = L(r)
+                        if abs(x) < 80 and abs(z) < 45: zs.append(z)
+            mirror = bool(zs) and sum(zs) / len(zs) < 0
+            out['fernZ'] = round(sum(zs) / len(zs), 1) if zs else None
+            lo, hi = BAND[line]; band = (-hi, -lo) if mirror else (lo, hi)
+            out['mirror'] = mirror
+        in_band = lambda pts: line in BAND and sum(1 for x, z in pts if band[0] < z < band[1]) >= max(2, len(pts) * 0.6)
         def poly_of(nd):
             pts = [L(r) for r in nd if r in nodes]
             if len(pts) > 3 and pts[0] == pts[-1]: pts = pts[:-1]
@@ -199,8 +243,10 @@ def run(src, dst):
                 a = area(pts)
                 if abs(a) < 6: continue
                 if a < 0: pts = pts[::-1]      # tegen de klok in (van boven gezien in x,z → controle in de app)
-                if seg_hits_corridor(pts, RADIUS): dropped += 1; continue
+                if (seg_hits_band(pts, *band) if line in BAND else seg_hits_corridor(pts, RADIUS)): dropped += 1; continue
+                if line in BAND and (tg.get('man_made') in ('tower', 'mast') or tg.get('building') in ('train_station', 'transportation') and seg_hits_band(pts, band[0] - 8, band[1] + 8)): dropped += 1; continue
                 h, mh = height_of(tg, abs(a))
+                if line in BAND: h = min(h, 70.0)
                 out['b'].append([h, mh, kind_of(tg)] + flat(pts))
             elif tg.get('highway') in ROADW and tg.get('area') != 'yes' and tg.get('tunnel') not in ('yes', 'building_passage'):
                 pts = poly_of(nd) if not closed else [L(r) for r in nd if r in nodes]
@@ -233,7 +279,9 @@ def run(src, dst):
                 pts = poly_of(nd)
                 if len(pts) < 2 or not near(pts): continue
                 nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
-                if line:
+                if line in BAND:
+                    if tg['railway'] in ('light_rail', 'rail') and in_band(pts): continue   # eigen viaduct (S-Bahn + Fernbahn)
+                elif line:
                     if is_own_line(tg): continue   # eigen lijn (U1): bouwt LineWorld zelf, recht
                 elif tg['railway'] == 'subway' and ('U2' in nm or not nm.strip()):
                     continue   # eigen lijn: het spel heeft een recht spoor; die bouwt de app zelf
@@ -247,11 +295,43 @@ def run(src, dst):
             tg = tagsof(n)
             if tg.get('natural') == 'tree':
                 x, z = L(n.get('id'))
-                if math.hypot(x, z) < RADIUS and abs(z) > CORRIDOR: out['trees'].append([rnd(x), rnd(z)])
+                if math.hypot(x, z) < RADIUS and ((not band[0] - 3 < z < band[1] + 3) if line in BAND else abs(z) > CORRIDOR): out['trees'].append([rnd(x), rnd(z)])
+        if line in BAND:
+            # Waterkruisingen: waar ligt water (vlak of rivierlijn) onder het viaduct (z = 0 … 12)? → lijn-x-intervallen.
+            xs = []
+            for poly in out['w']:
+                P = [(poly[i] / 10, poly[i + 1] / 10) for i in range(0, len(poly), 2)]
+                for zc in ((band[0] + band[1]) / 2, band[0] + 6, band[1] - 6):
+                    for i in range(len(P)):
+                        (x1, z1), (x2, z2) = P[i - 1], P[i]
+                        if (z1 < zc) != (z2 < zc): xs.append(x1 + (x2 - x1) * (zc - z1) / (z2 - z1))
+            # Rivierlijnen (waterway=river/canal als 'r' met negatieve breedte): kruising met z = midden van de strook.
+            zc = (band[0] + band[1]) / 2
+            for rr in out['r']:
+                if rr[0] >= 0: continue
+                w = -rr[0] / 10; P = [(rr[i] / 10, rr[i + 1] / 10) for i in range(1, len(rr), 2)]
+                for i in range(1, len(P)):
+                    (x1, z1), (x2, z2) = P[i - 1], P[i]
+                    if (z1 < zc) != (z2 < zc):
+                        x = x1 + (x2 - x1) * (zc - z1) / (z2 - z1); sn = abs(z2 - z1) / (math.hypot(x2 - x1, z2 - z1) or 1)
+                        xs += [x - w / 2 / max(sn, 0.35), x + w / 2 / max(sn, 0.35)]
+            xs.sort(); xing = []
+            for i in range(0, len(xs) - 1, 2):
+                if xs[i + 1] - xs[i] > 4 and abs((xs[i] + xs[i + 1]) / 2) < RADIUS: xing.append([round(xs[i], 1), round(xs[i + 1], 1)])
+            out['xing'] = xing
+            if mirror:   # z → −z; veelhoeken andersom (draairichting)
+                def mir(a, start, poly):
+                    v = a[start:]; pts = [(v[i], -v[i + 1]) for i in range(0, len(v), 2)]
+                    if poly: pts = pts[::-1]
+                    a[start:] = [c for p in pts for c in p]
+                for k, st0, poly in (('b', 3, True), ('r', 1, False), ('g', 1, True), ('w', 0, True), ('rail', 1, False), ('via', 2, False)):
+                    for a in out[k]: mir(a, st0, poly)
+                for t in out['trees']: t[1] = -t[1]
         js = json.dumps(out, separators=(',', ':'), ensure_ascii=False)
         od = os.path.join(dst, line.lower()) if line else dst
         os.makedirs(od, exist_ok=True)
         with open(os.path.join(od, out['slug'] + '.json'), 'w', encoding='utf-8') as fh: fh.write(js)
+        if line in BAND: print(f"  {slug}: spiegel {mirror} (Fernbahn z {out.get('fernZ')}), water onder het viaduct {out['xing']}")
         print(f"{slug}: bearing {out['bearing']}°, afstand node→spoor {d:.1f} m, gebouwen {len(out['b'])} (strook {dropped} weg), wegen {len(out['r'])}, groen {len(out['g'])}, "
               f"water {len(out['w'])}, sporen {len(out['rail'])}, viaducten {len(out['via'])}, bomen {len(out['trees'])}, {len(js)//1024} kB")
 

@@ -23,7 +23,10 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
  * toont (U3: alleen de eigen tak); withTrains/transfers/surroundings schakelen U1b/U1c/U1d-onderdelen in.
  */
 export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}`,
-  route = stations, zones = null, dfiRows = 2, trainsPerDir = 1 }) {
+  route = stations, zones = null, dfiRows = 2, trainsPerDir = 1, guests = [], template = null, decor = null }) {
+// S-Bahn (Fase 45b): guests = [{ line, perDir }] = andere lijnen met eigen treinen op dit spoor (S3/S7/S9 op de
+// Stadtbahn); template = eigen treinmodel (functie → Object3D, bv. BR 481) in plaats van het Blender-HK-model;
+// decor = (world, stations) → { update(player, active), status() } (Fernbahnverkeer).
 // U3b: route = de haltes van de eigen treinen (U3: 24, ook over het U1-spoor); zones = de lijnwerelden waar ze
 // doorheen rijden. Treinen van andere lijnen die door déze wereld rijden ("gasten") stoppen hier ook.
 const ID = line.id;
@@ -32,7 +35,7 @@ const relevant = () => ALL_TRAINS.filter(t => t.zones.some(z => z.id === ID));
 const isGuest = t => t.line.id !== ID;
 /** Het station van deze wereld waar de trein nu staat (of null). */
 const localStation = t => { const r = t.stations[t.currentIndex]; return stations.find(s => s.id === r?.id && !s.shared) || null; };
-let game = null, world = null, trains = [], boards = null, surround = null;
+let game = null, world = null, trains = [], boards = null, surround = null, deco = null;
 const status = { installed: false, enters: 0, leaves: 0, hud: false, god: false, model: withTrains ? 'laden' : 'geen treinen', boardings: 0, alightings: 0 };
 
 const onLine = p => p?.__line === line.id;
@@ -221,11 +224,12 @@ function installMovement() {
 
 // Treinmodel: het HK-model van de U2 (BlenderTrainsV1), anders een eenvoudige gele trein.
 async function loadTrains() {
-  let template = null;
+  if (template) { const t = template(); for (const tr of trains) tr.build(t); status.model = t.name || 'eigen'; return; }
+  let template_ = null;
   for (let i = 0; i < 80 && !globalThis.BerlinBlenderTrains?.load; i++) await Tick.sleep(250, 'boot.' + ID + 'Trains');
-  try { template = await globalThis.BerlinBlenderTrains?.load?.('U2'); } catch { template = null; }
-  for (const t of trains) t.build(template);
-  status.model = template ? 'HK (Blender)' : 'reserve';
+  try { template_ = await globalThis.BerlinBlenderTrains?.load?.('U2'); } catch { template_ = null; }
+  for (const t of trains) t.build(template_);
+  status.model = template_ ? 'HK (Blender)' : 'reserve';
 }
 
 // Geluid: ritgeluid, waarschuwingssignaal bij het sluiten van de deuren (samples uit AudioSystem).
@@ -291,8 +295,8 @@ function installHud() {
     const fmt = s => !Number.isFinite(s) ? '—' : s <= 0.9 ? 'nu' : `${Math.floor(Math.ceil(s) / 60)}:${String(Math.ceil(s) % 60).padStart(2, '0')}`;
     const here = relevant().map(tr => [tr, tr.routeIndex(st.id)]).filter(([tr, i]) => i >= 0 && i + tr.direction >= 0 && i + tr.direction < tr.stations.length);
     const multi = new Set(here.map(([tr]) => tr.line.id)).size > 1;
-    const deps = here.sort((a, b) => b[0].direction - a[0].direction || a[0].etaToStation(a[1]) - b[0].etaToStation(b[1]))
-      .map(([tr, i]) => `${multi ? tr.line.id + ' ' : ''}${tr.timeline.terminusName} ${fmt(tr.etaToStation(i))}`);
+    const deps = here.sort((a, b) => (line.sbahn ? 0 : b[0].direction - a[0].direction) || a[0].etaToStation(a[1]) - b[0].etaToStation(b[1]))
+      .slice(0, 4).map(([tr, i]) => `${multi ? tr.line.id + ' ' : ''}${tr.timeline.terminusName} ${fmt(tr.etaToStation(i))}`);
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || ID;
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
@@ -300,6 +304,7 @@ function installHud() {
       : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : 'het tunneleinde'}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
+      : line.sbahn ? `S-Bahn op het Stadtbahnviaduct · wacht op de S-Bahn of neem de trap naar beneden (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : st.kind === 'cutting' ? `Open ingraving · wacht op de ${ID} of neem de trap omhoog naar buiten (Ausgang).`
       : `Ondergronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`;
@@ -348,6 +353,7 @@ function frame() {
     }
     boards?.update(p.__lineTrain ? null : stations[p.__lineStation], list, true);
   } else boards?.update(null, [], false);
+  deco?.update(p, active);
 }
 
 async function install() {
@@ -366,9 +372,17 @@ async function install() {
           trains.push(new LineTrain({ line, stations: route, zones, direction: 1, startIndex: off, delay: 4 + k * 3 }));
           trains.push(new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1 - off, delay: 10 + k * 3 }));
         }
+        // Gasten (S3/S7/S9): rijden door deze lijnwereld, verspreid tussen de eigen treinen.
+        const own = zones || [{ id: ID, stations, origin: line.origin }];
+        guests.forEach((gs, j) => { for (let k = 0; k < (gs.perDir || 1); k++) {
+          const off = Number.isInteger(gs.start) ? gs.start : Math.round(((j + 1) / (guests.length + 1) + k / (gs.perDir || 1)) * (route.length - 1)) % (route.length - 1);
+          trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: 1, startIndex: off, delay: 6 + j * 5 }));
+          trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: -1, startIndex: route.length - 1 - off, delay: 12 + j * 5 }));
+        } });
         for (const t of trains) { world.root.add(t.group); ALL_TRAINS.push(t); }
       }
       if (withTrains || dfiRows > 2) boards = new DepartureBoards(line, world.root, dfiRows);
+      if (decor) deco = decor(world, stations);
       installMovement(); installHud(); installGod(); installSky(); installAudio();
       if (withTrains) loadTrains();
       for (const t of trains) t.place();
@@ -407,12 +421,19 @@ function board(index, dir = 1) {
   return true;
 }
 
+/** Test/console: `sec` spelseconden treinen vooruitspoelen (headless loopt het spel op ±1 beeld per seconde). */
+function simulate(sec = 10) {
+  const p = game.player; if (!onLine(p)) return false;
+  for (let t = 0; t < sec; t += 0.1) { updateTrains(p, 0.1); if (p.__lineTrain) ride(p, 0); deco?.update(p, true, 0.1); }
+  frame(); return true;
+}
+
 return {
-  line, stations, godStations, enter, leave, board, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
+  line, stations, godStations, enter, leave, board, simulate, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
   get trains() { return trains; }, get world() { return world; }, relevant, adopt,
   status: () => ({
     ...status, onLine: onLine(game?.player), station: game?.player?.__lineStation ?? null, world: world?.status() ?? null,
-    riding: game?.player?.__lineTrain?.id ?? null, dfi: boards?.key || null, line: game?.player?.__line ?? null, surroundings: surround?.status() ?? null,
+    riding: game?.player?.__lineTrain?.id ?? null, dfi: boards?.key || null, decor: deco?.status?.() ?? null, line: game?.player?.__line ?? null, surroundings: surround?.status() ?? null,
     trains: relevant().map(t => ({ id: t.id, line: t.line.id, view: t.viewZoneId, track: t.trackZone(t.x).id, dir: t.direction, x: Math.round(t.x), state: t.state, at: t.currentIndex, door: +t.door.toFixed(2), visible: t.group.visible, units: t.units.length })),
   }),
   install: () => install().catch(e => console.error(`[Metro] ${ID} failed`, e)),
