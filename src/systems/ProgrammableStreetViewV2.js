@@ -12,7 +12,7 @@ async function findOutdoor(maps,lat,lng,exclude){
   for(const radius of [40,80,160,320]){
     svStats.lookups++;
     let r=null;
-    try{r=await svc.getPanorama({location:{lat,lng},radius,sources:[SV.GOOGLE||'google'],source:SV.OUTDOOR||'outdoor',preference:PREF.NEAREST||'nearest'})}catch{r=null}
+    try{r=await svc.getPanorama({location:{lat,lng},radius,sources:[SV.GOOGLE||'google'],preference:PREF.NEAREST||'nearest'})}catch{r=null}
     const d=r?.data,id=d?.location?.pano;
     if(!id)continue;
     if(id===exclude||!(d.links?.length)){svStats.rejected++;continue}
