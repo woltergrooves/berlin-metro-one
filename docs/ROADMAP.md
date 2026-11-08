@@ -1,6 +1,6 @@
 🚇 BERLIN LIFE — ROADMAP 3.0
 
-Bijgewerkt: 8 november 2026
+Bijgewerkt: 8 november 2026 (avond)
 
 Hoofddoel: Eerst een groot, authentiek en leuk te verkennen Berlijn bouwen. Daarna die wereld steeds levendiger maken met economie, personages, banen, verhalen en keuzes die echte gevolgen hebben.
 
@@ -58,7 +58,7 @@ HOOFDSTUK 2 — BERLIJN UITBREIDEN
 
 Dit krijgt nu de hoogste ontwikkelprioriteit.
 
-Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig), U8 en U9 (8 nov) — alle U-Bahnlijnen. Volgende: Fase 45 (S-Bahn/tram) of Mijlpaal 5.
+Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig), U8 en U9 — alle U-Bahnlijnen. Daarnaast de S-Bahn Stadtbahn Westkreuz ⇄ Ostkreuz (14 stations, deel a: begaanbaar, nog zonder treinen). Volgende: Fase 45 verder (Stadtbahn deel b–d, daarna Ringbahn).
 
 ✅ Fase 43 — U1 en U3 (U1 30 okt, U3 31 okt 2026; U4 als extra 1 nov)
 
@@ -104,7 +104,7 @@ U7 — ✅ volledig Rudow ⇄ Rathaus Spandau (40 stations): U7a Rudow ⇄ Möck
 
 Iedere lijn wordt afzonderlijk gebouwd en getest.
 
-🟡 Fase 45 — Tram en S-Bahn (S-Bahn Stadtbahn deel a ✅ 8 nov: Westkreuz ⇄ Ostkreuz begaanbaar, treinen volgen)
+🟡 Fase 45 — Tram en S-Bahn (gestart 8 nov 2026)
 
 * Selectieve uitbreiding van het OV-netwerk.
 * Realistische overstappen.
@@ -112,6 +112,13 @@ Iedere lijn wordt afzonderlijk gebouwd en getest.
 * S-Bahn als verbinding tussen belangrijke stadsdelen.
 * Trams met herkenbare bovengrondse routes.
 * Bus 200 behouden en verder verbeteren.
+
+Onderdelen (zie het werkplan onderaan):
+* S-Bahn Stadtbahn S3/S5/S7/S9 Westkreuz ⇄ Ostkreuz — 🟡 deel a ✅ (8 nov: 14 stations op het gemetselde boogviaduct met Fernbahnsporen, grote stationshallen, S-Bahnborden, uitgangen naar vaste straatpunten); deel b treinen, c overstappen, d omgeving nog open.
+* Ringbahn S41/S42 — ⬜ 27 stations, verbindt bijna alle U-lijnen.
+* Nord-Süd-tunnel S1/S2/S25 — ⬜ met de spookstations-geschiedenis.
+* Tram M10 (en later M1/M4) — ⬜.
+* Bus 100 — ⬜ naast Bus 200.
 
 🟡 Fase 46 — Berlin Graphics & Audio Upgrade — graphics-deel ✅ (G1–G4), audio nog open
 
@@ -161,6 +168,8 @@ Als Berlijn groter is, moet het ook interessanter worden om rond te dwalen.
 * Altijd kunnen terugkeren naar het station.
 * Betaalde Google Maps-API alleen bewust inschakelen, met kostenbeheersing.
 * Geen dubbele overlays.
+
+Stand 8 nov 2026: StreetScreen (één laag boven Street View: buurtkaart met echte plekken, kopen, Pfand, stempels, uitgaan) voor 179 haltes. Betaalde Maps API staat standaard aan (keuze speler). Fix 8 nov: alleen loopbare Google-straatpanorama's (geen geüploade 360°-foto's zonder pijlen); S-Bahnstations openen op een vast straatpunt. Nog open: GOD-schakelaar voor betaalde Street View, plekken bij een paar rustige haltes.
 
 🟡 Fase 6 — Virtual Proximity
 
@@ -235,6 +244,8 @@ Activiteiten ontwikkelen zich in niveaus:
 ⸻
 
 HOOFDSTUK 4 — DAGELIJKS LEVEN EN ECONOMIE
+
+Telefoon (8 nov 2026): de in-game telefoon ziet eruit als een echte smartphone — toestelframe met Dynamic Island, statusbalk, beginscherm met widgets (klok, portemonnee, ticket), app-iconen en dock, apps in donkere modus. Inhoud ongewijzigd (Thuis, Jobs, BVG-lijnplan, Chats, Plekken, Stad).
 
 🟡 Fase 2 — Time, Days & Calendar
 
@@ -573,6 +584,10 @@ Mijlpaal 4 — U6 en U7 ✅ — U6 ✅ (7 nov), U7 ✅ (U7a 7 nov, U7b 8 nov). U
 
 Nieuwe stadsdelen en belangrijke overstapstations speelbaar maken.
 
+Mijlpaal 4b — S-Bahn en tram (Fase 45) — 🟡 gestart
+
+Het OV-netwerk afmaken met de belangrijkste S-Bahn- en tramlijnen, zodat de hele binnenstad met elkaar verbonden is.
+
 Mijlpaal 5 — Berlin Discovery uitbreiden
 
 Nieuwe stations krijgen eigen activiteiten, ontdekkingen, historische verhalen en interessante bestemmingen.
@@ -587,6 +602,41 @@ De volledige koeriers-, Späti- en portierscarrières ontwikkelen, gevolgd door 
 
 ⸻
 
+WERKPLAN — DE EERSTVOLGENDE STAPPEN (één chat per stap)
+
+Elke stap: bouwen → headless testen → direct naar de hoofdlink → controle door de speler op iPhone/iPad. Een stap geldt als goedgekeurd tenzij de speler iets meldt.
+
+A. S-Bahn Stadtbahn afmaken (±3–4 chats)
+  1. Deel b — treinen: eigen model BR 481/483 (rood-oker, 2 of 4 wagens), S3/S5/S7/S9 op dezelfde sporen met eigen bestemmingen (Spandau, Erkner, Potsdam/Ahrensfelde, Flughafen BER), vertrekborden in S-Bahnstijl, frequentie per 5 min, instappen en meerijden. Af en toe een ICE/RE op de buitensporen als decor.
+  2. Deel c — overstappen: alle trapgaten openen. Zoo ⇄ U2/U9, Hauptbahnhof ⇄ U5, Friedrichstraße ⇄ U6, Alexanderplatz ⇄ U2/U5/U8, Jannowitzbrücke ⇄ U8, Warschauer Straße ⇄ U1/U3, Charlottenburg ⇄ U7 (Wilmersdorfer Straße); de afgesloten S-hekken op die U-lijnen laten wijzen naar de S-Bahn. Westkreuz/Ostkreuz blijven dicht tot de Ringbahn er is.
+  3. Deel d — echte omgeving: OSM-gebouwen langs het viaduct, de Spree met bruggen (Bellevue, Humboldthafen, Friedrichstraße–Hackescher Markt, Jannowitzbrücke), Fernsehturm, Berliner Dom, Tiergarten-groen. Zichtlijnen vanaf het perron.
+  4. Eventueel e — afwerking: geluid (S-Bahn-aankondigingen), drukte op de perrons, prestaties op iPhone.
+
+B. Ringbahn S41/S42 (±5–6 chats)
+  27 stations rond het centrum (Gesundbrunnen, Schönhauser Allee, Ostkreuz, Neukölln, Hermannstraße, Tempelhof, Südkreuz, Innsbrucker Platz, Heidelberger Platz, Westkreuz, Westend, …). Bijzonder: de lijn is een cirkel — het spel moet een rondlopende route aankunnen (S41 met de klok mee, S42 tegen de klok in). Daarna overstappen op bijna alle U-lijnen en op de Stadtbahn (Westkreuz, Ostkreuz). Stappen a–e zoals bij de U-Bahn.
+
+C. Nord-Süd-tunnel S1/S2/S25 (±3 chats)
+  Gesundbrunnen – Nordbahnhof – Oranienburger Straße – Friedrichstraße – Brandenburger Tor – Potsdamer Platz – Anhalter Bahnhof – Yorckstraße. Ondergronds; verhaal van de spookstations uit de Koude Oorlog (Berlin Knowledge).
+
+D. Tram en bus (±4–5 chats)
+  Tram M10 Hauptbahnhof ⇄ Warschauer Straße via Prenzlauer Berg (bovengronds, door Street View-straten), daarna eventueel M1/M4. Bus 100 Zoo ⇄ Alexanderplatz langs de bezienswaardigheden, naast de bestaande Bus 200.
+
+E. Audio — Fase 46 afronden (±1–2 chats)
+  BVG-geluiden: deurwaarschuwing ("Zurückbleiben bitte"), stationsaankondigingen, rijgeluid, perronsfeer, S-Bahn-geluiden.
+
+F. Onderhoud tussendoor (kleine chats)
+  * GOD-schakelaar voor de betaalde Street View (aan/uit zonder console).
+  * Oude tests bijwerken naar de huidige stand (u1-transfer, u5-test, u6-test, u7-test, u7b-test, u3c-test, u4-test).
+  * U6-noordstuk Kurt-Schumacher-Platz ⇄ Alt-Tegel toevoegen na de echte heropening (zomer 2027).
+  * Treinmodellen: Großprofil-treinen (F/H) voor U5–U9 in plaats van het HK-model.
+
+G. Daarna: Mijlpaal 5 — Berlin Discovery
+  Per lijn ontdekkingen en activiteiten bij de nieuwe stations (Museumsinsel, Checkpoint Charlie, Tempelhofer Feld, Zoo, Spandau Zitadelle, Hackescher Markt, Oberbaumbrücke …), Berlin Stamps en verhalen; daarna Mijlpaal 6 (levende stad) en 7 (carrières en verhaal).
+
+Schatting: A–E samen ongeveer 16–20 chats.
+
+⸻
+
 BLIJVENDE KWALITEITSREGELS
 
 1. GitHub is de enige broncodebasis. Vercel wordt gebruikt voor previews en productie, niet voor losse codeketens.
@@ -594,8 +644,8 @@ BLIJVENDE KWALITEITSREGELS
 3. Geen regressies. De bestaande U2, U8, Blender-modellen, savegames en Street View mogen niet kapotgaan door nieuwe uitbreidingen.
 4. Eén interface per functie. Geen dubbele knoppen, menu’s of overlays.
 5. iPhone en iPad eerst. Prestaties, touchbediening en geheugengebruik zijn doorslaggevend.
-6. Google Maps-kosten beheersen. De programmeerbare Street View-API mag geen onverwachte kosten veroorzaken; bij een absolute nul-kosteneis moet de betaalde API uit blijven.
-7. Elke uitbreiding eerst als preview. De productieversie wordt uitsluitend aangepast na expliciete toestemming.
+6. Google Maps-kosten beheersen. De betaalde Street View-API staat standaard aan (keuze speler 30 okt 2026); de speler houdt de loads zelf in de gaten via het GOD-menu.
+7. Geen previews meer (sinds 28 okt 2026): elke afgeronde stap gaat na de tests direct naar de hoofdlink https://berlin-metro-one.vercel.app; terugdraaien kan via een rollback in Vercel. Daarna controleert de speler op iPhone/iPad.
 8. Vrijheid en consequenties. Berlin Life moet geen verzameling oppervlakkige minigames worden. De stad, personages en gameplay moeten met elkaar samenhangen.
 
 ⸻
