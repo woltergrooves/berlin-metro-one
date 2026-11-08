@@ -96,10 +96,18 @@ const S_EXITS = {
   ostkreuz: [52.5028862, 13.4700329],           // Kynaststraße
 };
 
+// Deel d: echte omgeving per station (OSM, tools/g4/osm2pack.py → public/assets/surroundings/s5/<id>.json).
+// Spreebruggen (stalen vakwerkbrug in het tussenstuk naar het volgende station): Bellevue → Hauptbahnhof (Spree),
+// Hauptbahnhof → Friedrichstraße (Humboldthafen / Spree).
+const S_BRIDGES = {
+  bellevue: { name: 'Spreebrücke', river: 'Spree', width: 44 },
+  hauptbahnhof: { name: 'Humboldthafenbrücke', river: 'Spree', width: 46 },
+};
+
 /** Stations van de Stadtbahnwereld. */
 export const S5_STATIONS = RAW.map(([id, name, lat, lon, elev, transfers, accent, profile], index) => ({
   line: 'S5', id, name, index, lat, lon, kind: 'viaduct', arches: true, layout: 'island', realLayout: 'island', elev, transfers,
   wall: '#7a3b2e', accent: '#' + accent, transfer: S_TRANSFERS[id] || null, exit: S_EXITS[id] ? { lat: S_EXITS[id][0], lon: S_EXITS[id][1] } : null,
-  profile: profile && profile.hall ? profile : null, fern: !!profile?.fern, bridge: null, surroundings: null,
+  profile: profile && profile.hall ? profile : null, fern: !!profile?.fern, bridge: S_BRIDGES[id] || null, surroundings: {},
   x: S5_LINE.origin.x + index * S5_LINE.spacing,
 }));

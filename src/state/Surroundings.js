@@ -26,7 +26,7 @@ const NEAR = 300, FAR = 460;                       // m (langs het spoor): laden
 const LEVEL = 3.4, BAY = 3.0;                      // verdieping en raamtravee (m)
 const TILE_U = 8 * BAY, TILE_V = 8 * LEVEL;        // gevelstextuur: 8 traveeën × 8 verdiepingen
 const FAR_MARKS = {                                // herkenningspunten in de verte (echte positie, ingekorte afstand)
-  fernsehturm: { lat: 52.520833, lon: 13.409444, line: ['U1'], at: ['gleisdreieck', 'schoenhauser-allee', 'eberswalder-strasse', 'nollendorfplatz', 'buelowstrasse'] },
+  fernsehturm: { lat: 52.520833, lon: 13.409444, line: ['U1', 'S5'], at: ['gleisdreieck', 'schoenhauser-allee', 'eberswalder-strasse', 'nollendorfplatz', 'buelowstrasse'] },
   olympiastadion: { lat: 52.514722, lon: 13.239444, at: ['olympia-stadion', 'ruhleben'] },
 };
 const OWN = {                                       // eigen viaduct: stijl per station

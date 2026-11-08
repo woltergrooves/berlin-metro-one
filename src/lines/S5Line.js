@@ -8,6 +8,6 @@ import { createLine } from './LineRuntime.js';
 import { sbahnTemplate, FernbahnTraffic } from './SBahnTrains.js';
 
 export const S5 = createLine({ line: S5_LINE, stations: S5_STATIONS, withTrains: true, trainsPerDir: 2, guests: S5_GUESTS, transfers: S5_SIGN, template: sbahnTemplate,
-  dfiRows: 4, decor: (world, stations) => new FernbahnTraffic(world, stations), surroundings: false, label: 'Nieuw: S-Bahn Stadtbahn (S3 · S5 · S7 · S9)' });
+  dfiRows: 4, decor: (world, stations) => new FernbahnTraffic(world, stations), surroundings: true, label: 'Nieuw: S-Bahn Stadtbahn (S3 · S5 · S7 · S9)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), S5 };
 S5.install();

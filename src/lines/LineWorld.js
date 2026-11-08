@@ -1073,6 +1073,13 @@ function shells(kit, city, m, a, b, cs, x0, x1) {
     const t0 = tunnelFirst ? x0 : xp + 1, t1 = tunnelFirst ? xp - 1 : x1;
     city.flat(m.grass, t0, t1, -T - 60, T + 60, CUT_TOP, true, 6);
   }
+  else if (a.arches && b.arches && a.bridge) {
+    // S-Bahn deel d: Spreebrug in het Stadtbahnviaduct — bogen tot de kade, daarna een stalen vakwerkbrug.
+    const [rv0, rv1] = riverOf(a, x0, x1);
+    viaductShell(kit, m, a, cs, x0, rv0 - 3, false, a.elev, a.elev, true, city);
+    viaductShell(kit, m, a, cs, rv1 + 3, x1, false, b.elev, b.elev, true, city);
+    stadtbahnBridge(kit, m, a, rv0, rv1);
+  }
   else if (a.kind === 'viaduct' && b.kind === 'viaduct' && a.bridge) {
     // Brug (U1d): staal tot de oever, dan de brug; geen straat boven de rivier.
     const [rv0, rv1] = riverOf(a, x0, x1);
@@ -1105,6 +1112,28 @@ function shells(kit, city, m, a, b, cs, x0, x1) {
     viaductShell(kit, m, vst, { ...cs }, vA, vB, false, eAt(vA), eAt(vB), false);
     street(city, m, vst, sA, sB, e0, e1);
   }
+}
+// Stalen vakwerkbrug over vier sporen (Stadtbahn over de Spree / Humboldthafen): water met kades, ligger aan beide
+// kanten (boven- en onderrand, stijlen, diagonalen), dek met Fernbahnsporen, pijler in het water bij een brede rivier.
+function stadtbahnBridge(kit, m, st, rv0, rv1) {
+  const g = -st.elev, WY = g - 3.2, b0 = rv0 - 3, b1 = rv1 + 3, L = b1 - b0, cx = (b0 + b1) / 2, top = RAIL_Y - 0.3, [Z0, Z1] = ARCH_Z;
+  kit.flat(m.water, rv0, rv1, -420, 420, WY, true, 9);
+  for (const xq of [rv0, rv1]) kit.box(m.stone, 0.8, g - WY + 0.4, 840, xq + (xq === rv0 ? -0.4 : 0.4), (g + WY) / 2 - 0.2, 0, 2);
+  for (const xa of [b0 + 1.5, b1 - 1.5]) kit.box(m.brick, 3, top - g + 0.2, Z1 - Z0 + 1, xa, (top + g) / 2, (Z0 + Z1) / 2, 2);   // landhoofden
+  tracks(kit, m, FERN, b0, b1);
+  kit.box(m.steel, L, 0.7, Z1 - Z0, cx, top - 0.35, (Z0 + Z1) / 2);                                    // dek
+  for (let x = b0 + 2; x < b1; x += 4) kit.box(m.dark, 0.25, 0.9, Z1 - Z0 - 0.4, x, top - 1.1, (Z0 + Z1) / 2); // dwarsdragers
+  const H = 5.2;
+  for (const z of [Z0 + 0.3, Z1 - 0.3]) {
+    kit.box(m.steel, L, 0.6, 0.5, cx, top - 0.6, z); kit.box(m.steel, L - 4, 0.5, 0.5, cx, top + H, z);       // onder- en bovenrand
+    const n = Math.max(4, Math.round(L / 6)), d = L / n;
+    for (let i = 0; i <= n; i++) {
+      const x = b0 + i * d; kit.box(m.steel, 0.35, H, 0.4, x, top + H / 2, z);
+      if (i < n) { const ang = Math.atan2(H, d) * (i % 2 ? 1 : -1); kit.box(m.steel, Math.hypot(H, d), 0.22, 0.3, x + d / 2, top + H / 2, z, 0, ang); }
+    }
+  }
+  for (const tz of FERN.tracks) kit.box(m.dark, L, 0.03, 0.03, cx, RAIL_Y + 5.5, tz);
+  if (rv1 - rv0 > 36) kit.box(m.stone, 4, top - 0.7 - WY + 0.5, Z1 - Z0, (rv0 + rv1) / 2, (top - 0.7 + WY - 0.5) / 2, (Z0 + Z1) / 2, 2);   // pijler
 }
 // Rivier van een brug in het tussenstuk (lokale x van station a).
 function riverOf(a, x0, x1) { const c = (x0 + x1) / 2, h = (a.bridge?.width || 52) / 2; return [c - h, c + h]; }
