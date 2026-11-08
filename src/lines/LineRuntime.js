@@ -304,21 +304,8 @@ function installHud() {
   };
 }
 
-// GOD-menu: blok met alle stations van de lijn + terug naar de U2.
-function installGod() {
-  Tick.every('god.' + ID, 400, () => {
-    const panel = document.querySelector('#gp3'), tools = document.querySelector('#tools3');
-    if (!panel || !tools || document.querySelector(`#${ID}God`)) return;
-    const d = document.createElement('div'); d.id = `${ID}God`;
-    d.style.cssText = 'margin:6px 10px;padding:8px 10px;border-radius:10px;background:#ffffff12;border:1px solid #ffffff22;color:#fff;font:700 12px Arial;line-height:1.45;display:block;text-align:left';
-    d.innerHTML = `<div style="display:block"><span style="background:${line.color};color:${line.textColor || '#fff'};border-radius:4px;padding:1px 6px;margin-right:6px">${ID}</span>${label}</div>` +
-      `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">${godStations.map(s => `<button data-u1="${s.index}" style="min-height:34px;padding:4px 8px;border-radius:8px;border:1px solid #ffffff33;background:#ffffff18;color:#fff;font:700 11px Arial">${s.name}</button>`).join('')}` +
-      `<button data-u1="back" style="min-height:34px;padding:4px 8px;border-radius:8px;border:1px solid #ffffff33;background:#d43131;color:#fff;font:700 11px Arial">↩ U2 Wittenbergplatz</button></div>`;
-    d.querySelectorAll('button[data-u1]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); if (b.dataset.u1 === 'back') leave(); else enter(Number(b.dataset.u1)); panel.classList.remove('on'); }; });
-    tools.parentNode.insertBefore(d, tools);
-    status.god = true;
-  });
-}
+// GOD-menu: sinds 8 nov één teleportblok voor alle lijnen (src/lines/GodTeleport.js leest godStations).
+function installGod() { status.god = true; }
 
 // Hemel boven viaduct/ingraving (dag/nacht uit RenderBase), alleen tijdens het tekenen.
 function installSky() {
@@ -419,7 +406,7 @@ function board(index, dir = 1) {
 }
 
 return {
-  line, stations, enter, leave, board, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
+  line, stations, godStations, enter, leave, board, exit: i => toStreet(stations[i ?? game.player.__lineStation]), surroundings: () => surround?.status() ?? null,
   get trains() { return trains; }, get world() { return world; }, relevant, adopt,
   status: () => ({
     ...status, onLine: onLine(game?.player), station: game?.player?.__lineStation ?? null, world: world?.status() ?? null,
