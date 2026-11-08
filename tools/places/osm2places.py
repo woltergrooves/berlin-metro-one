@@ -28,7 +28,7 @@ def norm(s):
 
 def stations(repo):
     out = {}
-    for line in ('U1', 'U3', 'U4', 'U5', 'U6', 'U7', 'U9', 'S5'):
+    for line in ('U1', 'U3', 'U4', 'U5', 'U6', 'U7', 'U9', 'S5', 'S41'):
         src = open(os.path.join(repo, 'src/data/%s.js' % line.lower()), encoding='utf-8').read()
         for name, lat, lon in re.findall(r"\['[a-z-]+',\s*'([^']+)',\s*([\d.]+),\s*([\d.]+)", src):
             out.setdefault(norm(name), {'name': name, 'lat': float(lat), 'lon': float(lon), 'lines': set()})['lines'].add(line)

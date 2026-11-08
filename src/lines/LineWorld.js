@@ -1153,7 +1153,9 @@ export class LineWorld {
   wanted(index) {
     const st = new Set(), seg = new Set();
     for (let i = index - 1; i <= index + 1; i++) if (i >= 0 && i < this.stations.length) st.add(i);
-    for (let i = index - 2; i <= index + 1; i++) if (i >= 0 && i < this.stations.length - 1) seg.add(i);
+    // Ringbahn (S41/S42): ook het stuk Wedding → Gesundbrunnen, aan beide kanten (−1 = vóór het eerste station, n−1 = na het laatste).
+    const lo = this.line.ring ? -1 : 0, hi = this.line.ring ? this.stations.length - 1 : this.stations.length - 2;
+    for (let i = index - 2; i <= index + 1; i++) if (i >= lo && i <= hi) seg.add(i);
     return { st, seg };
   }
   /** Bouwt/verwijdert stations rond de speler. active=false → alles verbergen (speler is niet op deze lijn). */
@@ -1182,8 +1184,11 @@ export class LineWorld {
   /** Synchroon alles om index heen bouwen (bij teleport, zodat je niet in het niets staat). */
   prime(index) { const w = this.wanted(index); for (const i of [index, ...w.st]) if (!this.stationGroups.has(i)) this.buildOne('st', i); }
   buildOne(kind, i) {
-    const a = this.stations[i];
-    const { kit, city } = kind === 'st' ? stationKit(this.line, a, this.m) : segmentKit(this.line, a, this.stations[i + 1], this.m);
+    const S = this.stations, n = S.length, sp = this.line.spacing;
+    // Ring: het tussenstuk rond de "naad" verbindt het laatste en het eerste station (kopie op de andere kant).
+    const a = kind === 'seg' && i < 0 ? { ...S[n - 1], x: S[0].x - sp } : S[i];
+    const b = kind === 'seg' ? (i >= n - 1 ? { ...S[0], x: S[n - 1].x + sp } : S[i + 1]) : null;
+    const { kit, city } = kind === 'st' ? stationKit(this.line, a, this.m) : segmentKit(this.line, a, b, this.m);
     const g = kit.build(`${this.line.id}:${kind}:${a.id}`);
     // Tijdelijke stadsbebouwing (straat, gevels, bomen) apart: verborgen zodra de OSM-omgeving (U1d) er staat.
     const c = city.build(`${this.line.id}:${kind}:${a.id}:city`); c.userData.lineCity = true; c.visible = this.cityVisible !== false;

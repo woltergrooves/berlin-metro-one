@@ -111,6 +111,8 @@ import('../lines/U6Line.js').catch(log('U6'));     // U6: Alt-Mariendorf ⇄ Kur
 import('../lines/U7Line.js').catch(log('U7'));     // U7: Rudow ⇄ Rathaus Spandau (Mijlpaal 4)
 import('../lines/U9Line.js').catch(log('U9'));     // U9: Osloer Straße ⇄ Rathaus Steglitz
 import('../lines/S5Line.js').catch(log('S5'));     // S-Bahn Stadtbahn: Westkreuz ⇄ Ostkreuz (Fase 45 deel a)
+import('../lines/S41Line.js').catch(log('S41'));   // S-Bahn Ringbahn S41/S42: 27 stations (Fase 45, werkplan B deel a)
+import('../systems/RouteHud.js').catch(log('RouteHud'));   // routeplanner-aanwijzing in de HUD (9 nov 2026)
 import('../lines/GodTeleport.js').catch(log('GodTeleport'));   // GOD-menu: één teleportblok voor alle lijnen
 
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────

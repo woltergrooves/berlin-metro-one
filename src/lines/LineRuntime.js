@@ -304,6 +304,7 @@ function installHud() {
       : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : 'het tunneleinde'}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
+      : line.ring ? `Ringbahn · wacht op de S41 ↻ of S42 ↺ of neem de trap ${st.kind === 'cutting' ? 'omhoog' : 'naar beneden'} (Ausgang).`
       : line.sbahn ? `S-Bahn op het Stadtbahnviaduct · wacht op de S-Bahn of neem de trap naar beneden (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : st.kind === 'cutting' ? `Open ingraving · wacht op de ${ID} of neem de trap omhoog naar buiten (Ausgang).`

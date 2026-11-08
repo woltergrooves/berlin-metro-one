@@ -10,11 +10,12 @@
 import { U8_STOPS } from './U8FullLineVisual.js';
 import { U3_ROUTE } from '../data/u3.js';
 
-const ORDER = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9', 'S5'];
-const COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#ffd900', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405' };
+const ORDER = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9', 'S5', 'S41'];
+const COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#ffd900', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405', S41: '#ad5937', S42: '#cb6418' };
 const TEXT = { U4: '#1a1a1a' };
 const LABEL = { S5: 'S' };   // de Stadtbahnwereld: S3 · S5 · S7 · S9
-const SUB = { S5: 'S3 · S5 · S7 · S9' };
+const SUB = { S5: 'S3 · S5 · S7 · S9', S41: 'Ring · S41 ↻ · S42 ↺' };
+const RING = { S41: { cw: 'S41', ccw: 'S42' } };   // rondlopende lijnen: buren lopen rond, richting = met/tegen de klok
 const HOME = 'Rosa-Luxemburg-Platz';
 const MIN_STOP = 2, MIN_TRANSFER = 5;
 
@@ -34,7 +35,8 @@ function network(game) {
     else if (id === 'U8') names = U8_STOPS.map(s => s.name);
     else if (id === 'U3' && BL.U3) names = U3_ROUTE.map(s => s.name);
     else if (BL[id]?.stations) names = BL[id].stations.filter(s => !s.shared).map(s => s.name);
-    if (names?.length) lines.push({ id, names });
+    // ride = er rijden treinen (Ringbahn deel a: nog niet) → alleen dan telt de lijn mee in de routeplanner.
+    if (names?.length) lines.push({ id, names, ring: !!RING[id], ride: !BL[id]?.relevant || BL[id].relevant().length > 0 });
   }
   // Overstappen = dezelfde (genormaliseerde) naam op meerdere lijnen.
   const byName = new Map();
@@ -52,8 +54,9 @@ function hereName(game) {
 
 /** Snelste route (minuten) van halte A naar halte B over alle lijnen. */
 function plan(net, from, to) {
-  const A = net.byName.get(norm(from)), B = net.byName.get(norm(to));
-  if (!A || !B) return null;
+  const byName = new Map([...net.byName].map(([k, v]) => [k, v.filter(n => net.lines.find(l => l.id === n.line)?.ride)]));
+  const A = byName.get(norm(from)), B = byName.get(norm(to));
+  if (!A?.length || !B?.length) return null;
   if (norm(from) === norm(to)) return { legs: [], minutes: 0 };
   const L = Object.fromEntries(net.lines.map(l => [l.id, l])), key = n => n.line + '|' + n.i;
   const dist = new Map(), prev = new Map(), todo = [];
@@ -64,8 +67,9 @@ function plan(net, from, to) {
     const n = todo.shift(), d = dist.get(key(n));
     if (goal.has(key(n))) { status.routes++; return build(n, d); }
     const nb = [];
-    for (const j of [n.i - 1, n.i + 1]) if (j >= 0 && j < L[n.line].names.length) nb.push([{ line: n.line, i: j }, MIN_STOP]);
-    for (const m of net.byName.get(norm(L[n.line].names[n.i])) || []) if (m.line !== n.line) nb.push([m, MIN_TRANSFER]);
+    const len = L[n.line].names.length;
+    for (let j of [n.i - 1, n.i + 1]) { if (L[n.line].ring) j = (j + len) % len; if (j >= 0 && j < len) nb.push([{ line: n.line, i: j }, MIN_STOP]); }
+    for (const m of byName.get(norm(L[n.line].names[n.i])) || []) if (m.line !== n.line) nb.push([m, MIN_TRANSFER]);
     for (const [m, c] of nb) {
       const k = key(m), nd = d + c;
       if (nd < (dist.get(k) ?? Infinity)) { dist.set(k, nd); prev.set(k, n); todo.push(m); }
@@ -79,14 +83,16 @@ function plan(net, from, to) {
     for (let s = 0; s < path.length - 1; s++) {
       const a = path[s], b = path[s + 1];
       if (a.line !== b.line) continue;
+      const len = L[a.line].names.length, sign = L[a.line].ring ? ((b.i - a.i + len) % len === 1 ? 1 : -1) : Math.sign(b.i - a.i);
       const last = legs[legs.length - 1];
-      if (last && last.line === a.line && last.to === a.i) { last.to = b.i; continue; }
-      legs.push({ line: a.line, from: a.i, to: b.i });
+      if (last && last.line === a.line && last.to === a.i && last.sign === sign) { last.to = b.i; last.stops++; continue; }
+      legs.push({ line: a.line, from: a.i, to: b.i, stops: 1, sign });
     }
     return {
       minutes, legs: legs.map(g => {
-        const names = L[g.line].names;
-        return { line: g.line, from: names[g.from], to: names[g.to], stops: Math.abs(g.to - g.from), dir: g.to > g.from ? names[names.length - 1] : names[0] };
+        const names = L[g.line].names, R = RING[g.line];
+        return { line: g.line, chip: R ? (g.sign > 0 ? R.cw : R.ccw) : g.line, sign: g.sign, from: names[g.from], to: names[g.to], stops: g.stops,
+          dir: R ? (g.sign > 0 ? 'Ring ↻' : 'Ring ↺') : g.sign > 0 ? names[names.length - 1] : names[0] };
       }),
     };
   }
@@ -134,7 +140,7 @@ function routeHtml(r, from, to) {
   let h = '<div class="bnz-res">';
   r.legs.forEach((g, k) => {
     if (k) h += `<div class="bnz-xfer">⇄ overstappen in ${esc(g.from)}</div>`;
-    h += `<div class="bnz-leg">${chip(g.line)}<div><b>${esc(g.from)} → ${esc(g.to)}</b><small>richting ${esc(g.dir)} · ${g.stops} ${g.stops === 1 ? 'halte' : 'haltes'}</small></div></div>`;
+    h += `<div class="bnz-leg">${chip(g.chip || g.line)}<div><b>${esc(g.from)} → ${esc(g.to)}</b><small>richting ${esc(g.dir)} · ${g.stops} ${g.stops === 1 ? 'halte' : 'haltes'}</small></div></div>`;
   });
   const x = r.legs.length - 1;
   return h + `<div class="bnz-sum">± ${Math.max(1, r.minutes)} min <span>${x ? `${x} ${x === 1 ? 'overstap' : 'overstappen'}` : 'geen overstap'}</span></div></div>`;
@@ -144,7 +150,7 @@ function routeHtml(r, from, to) {
 function summary(to, game = globalThis.__berlinMetroGame) {
   const net = network(game), from = hereName(game), r = from && plan(net, from, to);
   if (!r || !r.legs.length) return null;
-  return r.legs.map(g => `<b style="color:${COLORS[g.line]}">${LABEL[g.line] || g.line}</b> richting <b>${esc(g.dir)}</b>`).join(' → ') + ` · ±${r.minutes} min`;
+  return r.legs.map(g => `<b style="color:${COLORS[g.chip || g.line]}">${LABEL[g.chip || g.line] || g.chip || g.line}</b> richting <b>${esc(g.dir)}</b>`).join(' → ') + ` · ±${r.minutes} min`;
 }
 
 function render(s, body, game) {
@@ -156,7 +162,7 @@ function render(s, body, game) {
     const p = game?.player;
     ui.sel = p?.__line || (Number.isInteger(p?.__u8FullStation) ? 'U8' : 'U2');
   }
-  const sig = [from, ui.dest, ui.sel, job, net.lines.map(l => l.id + l.names.length).join()].join('|');
+  const sig = [from, ui.dest, ui.sel, job, net.lines.map(l => l.id + l.names.length + (l.ride ? '' : '-')).join()].join('|');
   const root = body.querySelector(':scope > .bnz');
   if (root && root.__sig === sig) return true;          // niets veranderd: niet opnieuw opbouwen (scroll/invoer blijven)
   if (root && root.contains(document.activeElement)) return true;   // tijdens typen niets weggooien
@@ -173,7 +179,7 @@ function render(s, body, game) {
     </div>
     <div class="bnz-chips">${net.lines.map(l => `<button data-line="${l.id}" class="${l.id === ui.sel ? 'on' : ''}">${chip(l.id)}</button>`).join('')}</div>
     <div class="bnz-card" style="--c:${COLORS[line.id]}">
-      <div class="bnz-head">${chip(line.id)}<span>${esc(line.names[0])} ⇄ ${esc(line.names[line.names.length - 1])}${SUB[line.id] ? ' · ' + SUB[line.id] : ''} · ${line.names.length} haltes</span></div>
+      <div class="bnz-head">${chip(line.id)}<span>${line.ring ? 'Rondlijn' : `${esc(line.names[0])} ⇄ ${esc(line.names[line.names.length - 1])}`}${SUB[line.id] ? ' · ' + SUB[line.id] : ''} · ${line.names.length} haltes${line.ride ? '' : ' · treinen volgen binnenkort'}</span></div>
       <div class="bnz-stops">${line.names.map(n => {
         const o = others(n), isHere = from && norm(n) === norm(from), isDest = ui.dest && norm(n) === norm(ui.dest);
         return `<button class="bnz-stop${o.length ? ' x' : ''}${isHere ? ' here' : ''}${isDest ? ' dest' : ''}" data-stop="${esc(n)}"><span class="n">${esc(n)}${isHere ? ' 📍' : ''}${norm(n) === norm(HOME) ? ' 🏠' : ''}${job && norm(n) === norm(job) ? ' 📦' : ''}</span><span class="b">${o.map(id => chip(id, true)).join('')}</span></button>`;
@@ -200,5 +206,6 @@ function render(s, body, game) {
   return true;
 }
 
-export const PhoneNetz = { render, plan: (a, b) => plan(network(globalThis.__berlinMetroGame), a, b), summary, status: () => ({ ...status, ...ui }), setDest: d => { ui.dest = d; } };
+export const PhoneNetz = { render, plan: (a, b) => plan(network(globalThis.__berlinMetroGame), a, b), summary, here: (game = globalThis.__berlinMetroGame) => hereName(game), norm,
+  get dest() { return ui.dest; }, colors: COLORS, text: TEXT, label: LABEL, status: () => ({ ...status, ...ui }), setDest: d => { ui.dest = d; } };
 globalThis.BerlinPhoneNetz = PhoneNetz;
