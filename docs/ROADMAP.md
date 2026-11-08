@@ -1,6 +1,6 @@
 🚇 BERLIN LIFE — ROADMAP 3.0
 
-Bijgewerkt: 7 november 2026
+Bijgewerkt: 8 november 2026
 
 Hoofddoel: Eerst een groot, authentiek en leuk te verkennen Berlijn bouwen. Daarna die wereld steeds levendiger maken met economie, personages, banen, verhalen en keuzes die echte gevolgen hebben.
 
@@ -58,7 +58,7 @@ HOOFDSTUK 2 — BERLIJN UITBREIDEN
 
 Dit krijgt nu de hoogste ontwikkelprioriteit.
 
-Stand 7 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie) en U8. Bezig: U7a (Rudow ⇄ Möckernbrücke).
+Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig) en U8. Volgende: U9.
 
 ✅ Fase 43 — U1 en U3 (U1 30 okt, U3 31 okt 2026; U4 als extra 1 nov)
 
@@ -81,7 +81,7 @@ U3:
 
 Doel: Het bestaande netwerk voor het eerst substantieel uitbreiden.
 
-🟡 Fase 44 — U5, U6 en U7 (U5 ✅ 7 nov, U6 ✅ 7 nov, U7 bezig)
+✅ Fase 44 — U5, U6 en U7 (U5 ✅ 7 nov, U6 ✅ 7 nov, U7 ✅ 8 nov)
 
 U5 — ✅ volledig Hauptbahnhof ⇄ Hönow (26 stations, bovengronds oost met echte omgeving).
 
@@ -96,7 +96,7 @@ U6 — ✅ Alt-Mariendorf ⇄ Kurt-Schumacher-Platz (24 stations). Noordstuk tot
 * Friedrichstraße, Checkpoint Charlie en Tempelhof.
 * Noord-zuidverbinding door de stad.
 
-U7 — 🟡 in twee helften: U7a Rudow ⇄ Möckernbrücke (17 stations, overstap U8 Hermannplatz, U6 Mehringdamm, U1/U3 Möckernbrücke) — bezig; U7b Yorckstraße ⇄ Rathaus Spandau (23 stations, overstap U4, U3, U2).
+U7 — ✅ volledig Rudow ⇄ Rathaus Spandau (40 stations): U7a Rudow ⇄ Möckernbrücke (7 nov; overstap U8 Hermannplatz, U6 Mehringdamm, U1/U3 Möckernbrücke), U7b Yorckstraße ⇄ Rathaus Spandau (8 nov; overstap U4 Bayerischer Platz, U3 Fehrbelliner Platz, U2 Bismarckstraße).
 
 * Overstappen op bestaande lijnen, waaronder Bismarckstraße en Hermannplatz.
 * Lange, herkenbare route door verschillende stadsdelen.
@@ -569,7 +569,7 @@ Mijlpaal 3 — U5 uitbreiden ✅ (7 nov 2026: west en oost, Hauptbahnhof ⇄ Hö
 
 Begin bij Alexanderplatz richting Hauptbahnhof, met historische haltes zoals Museumsinsel en Brandenburger Tor. Daarna verdere uitbreiding.
 
-Mijlpaal 4 — U6 en U7 🟡 ⏭️ NU — U6 ✅ (7 nov); U7a Rudow ⇄ Möckernbrücke bezig, daarna U7b Yorckstraße ⇄ Rathaus Spandau. Daarna U9.
+Mijlpaal 4 — U6 en U7 ✅ — U6 ✅ (7 nov), U7 ✅ (U7a 7 nov, U7b 8 nov). ⏭️ Volgende: U9.
 
 Nieuwe stadsdelen en belangrijke overstapstations speelbaar maken.
 

@@ -626,6 +626,40 @@ function muralTex(style) {
       c.fillStyle = 'rgba(255,255,255,0.08)'; c.fillRect(0, 0, w, 6);
       return;
     }
+    if (style === 'siemens') {   // U7 Siemensdamm/Rohrdamm: Siemensstadt — fabriekshallen, schoorstenen en tandwielen
+      c.fillStyle = '#d9dee3'; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#7d4a36';
+      for (let i = 0; i < 5; i++) { const x = 20 + i * 205; c.fillRect(x, 70, 150, 80); for (let k = 0; k < 6; k++) { c.beginPath(); c.moveTo(x + k * 25, 70); c.lineTo(x + k * 25 + 25, 50); c.lineTo(x + k * 25 + 25, 70); c.fill(); } c.fillRect(x + 120, 18, 14, 52); }
+      c.fillStyle = '#e8d9a8'; for (let i = 0; i < 5; i++) for (let k = 0; k < 5; k++) c.fillRect(30 + i * 205 + k * 26, 92, 14, 22);
+      c.strokeStyle = '#1f5f8a'; c.lineWidth = 7;
+      for (let i = 0; i < 5; i++) { const cx = 190 + i * 205, cy = 38, r = 20; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.stroke(); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; c.beginPath(); c.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); c.lineTo(cx + Math.cos(a) * (r + 9), cy + Math.sin(a) * (r + 9)); c.stroke(); } }
+      c.fillStyle = '#3a4048'; c.fillRect(0, h - 10, w, 10);
+      return;
+    }
+    if (style === 'paulstern') {   // U7 Paulsternstraße: bloemenweide onder een sterrenhemel
+      const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#1d2a4a'); g.addColorStop(0.55, '#3a5a6a'); g.addColorStop(0.56, '#4f7a3a'); g.addColorStop(1, '#2f5a2a');
+      c.fillStyle = g; c.fillRect(0, 0, w, h);
+      c.fillStyle = '#f5e9a8'; for (let i = 0; i < 40; i++) { c.beginPath(); c.arc((i * 97) % w, 8 + (i * 53) % 70, 1.5 + (i % 3), 0, Math.PI * 2); c.fill(); }
+      for (let i = 0; i < 70; i++) {
+        const x = (i * 61) % w + 6, y = 100 + (i * 29) % 50;
+        c.strokeStyle = '#2a4a1a'; c.lineWidth = 2; c.beginPath(); c.moveTo(x, y); c.lineTo(x, h); c.stroke();
+        c.fillStyle = ['#e04a3a', '#f0c23a', '#ffffff', '#8a5ad0', '#f08ab0'][i % 5]; c.beginPath(); c.arc(x, y, 6, 0, Math.PI * 2); c.fill();
+      }
+      return;
+    }
+    if (style === 'zitadelle') {   // U7 Zitadelle: de Zitadelle Spandau met de Juliusturm, bakstenen gewelven
+      c.fillStyle = '#a8603e'; c.fillRect(0, 0, w, h);
+      c.strokeStyle = 'rgba(60,30,20,0.45)'; c.lineWidth = 1;
+      for (let y = 0; y < h; y += 12) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); for (let x = (y / 12) % 2 ? 0 : 14; x < w; x += 28) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + 12); c.stroke(); } }
+      for (let i = 0; i < 4; i++) {
+        const x = 40 + i * 260;
+        c.fillStyle = '#d8cfbd'; c.fillRect(x, 60, 170, 90); c.fillRect(x + 60, 14, 50, 60);
+        for (let k = 0; k < 5; k++) c.fillRect(x + 58 + k * 11, 6, 7, 10);
+        for (let k = 0; k < 9; k++) c.fillRect(x + k * 20, 50, 12, 12);
+        c.fillStyle = '#3a2a22'; c.beginPath(); c.arc(x + 85, 150, 22, Math.PI, 0); c.fill(); c.fillRect(x + 78, 30, 14, 20);
+      }
+      return;
+    }
     if (style === 'luftbruecke') {   // U6 Platz der Luftbrücke: "Rosinenbomber" boven Tempelhof (1948/49)
       const g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#6f97b8'); g.addColorStop(1, '#c9d9e3'); c.fillStyle = g; c.fillRect(0, 0, w, h);
       c.fillStyle = '#7a7f84'; c.fillRect(0, h - 26, w, 26);                                   // het vliegveld

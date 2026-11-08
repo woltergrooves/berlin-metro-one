@@ -1,4 +1,4 @@
-// Berlin Life — U7 (Mijlpaal 4, deel U7a). Rudow ⇄ Möckernbrücke, 17 stations, volledig ondergronds.
+// Berlin Life — U7 (Mijlpaal 4). Rudow ⇄ Rathaus Spandau, 40 stations, volledig ondergronds (U7a 7 nov, U7b 8 nov 2026).
 //
 // Bron: OpenStreetMap-route-relatie 2678985 (U Rudow ⇒ S+U Rathaus Spandau; haltecoördinaten, alle sporen tunnel,
 // layer −1/−2/−3). De U7 (40 stations) wordt in twee helften gebouwd. U7a = het oostelijke/zuidelijke deel tot en met
@@ -12,6 +12,9 @@
 //   Hermannplatz — hoge hal (7 m) uit 1926 (profiel vault), overstap U8.
 //   Mehringdamm — overstap U6 (in werkelijkheid kruisperron).
 //   Möckernbrücke — overstap U1/U3 (de U1 rijdt hier op het viaduct boven het Landwehrkanaal).
+//   U7b: Bayerischer Platz (U4), Fehrbelliner Platz (U3, Rümmler-rood/oranje), Bismarckstraße (U2),
+//   Siemensdamm/Rohrdamm (Siemensstadt, industrie), Paulsternstraße (bloemenweide), Zitadelle (Juliusturm),
+//   Rathaus Spandau (hoge hal met kroonluchters, profiel vault).
 //
 // Speltekening (zie src/lines/LineWorld.js): eigen gebied op z = −5600 (U1 −2600, U3 −3200, U4 −3800, U5 −4400, U6 −5000),
 // langs de x-as, 150 m per station. Rudow = x 0, +x = richting Möckernbrücke (later Rathaus Spandau).
@@ -24,7 +27,7 @@ export const U7_LINE = {
   headwayMinutes: 5,
   spacing: 150,
   origin: { x: 0, y: 0, z: -5600 }, // 600 m naast de U6 (z −5000); ver van U2 (x≈0, z ≥ −1080) en U8 (z≈49)
-  termini: ['rudow', 'moeckernbruecke'],
+  termini: ['rudow', 'rathaus-spandau'],
 };
 
 // [id, naam, lat, lon, ligging, perron, overstap, wand, accent, profiel]
@@ -46,6 +49,30 @@ const RAW = [
   ['gneisenaustrasse',        'Gneisenaustraße',         52.4914508, 13.3952569, 'tunnel', 'island', [],                          'e6dcc6', '6a3a2a', null],
   ['mehringdamm',             'Mehringdamm',             52.4944635, 13.3889251, 'tunnel', 'island', ['U6'],                      'f0e2b8', '8a4a2a', null],
   ['moeckernbruecke',         'Möckernbrücke',           52.4987640, 13.3827271, 'tunnel', 'island', ['U1', 'U3'],                'dde4d6', '3a5a4a', null],
+  // U7b — Yorckstraße ⇄ Rathaus Spandau (8 nov 2026), achteraan: index 17 … 39, x 2550 … 5850.
+  ['yorckstrasse',            'Yorckstraße',             52.4930453, 13.3703794, 'tunnel', 'island', ['S1', 'S2', 'S25', 'S26'],  'e9dc9a', '5a6a1a', null],
+  ['kleistpark',              'Kleistpark',              52.4904543, 13.3598438, 'tunnel', 'island', [],                          'cfe0c8', '2f5a2f', null],
+  ['eisenacher-strasse',      'Eisenacher Straße',       52.4895710, 13.3498022, 'tunnel', 'island', [],                          'f0c9a8', '8a3a1a', null],
+  ['bayerischer-platz',       'Bayerischer Platz',       52.4886909, 13.3409909, 'tunnel', 'island', ['U4'],                      'c8d8ea', '1f4a8a', null],
+  ['berliner-strasse',        'Berliner Straße',         52.4872916, 13.3304957, 'tunnel', 'island', ['U9'],                      'f2e6c4', 'a0502a', null],
+  ['blissestrasse',           'Blissestraße',            52.4864661, 13.3216144, 'tunnel', 'island', [],                          'e0d0e6', '5a2a6a', null],
+  ['fehrbelliner-platz',      'Fehrbelliner Platz',      52.4906784, 13.3141087, 'tunnel', 'island', ['U3'],                      'f2c38a', 'b8461e', null],
+  ['konstanzer-strasse',      'Konstanzer Straße',       52.4948205, 13.3089766, 'tunnel', 'island', [],                          'd2e4ec', '1a5a7a', null],
+  ['adenauerplatz',           'Adenauerplatz',           52.5002423, 13.3073990, 'tunnel', 'island', [],                          'e6d8c4', '6a4a2a', null],
+  ['wilmersdorfer-strasse',   'Wilmersdorfer Straße',    52.5068976, 13.3066701, 'tunnel', 'island', ['S3', 'S5', 'S7', 'S9'],    'efe7c8', '7a6a1a', null],
+  ['bismarckstrasse',         'Bismarckstraße',          52.5119125, 13.3051930, 'tunnel', 'island', ['U2'],                      'f2d9a0', '8a2a1a', null],
+  ['richard-wagner-platz',    'Richard-Wagner-Platz',    52.5171293, 13.3066452, 'tunnel', 'island', [],                          'e8c8c0', '7a1f24', null],
+  ['mierendorffplatz',        'Mierendorffplatz',        52.5263638, 13.3048917, 'tunnel', 'island', [],                          'dfe6c6', '4a6a1a', null],
+  ['jungfernheide',           'Jungfernheide',           52.5304169, 13.3007460, 'tunnel', 'island', ['S41', 'S42', 'RE', 'RB'],  'd6dde6', '2a3a5a', null],
+  ['jakob-kaiser-platz',      'Jakob-Kaiser-Platz',      52.5363433, 13.2931796, 'tunnel', 'island', [],                          'f0e0b0', '8a6a12', null],
+  ['halemweg',                'Halemweg',                52.5366817, 13.2859108, 'tunnel', 'island', [],                          'e4ecd8', '3a6a3a', null],
+  ['siemensdamm',             'Siemensdamm',             52.5368161, 13.2727557, 'tunnel', 'island', [],                          'e8ecef', '1f5f8a', { kind: 'murals', style: 'siemens' }],
+  ['rohrdamm',                'Rohrdamm',                52.5370337, 13.2626304, 'tunnel', 'island', [],                          'd8dbe0', '3a4048', { kind: 'murals', style: 'siemens' }],
+  ['paulsternstrasse',        'Paulsternstraße',         52.5380626, 13.2476544, 'tunnel', 'island', [],                          'cfe2c2', '2a5a2a', { kind: 'murals', style: 'paulstern' }],
+  ['haselhorst',              'Haselhorst',              52.5387660, 13.2328804, 'tunnel', 'island', [],                          'f0dcc0', '8a4a1a', null],
+  ['zitadelle',               'Zitadelle',               52.5376748, 13.2175554, 'tunnel', 'island', [],                          'd8c8b0', '6a3a22', { kind: 'murals', style: 'zitadelle' }],
+  ['altstadt-spandau',        'Altstadt Spandau',        52.5391065, 13.2056046, 'tunnel', 'island', [],                          'c9b49a', '5a2a1a', null],
+  ['rathaus-spandau',         'Rathaus Spandau',         52.5353827, 13.1997806, 'tunnel', 'island', ['S3', 'S9', 'RE', 'RB'],    'e6dcc0', '2a4a3a', { kind: 'vault' }],
 ];
 
 // Overstappen. line/station = waar je uitkomt; color/towards = het overstapbord op het U7-perron.
@@ -56,9 +83,18 @@ export const U7_TRANSFERS = {
   hermannplatz: { line: 'U8', color: '#224f86', station: 20, towards: 'Wittenau · Hermannstraße' },
   mehringdamm: { line: 'U6', color: '#8c6dab', station: 'mehringdamm', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },
   moeckernbruecke: { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'moeckernbruecke', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
+  // U7b: U4, U3 en U2 open; S-Bahn, U9 en regionaal verkeer nog dicht.
+  yorckstrasse: { line: 'S', label: 'S1 S2 S25 S26', color: '#008d4f', towards: 'Nord-Süd-Bahn · S1 S2 S25 S26', closed: true },
+  'bayerischer-platz': { line: 'U4', color: '#ffd900', text: '#1a1a1a', station: 'bayerischer-platz', towards: 'Nollendorfplatz · Innsbrucker Platz' },
+  'berliner-strasse': { line: 'U9', color: '#ff7300', towards: 'Osloer Straße · Rathaus Steglitz', closed: true },
+  'fehrbelliner-platz': { line: 'U3', color: '#16683d', station: 'fehrbelliner-platz', towards: 'Warschauer Str. · Krumme Lanke' },
+  'wilmersdorfer-strasse': { line: 'S', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · S3 S5 S7 S9', closed: true },
+  bismarckstrasse: { line: 'U2', color: '#da421e', station: 'bismarckstrasse', towards: 'Pankow · Ruhleben' },
+  jungfernheide: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
+  'rathaus-spandau': { line: 'S', label: 'S3 S9', color: '#008d4f', towards: 'Stadtbahn · S3 S9 · Regionalverkehr', closed: true },
 };
 
-// Bord op het U8-perron Hermannplatz (terug naar de U7), zie LineTransfers.
+// Bord op het U8-perron Hermannplatz en (sinds U7b) op het U2-perron Bismarckstraße (terug naar de U7), zie LineTransfers.
 export const U7_SIGN = { line: 'U7', color: '#528dba', towards: 'Rudow · Rathaus Spandau', hint: 'Übergang U7' };
 
 /** Stations van de U7-wereld. */

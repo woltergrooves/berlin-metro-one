@@ -1,4 +1,4 @@
-# U7 — in twee helften (Mijlpaal 4 deel 2)
+# U7 — in twee helften (Mijlpaal 4 deel 2) — ✅ volledig sinds 8 nov 2026
 
 Bron: OSM-relatie 2678985 (U Rudow ⇒ S+U Rathaus Spandau, 40 haltes; alle sporen tunnel, layer −1…−3) en 2678986 (andere richting).
 
@@ -23,11 +23,24 @@ Controleert: stations 17/17, hek S Neukölln, overstappen 6/6 (U7⇄U6, U7⇄U1,
 Console: `BerlinLines.U7.enter(i)`, `.board(i, dir)`, `.exit(i)`, `BerlinLines.Transfers.toU7(i)`, `.toLine('U7', id)`.
 Let op: `u6-test.mjs` verwacht op Mehringdamm nog een hek (U7) → verouderd voor dat onderdeel.
 
-## U7b — Yorckstraße ⇄ Rathaus Spandau (volgt)
-Yorckstraße (S1/S2), Kleistpark, Eisenacher Straße, Bayerischer Platz (U4), Berliner Straße (U9), Blissestraße, Fehrbelliner Platz (U3),
-Konstanzer Straße, Adenauerplatz, Wilmersdorfer Straße (S), Bismarckstraße (U2), Richard-Wagner-Platz, Mierendorffplatz, Jungfernheide (S),
-Jakob-Kaiser-Platz, Halemweg, Siemensdamm, Rohrdamm, Paulsternstraße, Haselhorst, Zitadelle, Altstadt Spandau, Rathaus Spandau (S).
-Openen: U4 Bayerischer Platz, U3 Fehrbelliner Platz, U2 Bismarckstraße (bord op het U2-perron).
+## U7b — Yorckstraße ⇄ Rathaus Spandau (8 nov 2026)
+23 stations achteraan: **Yorckstraße = index 17 (x 2550) … Rathaus Spandau = index 39 (x 5850)**. Alles tunnel (OSM-wegen layer −1…−3).
+U7 nu volledig: 40 stations, **5 treinen per richting**, DFI-eindpunten Rudow / Rathaus Spandau.
+
+- Profielen: Rathaus Spandau `vault` (hoge hal); `murals` met nieuwe stijlen `siemens` (Siemensdamm, Rohrdamm: fabriekshallen + tandwielen),
+  `paulstern` (Paulsternstraße: bloemenweide onder sterren) en `zitadelle` (Zitadelle: Juliusturm, baksteen). Tegelkleur per station.
+- **Overstappen open:**
+  - Bayerischer Platz U7 ⇄ U4 (U4-hek weg; U4-bord met donkere letters).
+  - Fehrbelliner Platz U7 ⇄ U3 (U3-hek weg).
+  - Bismarckstraße U7 → U2 (−z-einde U2-perron) en terug via het **blauwe U7-bord aan het −z-einde van het U2-perron Bismarckstraße** (zelfde `U7_SIGN` als op het U8-perron Hermannplatz).
+- **Dicht:** Yorckstraße (S1/S2/S25/S26), Berliner Straße (U9), Wilmersdorfer Straße (Stadtbahn), Jungfernheide (Ring), Rathaus Spandau (S3/S9).
+- Buurtpakketten voor de nieuwe haltes (`ONLY_LINES=U7`; Bayerischer Platz, Fehrbelliner Platz, Bismarckstraße bestonden al).
+
+### Test U7b
+`tools/consolidation/u7b-test.mjs <url> <map> [kwaliteit] [uur]` (env `SKIP=1`, `NORIDE=1`). Controleert: 40 stations, stations 17–39,
+hekken Yorckstraße/Berliner Straße, U7⇄U4, U7⇄U3, U7⇄U2 (blauw bord), U7a-controle Möckernbrücke → U1, 10 treinen + DFI-eindpunt,
+meerijden Altstadt Spandau → Rathaus Spandau, uitgang Rathaus Spandau → Street View.
+Let op: `u7-test.mjs` verwacht nog 6 treinen (nu 10); `u3c-test`/`u4-test` verwachten nog een U7-hek.
 
 ## Bekend / later
 - Treinen = HK-model (echte U7 rijdt Großprofil).

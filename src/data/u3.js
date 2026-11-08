@@ -54,7 +54,7 @@ const RAW = [
 // met het echte overstapbord, maar afgesloten (closed) — de HUD zegt dat die lijn later komt.
 export const U3_TRANSFERS = {
   'heidelberger-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
-  'fehrbelliner-platz': { line: 'U7', color: '#528dba', towards: 'Rathaus Spandau · Rudow', closed: true },
+  'fehrbelliner-platz': { line: 'U7', color: '#528dba', station: 'fehrbelliner-platz', towards: 'Rathaus Spandau · Rudow' },
   spichernstrasse:      { line: 'U9', color: '#ff7300', towards: 'Osloer Straße · Rathaus Steglitz', closed: true },
 };
 
