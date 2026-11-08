@@ -1,6 +1,6 @@
 🚇 BERLIN LIFE — ROADMAP 3.0
 
-Bijgewerkt: 9 november 2026 (S-Bahn Stadtbahn afgerond)
+Bijgewerkt: 9 november 2026 (Ringbahn deel a + routeaanwijzing in de HUD)
 
 Hoofddoel: Eerst een groot, authentiek en leuk te verkennen Berlijn bouwen. Daarna die wereld steeds levendiger maken met economie, personages, banen, verhalen en keuzes die echte gevolgen hebben.
 
@@ -115,7 +115,7 @@ Iedere lijn wordt afzonderlijk gebouwd en getest.
 
 Onderdelen (zie het werkplan onderaan):
 * S-Bahn Stadtbahn S3/S5/S7/S9 Westkreuz ⇄ Ostkreuz — ✅ (a 8 nov: 14 stations op het gemetselde boogviaduct met Fernbahnsporen, grote stationshallen, S-Bahnborden, uitgangen; b 9 nov: eigen treinmodel BR 481, S5 + S3/S7/S9 met echte eindpunten, S-Bahn-vertrekbord, ICE/RE als decor; c 9 nov: overstappen op U1/U3, U2, U5, U6, U7, U8, U9 met keuzevenster bij Zoo en Alexanderplatz; d 9 nov: echte OSM-omgeving per station, Spreebruggen, Fernsehturm).
-* Ringbahn S41/S42 — ⬜ 27 stations, verbindt bijna alle U-lijnen.
+* Ringbahn S41/S42 — 🟡 a ✅ 9 nov: 27 stations rond het centrum (ingravingen en dijken, rondlopend spoor, uitgangen + Street View, overstappen zichtbaar maar nog dicht). Volgende: b treinen S41 ↻ / S42 ↺, c overstappen, d omgeving.
 * Nord-Süd-tunnel S1/S2/S25 — ⬜ met de spookstations-geschiedenis.
 * Tram M10 (en later M1/M4) — ⬜.
 * Bus 100 — ⬜ naast Bus 200.
@@ -244,6 +244,8 @@ Activiteiten ontwikkelen zich in niveaus:
 ⸻
 
 HOOFDSTUK 4 — DAGELIJKS LEVEN EN ECONOMIE
+
+Routeaanwijzing (9 nov 2026): kies je in de BVG-app een bestemming, dan staat de route bovenin het scherm (lijn, richting, haltes, overstap, ‘stap uit bij de volgende halte’), ook tijdens het rijden — zonder de telefoon te openen.
 
 Telefoon (8 nov 2026): de in-game telefoon ziet eruit als een echte smartphone — toestelframe met Dynamic Island, statusbalk, beginscherm met widgets (klok, portemonnee, ticket), app-iconen en dock, apps in donkere modus. Inhoud ongewijzigd (Thuis, Jobs, BVG-lijnplan, Chats, Plekken, Stad).
 
