@@ -58,7 +58,7 @@ HOOFDSTUK 2 — BERLIJN UITBREIDEN
 
 Dit krijgt nu de hoogste ontwikkelprioriteit.
 
-Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig) en U8. Volgende: U9.
+Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig), U8 en U9 (8 nov) — alle U-Bahnlijnen. Volgende: Fase 45 (S-Bahn/tram) of Mijlpaal 5.
 
 ✅ Fase 43 — U1 en U3 (U1 30 okt, U3 31 okt 2026; U4 als extra 1 nov)
 
@@ -569,7 +569,7 @@ Mijlpaal 3 — U5 uitbreiden ✅ (7 nov 2026: west en oost, Hauptbahnhof ⇄ Hö
 
 Begin bij Alexanderplatz richting Hauptbahnhof, met historische haltes zoals Museumsinsel en Brandenburger Tor. Daarna verdere uitbreiding.
 
-Mijlpaal 4 — U6 en U7 ✅ — U6 ✅ (7 nov), U7 ✅ (U7a 7 nov, U7b 8 nov). ⏭️ Volgende: U9.
+Mijlpaal 4 — U6 en U7 ✅ — U6 ✅ (7 nov), U7 ✅ (U7a 7 nov, U7b 8 nov). U9 ✅ (8 nov, Osloer Straße ⇄ Rathaus Steglitz) — alle U-Bahnlijnen speelbaar. GOD-menu: één overzichtelijk teleportblok.
 
 Nieuwe stadsdelen en belangrijke overstapstations speelbaar maken.
 
