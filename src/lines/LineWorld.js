@@ -33,7 +33,13 @@ const TEX = new Map();
 function tex(key, make) { if (!TEX.has(key)) TEX.set(key, make()); return TEX.get(key); }
 
 // BVG-hangbord (zelfde stijl als StationProfiles): wit paneel, lijnsymbool, naam zwart.
-function signTex(name, line, color) {
+function signTex(name, line, color, sbahn = false) {
+  if (sbahn) return tex('ssign:' + name, () => canvasTex(1024, 176, (x) => {   // S-Bahn Berlin: donkergroen bord, wit S-logo, witte naam
+    x.fillStyle = '#0b6a3a'; x.fillRect(0, 0, 1024, 176); x.fillStyle = '#f2f2ee'; x.fillRect(0, 0, 1024, 6); x.fillRect(0, 170, 1024, 6);
+    x.fillStyle = '#f2f2ee'; x.beginPath(); x.arc(84, 88, 56, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#0b6a3a'; x.font = '700 80px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('S', 84, 93);
+    x.fillStyle = '#f6f5f0'; x.textAlign = 'left'; x.font = `700 ${name.length > 18 ? 60 : 72}px Arial`; x.fillText(name, 170, 92, 830);
+  }));
   return tex('sign:' + line + name, () => canvasTex(1024, 176, (x) => {
     x.fillStyle = '#f6f5f0'; x.fillRect(0, 0, 1024, 176); x.fillStyle = '#c9c7c0'; x.fillRect(0, 168, 1024, 8);
     x.fillStyle = color; x.fillRect(24, 34, 108, 108);
@@ -203,7 +209,7 @@ function tracks(kit, m, cs, x0, x1) {
   for (const tz of cs.tracks) {
     kit.box(m.bed, len, 0.3, 3.0, cx, RAIL_Y - 0.15, tz);
     for (const s of [-0.72, 0.72]) kit.box(m.rail, len, 0.12, 0.07, cx, RAIL_Y + 0.12, tz + s);
-    kit.box(m.rail, len, 0.1, 0.12, cx, RAIL_Y + 0.1, tz + Math.sign(tz || 1) * 1.28);   // stroomrail aan de buitenkant
+    if (!cs.noThird) kit.box(m.rail, len, 0.1, 0.12, cx, RAIL_Y + 0.1, tz + Math.sign(tz || 1) * 1.28);   // stroomrail aan de buitenkant (Fernbahn: geen)
     for (let x = x0 + 0.35; x < x1; x += 0.75) kit.box(m.sleeper, 0.24, 0.08, 2.1, x, RAIL_Y + 0.02, tz);
   }
 }
@@ -231,7 +237,7 @@ function stationKit(line, st, m) {
     for (const x of [-27, -9, 9, 27]) { kit.box(m.bench, 2.1, 0.08, 0.5, x, 0.45, zc); kit.box(m.steel, 0.1, 0.45, 0.4, x - 0.9, 0.22, zc); kit.box(m.steel, 0.1, 0.45, 0.4, x + 0.9, 0.22, zc); }
   }
   // Hang- en wandborden.
-  const sign = std('Line_Sign_' + st.id, '#ffffff', { map: signTex(st.name, line.id, line.color), roughness: 0.6 });
+  const sign = std('Line_Sign_' + st.id, '#ffffff', { map: signTex(st.name, line.id, line.color, line.sbahn), roughness: 0.6 });
   const signY = viaduct ? 2.75 : 3.0;
   for (const [z0, z1] of cs.plat) {
     const zc = cs.plat.length === 1 ? 0 : (z0 + z1) / 2;
@@ -526,6 +532,7 @@ function vault(kit, m, st, W, x0, x1) {
 
 // Viaduct: dek, stalen liggers, kolommen tot de straat, leuningen; bij een station perronkappen.
 function viaductShell(kit, m, st, cs, x0, x1, isStation, elev0 = st.elev, elev1 = st.elev, withStreet = true, city = kit) {
+  if (st.arches) return archShell(kit, m, st, cs, x0, x1, isStation, elev0, elev1, withStreet, city);   // S-Bahn Stadtbahn
   const len = x1 - x0, cx = (x0 + x1) / 2, deckW = isStation || cs.wide ? cs.wall * 2 : 9.4;   // breed naast een middenperron
   if (st.embank) embankment(kit, m, x0, x1, deckW, elev0, elev1);   // U5 oost: bovengronds op een (lage) aarden baan
   else {
@@ -725,6 +732,7 @@ function slab(kit, mat, x0, x1, z0, y0, z1, y1, th = 0.1) {
 }
 function stationHall(kit, m, st, cs, x0, x1) {
   const P = st.profile, len = x1 - x0, cx = (x0 + x1) / 2;
+  if (P.hall === 'hall-stadtbahn') return stadtbahnHall(kit, m, st, x0, x1);
   const steel = std('Line_HallSteel_' + st.id, P.steel, { roughness: 0.5, metalness: 0.4 });
   const roof = std('Line_HallRoof_' + st.id, P.roof, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
   const glass = std('Line_HallGlass', '#b9d0d6', { roughness: 0.08, metalness: 0.2, transparent: true, opacity: 0.26, side: THREE.DoubleSide, depthWrite: false });
@@ -851,10 +859,16 @@ function street(kit, m, st, x0, x1, elev0, elev1) {
     const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, (x0 + uv.getX(i) * len) / 4, (z0 + uv.getY(i) * (z1 - z0)) / 4);
     g.computeVertexNormals(); g.translate(cx, 0, (z0 + z1) / 2); kit.add(mat, g);
   };
-  if (st.embank) { geoGround(m.grass, -15, 15, -0.02); geoGround(m.asphalt, -24, -15, 0); geoGround(m.asphalt, 15, 24, 0); geoGround(m.pavement, -26, -24, 0.15); geoGround(m.pavement, 24, 26, 0.15); }
+  const A = st.arches, facZ = A ? [-34, 46] : [-32, 32], treeZ = A ? [-15, 27] : [-21, 21];
+  if (A) {   // Stadtbahn: straat langs beide kanten van het gemetselde viaduct (z −7,6 … 19,6)
+    geoGround(m.pavement, -12, -7.6, 0.15); geoGround(m.asphalt, -26, -12, 0); geoGround(m.pavement, -28, -26, 0.15);
+    geoGround(m.pavement, 19.6, 24, 0.15); geoGround(m.asphalt, 24, 38, 0); geoGround(m.pavement, 38, 40, 0.15);
+    geoGround(m.asphalt, -130, -28, 0.05); geoGround(m.asphalt, 40, 130, 0.05);
+  }
+  else if (st.embank) { geoGround(m.grass, -15, 15, -0.02); geoGround(m.asphalt, -24, -15, 0); geoGround(m.asphalt, 15, 24, 0); geoGround(m.pavement, -26, -24, 0.15); geoGround(m.pavement, 24, 26, 0.15); }
   else geoGround(m.asphalt, -18, 18, 0);                 // middenberm + rijbanen
-  if (!st.embank) { geoGround(m.pavement, -26, -18, 0.15); geoGround(m.pavement, 18, 26, 0.15); }
-  geoGround(m.asphalt, -130, -26, 0.05); geoGround(m.asphalt, 26, 130, 0.05);   // achter de gevels (zijstraten, binnenplaatsen)
+  if (!st.embank && !A) { geoGround(m.pavement, -26, -18, 0.15); geoGround(m.pavement, 18, 26, 0.15); }
+  if (!A) geoGround(m.asphalt, -130, -26, 0.05), geoGround(m.asphalt, 26, 130, 0.05);   // achter de gevels (zijstraten, binnenplaatsen)
   // Gevels aan beide kanten (straatblokken, af en toe een gat voor een zijstraat).
   const seed = st.index * 31;
   for (const s of [-1, 1]) {
@@ -866,19 +880,156 @@ function street(kit, m, st, x0, x1, elev0, elev1) {
       const ww = Math.min(w, x1 - x); if (ww < 4) break;
       const t = (x + ww / 2 - x0) / len, g = -(elev0 + (elev1 - elev0) * t);
       const f = std('Line_Facade_' + ((seed + k) % 8), '#ffffff', { map: facadeTex((seed + k) % 8), roughness: 0.9 });
-      const b = kit.box(f, ww, hgt, 12, x + ww / 2, g + hgt / 2, s * 32);
+      const b = kit.box(f, ww, hgt, 12, x + ww / 2, g + hgt / 2, facZ[s > 0 ? 1 : 0]);
       // UV per gevel: hele textuur over de voorkant, herhaald per ±14 m.
       const uv = b.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * ww / 14, uv.getY(i));
-      kit.box(m.dark, ww, 0.6, 12.4, x + ww / 2, g + hgt + 0.3, s * 32);
+      kit.box(m.dark, ww, 0.6, 12.4, x + ww / 2, g + hgt + 0.3, facZ[s > 0 ? 1 : 0]);
       x += ww; k++;
     }
     // Straatbomen op de stoep.
     for (let tx = x0 + 5 + (seed % 5); tx < x1; tx += 11) {
       const t = (tx - x0) / len, g = -(elev0 + (elev1 - elev0) * t);
-      kit.box(m.trunk, 0.35, 3.2, 0.35, tx, g + 1.6, s * 21);
-      const crown = new THREE.IcosahedronGeometry(2.6, 1); crown.scale(1, 1.15, 1); crown.translate(tx, g + 5.4, s * 21); kit.add(m.tree, crown);
+      kit.box(m.trunk, 0.35, 3.2, 0.35, tx, g + 1.6, treeZ[s > 0 ? 1 : 0]);
+      const crown = new THREE.IcosahedronGeometry(2.6, 1); crown.scale(1, 1.15, 1); crown.translate(tx, g + 5.4, treeZ[s > 0 ? 1 : 0]); kit.add(m.tree, crown);
     }
   }
+}
+
+// ── S-Bahn Stadtbahn (Fase 45): gemetseld boogviaduct met vier sporen ─────────────────────────────
+// Dwarsprofiel: S-Bahn-middenperron (sporen ±5,15) aan de −z-kant, Fernbahn (10,4 / 17,4, bovenleiding) aan +z.
+export const ARCH_Z = [-7.6, 19.6];
+const FERN = { tracks: [10.4, 17.4], noThird: true };
+const BAY = 15;                            // één viaductboog per 15 m
+function brickFill(x, w, h, base = [150, 62, 44], seed = 1) {
+  x.fillStyle = '#6a3226'; x.fillRect(0, 0, w, h);
+  let r0 = seed * 9301; const rnd = () => ((r0 = (r0 * 9301 + 49297) % 233280) / 233280);
+  for (let r = 0; r < h / 12; r++) for (let c = -1; c < w / 30 + 1; c++) {
+    const o = r % 2 ? 15 : 0, v = rnd();
+    x.fillStyle = `rgb(${base[0] + v * 40 | 0},${base[1] + v * 22 | 0},${base[2] + v * 14 | 0})`; x.fillRect(c * 30 + o + 1, r * 12 + 1, 28, 10);
+  }
+}
+// Eén boog: pilasters, kroonlijst, en in de boog een winkelpui (0), café met luifel (1) of dichtgemetseld met deur (2).
+function archTex(v) {
+  return tex('arch' + v, () => canvasTex(512, 512, (x, w, h) => {
+    brickFill(x, w, h, [150, 62, 44], v + 3);
+    x.fillStyle = 'rgba(40,14,8,0.28)'; x.fillRect(0, 0, 34, h); x.fillRect(w - 34, 0, 34, h);          // pilasters
+    x.fillStyle = '#b9ad98'; x.fillRect(0, 0, w, 30); x.fillStyle = '#8f8372'; x.fillRect(0, 30, w, 8);     // kroonlijst
+    const ax0 = 62, ax1 = w - 62, sy = 230, rx = (ax1 - ax0) / 2, ry = 160, cx = w / 2;
+    const path = () => { x.beginPath(); x.moveTo(ax0, h); x.lineTo(ax0, sy); x.ellipse(cx, sy, rx, ry, 0, Math.PI, 0); x.lineTo(ax1, h); x.closePath(); };
+    x.strokeStyle = '#c9bba2'; x.lineWidth = 22; path(); x.stroke();                                       // boogstenen
+    x.save(); path(); x.clip();
+    if (v === 2) {
+      brickFill(x, w, h, [128, 54, 40], 11);
+      x.fillStyle = '#2a2e30'; x.fillRect(cx - 50, h - 190, 100, 190);                                       // deur
+      for (const wx of [ax0 + 40, ax1 - 130]) { x.fillStyle = '#3a4a52'; x.fillRect(wx, sy - 30, 90, 110); }
+    } else {
+      const g = x.createLinearGradient(0, sy - ry, 0, h); g.addColorStop(0, v ? '#5a3a22' : '#3c4a50'); g.addColorStop(1, v ? '#d9a35a' : '#e9c98a');
+      x.fillStyle = g; x.fillRect(0, 0, w, h);
+      x.fillStyle = '#23272a'; for (let mx = ax0; mx <= ax1; mx += (ax1 - ax0) / 4) x.fillRect(mx - 5, sy - ry, 10, h);   // stijlen
+      x.fillRect(ax0, sy - 10, ax1 - ax0, 14); x.fillRect(ax0, h - 60, ax1 - ax0, 60);                       // kalf + borstwering
+      if (v === 1) { for (let i = 0; i < 8; i++) { x.fillStyle = i % 2 ? '#f2efe6' : '#8a2a22'; x.fillRect(ax0 + i * (ax1 - ax0) / 8, sy + 20, (ax1 - ax0) / 8, 46); } }
+      else { x.fillStyle = '#1b2a33'; x.fillRect(ax0 + 30, sy + 24, ax1 - ax0 - 60, 40); x.fillStyle = '#f2d36b'; x.font = '700 30px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(v === 3 ? 'Bäckerei' : 'Späti', cx, sy + 45); }
+    }
+    x.restore();
+    x.fillStyle = 'rgba(0,0,0,0.25)'; x.fillRect(0, h - 10, w, 10);
+  }));
+}
+// Hackescher Markt: bakstenen hallenwand met hoge boogramen (per 7,5 m).
+function hallWindowTex() {
+  return tex('hallwin', () => canvasTex(256, 512, (x, w, h) => {
+    brickFill(x, w, h, [160, 70, 48], 5);
+    x.fillStyle = '#e2d8c4'; x.fillRect(0, 0, w, 24); x.fillRect(0, h - 70, w, 14);
+    x.fillStyle = '#d8ccb4'; x.beginPath(); x.moveTo(52, h - 70); x.lineTo(52, 170); x.arc(w / 2, 170, w / 2 - 52, Math.PI, 0); x.lineTo(w - 52, h - 70); x.fill();
+    x.fillStyle = '#9fb7c2'; x.beginPath(); x.moveTo(64, h - 80); x.lineTo(64, 172); x.arc(w / 2, 172, w / 2 - 64, Math.PI, 0); x.lineTo(w - 64, h - 80); x.fill();
+    x.fillStyle = '#3a3a36'; for (let yy = 190; yy < h - 80; yy += 48) x.fillRect(64, yy, w - 128, 5); x.fillRect(w / 2 - 3, 100, 6, h - 180);
+  }));
+}
+function archShell(kit, m, st, cs, x0, x1, isStation, elev0, elev1, withStreet, city) {
+  const len = x1 - x0, cx = (x0 + x1) / 2, top = RAIL_Y - 0.3, [Z0, Z1] = ARCH_Z;
+  const gAt = x => -(elev0 + (elev1 - elev0) * (x - x0) / len);
+  tracks(kit, m, FERN, x0, x1);
+  kit.box(m.ballast, len, 0.4, Z1 - Z0, cx, top - 0.2, (Z0 + Z1) / 2);                       // dek (ballast)
+  // Boogwanden aan beide kanten, per boog een eigen pui; de bogen liggen vast in de wereld (station-x = 10 bogen).
+  for (let a = Math.floor(x0 / BAY) * BAY; a < x1; a += BAY) {
+    const b0 = Math.max(a, x0), b1 = Math.min(a + BAY, x1); if (b1 - b0 < 0.05) continue;
+    const g = Math.min(gAt(b0), gAt(b1)) - 0.3, k = Math.abs(Math.round((st.x + a) / BAY));
+    for (const [z, f, o] of [[Z0, -1, 0], [Z1, 1, 1]]) {
+      const v = (k * 7 + o * 3 + st.index) % 5 % 4, mat = std('Line_Arch' + v, '#ffffff', { map: archTex(v), roughness: 0.9 });
+      kit.wallX(mat, b0, b1, g, top, z, f, BAY, top - g, g);
+    }
+  }
+  // Borstwering (baksteen + deksteen) aan beide randen.
+  for (const [z, s] of [[Z0, 1], [Z1, -1]]) {
+    kit.box(m.brick, len, 1.35, 0.45, cx, top + 0.67, z + s * 0.22, 2);
+    kit.box(m.stone, len, 0.12, 0.62, cx, top + 1.4, z + s * 0.22);
+  }
+  // Bovenleiding Fernbahn: masten aan de +z-rand, rijdraad boven beide sporen (S-Bahn: stroomrail).
+  const hall = isStation && st.profile?.hall === 'hall-stadtbahn';
+  for (const tz of FERN.tracks) kit.box(m.dark, len, 0.03, 0.03, cx, RAIL_Y + 5.5, tz);
+  if (!hall) for (let x = Math.ceil(x0 / 30) * 30; x < x1; x += 30) {
+    kit.box(m.steel, 0.3, 7.6, 0.3, x, top + 3.8, Z1 - 0.7);
+    kit.box(m.steel, 0.12, 0.12, Z1 - FERN.tracks[0], x, RAIL_Y + 6.3, (Z1 + FERN.tracks[0]) / 2 - 0.4);
+  }
+  if (isStation) {
+    // Regionaal/Fernbahn-perron (niet begaanbaar) tussen de Fernbahnsporen.
+    if (st.fern) {
+      const f0 = 12.0, f1 = 15.8, fc = (f0 + f1) / 2;
+      kit.box(m.platform, len, 1.05, f1 - f0, cx, -0.525, fc, 2); kit.flat(m.platform, x0, x1, f0, f1, 0.001, true, 4);
+      for (const ze of [f0 + 0.42, f1 - 0.42]) kit.box(m.edge, len, 0.012, 0.1, cx, 0.006, ze);
+      const sign = std('Line_Sign_' + st.id, '#ffffff', { map: signTex(st.name, st.line, '#0b6a3a', true), roughness: 0.6 });
+      for (const x of [-18, 18]) { kit.plane(sign, 3.2, 0.55, M4(x, 2.75, fc + 0.03)); kit.plane(sign, 3.2, 0.55, M4(x, 2.75, fc - 0.03, Math.PI)); }
+      if (!hall) {
+        const roof = std('Line_Roof_' + st.id, st.accent, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
+        kit.box(roof, len - 10, 0.12, f1 - f0 + 0.8, cx, 3.5, fc);
+        for (let x = x0 + 9; x < x1 - 4; x += 9) kit.box(m.steel, 0.22, 3.4, 0.22, x, 1.7, fc);
+      }
+    }
+    if (st.profile?.hall) stationHall(kit, m, st, cs, x0, x1);
+    else {
+      // Vlinderdak op het middenperron (zuilen om de 9 m, vrij van uitgang en overstaptrap).
+      const roof = std('Line_Roof_' + st.id, st.accent, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
+      for (const s of [-1, 1]) slab(kit, roof, x0 + 3, x1 - 3, s * 4.1, 3.95, 0, 3.55, 0.12);
+      kit.box(m.steel, len - 6, 0.22, 0.3, cx, 3.45, 0);
+      for (let x = -31.5; x <= 31.5; x += 9) kit.box(m.steel, 0.26, 3.5, 0.26, x, 1.75, 0);
+      for (let x = x0 + 6; x < x1 - 4; x += 6) for (const z of [-2.2, 2.2]) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.62, z);
+    }
+  }
+  if (withStreet) street(city, m, st, x0, x1, elev0, elev1);
+}
+// Grote stationshal over alle vier sporen (Zoo, Hauptbahnhof, Friedrichstraße, Hackescher Markt, Alexanderplatz, Ostbahnhof).
+function stadtbahnHall(kit, m, st, x0, x1) {
+  const P = st.profile, len = x1 - x0, cx = (x0 + x1) / 2, top = RAIL_Y - 0.3, [Z0, Z1] = ARCH_Z;
+  const steel = std('Line_HallSteel_' + st.id, P.steel, { roughness: 0.5, metalness: 0.4 });
+  const roof = std('Line_HallRoof_' + st.id, P.roof, { roughness: 0.6, metalness: 0.3, side: THREE.DoubleSide });
+  const glass = std('Line_HallGlass', '#b9d0d6', { roughness: 0.08, metalness: 0.2, transparent: true, opacity: 0.26, side: THREE.DoubleSide, depthWrite: false });
+  const zc = (Z0 + Z1) / 2, Wr = (Z1 - Z0) / 2 + 0.3, y0 = 5.2, rise = P.glassAll ? 7.5 : 8.5;
+  // Zijwanden tot de aanzet van het gewelf.
+  for (const [z, s] of [[Z0 - 0.3, -1], [Z1 + 0.3, 1]]) {
+    if (P.brick) {
+      const wm = std('Line_HallWindows', '#ffffff', { map: hallWindowTex(), roughness: 0.85 });
+      kit.wallX(wm, x0, x1, top, y0, z - s * 0.05, -s, 7.5, y0 - top, top); kit.wallX(wm, x0, x1, top, y0, z + s * 0.05, s, 7.5, y0 - top, top);
+    } else {
+      kit.box(steel, len, 1.2, 0.2, cx, top + 1.95, z);
+      kit.box(glass, len, y0 - top - 2.5, 0.04, cx, (y0 + top + 2.5) / 2, z);
+      for (let x = x0; x <= x1 + 0.01; x += 6) kit.box(steel, 0.2, y0 - top, 0.3, x, (y0 + top) / 2, z);
+    }
+    kit.box(steel, len, 0.4, 0.5, cx, y0, z);
+  }
+  // Tongewelf: glazen lichtstraat (Hauptbahnhof: helemaal glas), stalen spanten.
+  const n = 16, pt = i => { const t = Math.PI - i / n * Math.PI; return [zc + Math.cos(t) * Wr, y0 + Math.sin(t) * rise]; };
+  const ribStep = P.glassAll ? 3.6 : 7.2;
+  for (let i = 0; i < n; i++) {
+    const [za, ya] = pt(i), [zb, yb] = pt(i + 1), sky = P.glassAll || (i >= 4 && i < 12);
+    slab(kit, sky ? glass : roof, x0, x1, za, ya, zb, yb, sky ? 0.04 : 0.12);
+    for (let x = x0; x <= x1 + 0.01; x += ribStep) slab(kit, steel, x - 0.1, x + 0.1, za, ya - 0.2, zb, yb - 0.2, 0.32);
+    if (P.glassAll) for (const x of [x0, x1]) slab(kit, steel, x - 0.25, x + 0.25, za, ya - 0.25, zb, yb - 0.25, 0.5);
+    else slab(kit, steel, x0, x1, za, ya - 0.24, zb, yb - 0.24, 0.06);   // langsregels
+  }
+  for (const x of [x0 + 0.3, x1 - 0.3]) for (let i = 0; i < n; i++) { const [za, ya] = pt(i), [zb, yb] = pt(i + 1); slab(kit, steel, x - 0.3, x + 0.3, za, ya - 0.4, zb, yb - 0.4, 0.6); }   // eindspanten
+  // Lichtbalk boven het middenperron (draagt ook de hangborden) en lampen boven het Fernbahnperron.
+  kit.box(steel, len - 4, 0.22, 0.3, cx, 3.5, 0);
+  for (let x = x0 + 5; x < x1 - 3; x += 6) for (const z of [-1.9, 1.9]) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.42, z);
+  if (st.fern) for (let x = x0 + 5; x < x1 - 3; x += 6) kit.box(m.lamp, 1.4, 0.06, 0.12, x, 3.6, 13.9);
 }
 
 // ── Tussenstukken ────────────────────────────────────────────────────────────────────────────────

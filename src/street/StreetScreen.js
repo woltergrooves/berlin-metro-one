@@ -19,7 +19,7 @@ const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '
 const euro = c => `€${((c || 0) / 100).toFixed(2).replace('.', ',')}`;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
-const LINE_COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#f0d722', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d' };
+const LINE_COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#f0d722', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405' };
 
 // ── Soorten plekken: uiterlijk, openingstijden (uren, eind mag > 24) en wat je er kunt doen ──────────
 // items: [id, naam, prijs in centen, emoji, minuten]. Gegeten/gedronken spullen gaan in de tas.
@@ -218,6 +218,7 @@ function renderHud() {
   if (key === lastHud) return; lastHud = key;
   ui.q('.badges').innerHTML = [...new Set(lines)].map(l => `<span class="badge" style="background:${LINE_COLORS[l] || '#555'};color:${l === 'U4' ? '#1a1a1a' : '#fff'}">${esc(l)}</span>`).join('');
   ui.q('.name').textContent = ctx?.name || 'Berlijn';
+  ui.q('.back').textContent = /^S/.test(ctx?.line || '') ? '← S-Bahn' : '← U-Bahn';   // S-Bahn Stadtbahn (Fase 45)
   ui.q('.sub').textContent = placeName ? `📍 bij ${placeName}` : 'Buiten bij de halte';
   ui.q('.clk').textContent = `${c?.weekdayName ? c.weekdayName.slice(0, 2) + ' ' : ''}${c?.hhmm || '--:--'}`;
   ui.q('.money').textContent = `💶 ${euro(s?.balanceCents)}`;

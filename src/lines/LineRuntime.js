@@ -134,7 +134,7 @@ function move(p, delta) {
   const ez = transferZ(cs);
   if (st.transfer && Math.abs(nx - TRANSFER_X) < 3.1 && Math.abs(nz - ez) < 1.0) {   // overstaptrap (U1c)
     if (!st.transfer.closed) { fromLine(st); return; }
-    if (!closedHinted) { closedHinted = true; game.ui?.notify?.(`Übergang ${st.transfer.label || st.transfer.line} · die lijn komt later in het spel`); }
+    if (!closedHinted) { closedHinted = true; game.ui?.notify?.(`Übergang ${st.transfer.label || st.transfer.line} · ${st.transfer.note || 'die lijn komt later in het spel'}`); }
     return;   // U3c: afgesloten (U7/U9/Ring nog niet gebouwd) → hek houdt je tegen
   }
   if (Math.abs(nx - TRANSFER_X) > 5) closedHinted = false;
@@ -294,7 +294,7 @@ function installHud() {
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || ID;
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
-      : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (nog niet in het spel) · wacht op de ${ID} of neem de trap naar buiten.`
+      : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (${st.transfer.note || 'nog niet in het spel'}) · wacht op de ${ID} of neem de trap naar buiten.`
       : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : 'het tunneleinde'}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`

@@ -110,6 +110,7 @@ import('../lines/U5Line.js').catch(log('U5'));     // U5: Hauptbahnhof ⇄ Höno
 import('../lines/U6Line.js').catch(log('U6'));     // U6: Alt-Mariendorf ⇄ Kurt-Schumacher-Platz (Mijlpaal 4)
 import('../lines/U7Line.js').catch(log('U7'));     // U7: Rudow ⇄ Rathaus Spandau (Mijlpaal 4)
 import('../lines/U9Line.js').catch(log('U9'));     // U9: Osloer Straße ⇄ Rathaus Steglitz
+import('../lines/S5Line.js').catch(log('S5'));     // S-Bahn Stadtbahn: Westkreuz ⇄ Ostkreuz (Fase 45 deel a)
 import('../lines/GodTeleport.js').catch(log('GodTeleport'));   // GOD-menu: één teleportblok voor alle lijnen
 
 // ── 5. Straat, stationsuitgangen, fases 6–16 (achtergrond) ─────────────────────────────────
