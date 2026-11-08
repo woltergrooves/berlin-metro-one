@@ -113,12 +113,16 @@ const atPlace = i => here && here.place === i;
 
 // ── Street View verplaatsen (gratis embed) ────────────────────────────────────────────────────
 function svUrl(lat, lng, heading = 0) { return `https://maps.google.com/maps?layer=c&cbll=${lat},${lng}&cbp=12,${Math.round(heading)},,0,0&source=embed&output=svembed`; }
-function showAt(lat, lng, heading) {
+function showAt(lat, lng, heading, opts = {}) {
   if (!ov?.frame) return;
   // Betaalde Street View actief? Dan het bestaande panorama verplaatsen (geen nieuwe instantie, geen iframe).
   const sv = globalThis.BerlinStreetView2, pano = sv?.getPanorama?.();
   if (sv?.state?.mode === 'programmable' && pano?.setPosition) {
-    try { pano.setPosition({ lat, lng }); pano.setPov?.({ heading: heading || 0, pitch: 0 }); sv.state.paidLoads = (sv.state.paidLoads || 0) + 1; return; } catch {}
+    try {   // alleen loopbare Google-straatpanorama's (geen geüploade 360°-foto's zonder pijlen) — fix 8 nov
+      if (sv.placeOutdoor) sv.placeOutdoor(lat, lng, heading || 0, opts).then(ok => { if (!ok && opts.exclude) notify('Geen ander loopbaar standpunt hier in de buurt'); });
+      else { pano.setPosition({ lat, lng }); pano.setPov?.({ heading: heading || 0, pitch: 0 }); }
+      sv.state.paidLoads = (sv.state.paidLoads || 0) + 1; return;
+    } catch {}
   }
   const canvas = ov.root.querySelector('#berlin-programmable-streetview'); if (canvas) canvas.style.display = 'none';
   ov.frame.style.display = 'block'; ov.frame.src = svUrl(lat, lng, heading);
@@ -388,7 +392,8 @@ function nudge() {
   const base = here?.place >= 0 ? pack.places[here.place] : pack ? { lat: pack.lat, lon: pack.lon } : null;
   if (!base) return;
   const n = (nudge.n = ((nudge.n || 0) + 1) % 6), a = n * Math.PI / 3, r = 28;
-  showAt(base.lat + Math.cos(a) * r / 111320, base.lon + Math.sin(a) * r / (111320 * Math.cos(base.lat * Math.PI / 180)), (n * 60) % 360);
+  const cur = globalThis.BerlinStreetView2?.getPanorama?.()?.getPano?.() || null;   // altijd een ánder, loopbaar panorama
+  showAt(base.lat + Math.cos(a) * r / 111320, base.lon + Math.sin(a) * r / (111320 * Math.cos(base.lat * Math.PI / 180)), (n * 60) % 360, { exclude: cur });
   notify('Ander standpunt');
 }
 function visit(p) { const s = street(), k = stampKey(p); s.visits[k] = (s.visits[k] || 0) + 1; saveStreet(s); }
