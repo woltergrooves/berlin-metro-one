@@ -169,7 +169,7 @@ Als Berlijn groter is, moet het ook interessanter worden om rond te dwalen.
 * Betaalde Google Maps-API alleen bewust inschakelen, met kostenbeheersing.
 * Geen dubbele overlays.
 
-Stand 8 nov 2026: StreetScreen (één laag boven Street View: buurtkaart met echte plekken, kopen, Pfand, stempels, uitgaan) voor 179 haltes. Betaalde Maps API staat standaard aan (keuze speler). Fix 8 nov: alleen loopbare Google-straatpanorama's (geen geüploade 360°-foto's zonder pijlen); S-Bahnstations openen op een vast straatpunt. Nog open: GOD-schakelaar voor betaalde Street View, plekken bij een paar rustige haltes.
+Stand 8 nov 2026: StreetScreen (één laag boven Street View: buurtkaart met echte plekken, kopen, Pfand, stempels, uitgaan) voor 179 haltes. Betaalde Maps API staat standaard aan (keuze speler). Fix 8 nov: alleen loopbare Google-straatpanorama's (geen geüploade 360°-foto's zonder pijlen); S-Bahnstations openen op een vast straatpunt. Nog open: GOD-schakelaar voor betaalde Street View, plekken bij een paar rustige haltes. Gepland na alle lijnen (werkplan E): pins in het panorama, doel + kompas + minikaart, acties dichtbij, opdrachten op straat.
 
 🟡 Fase 6 — Virtual Proximity
 
@@ -620,19 +620,29 @@ C. Nord-Süd-tunnel S1/S2/S25 (±3 chats)
 D. Tram en bus (±4–5 chats)
   Tram M10 Hauptbahnhof ⇄ Warschauer Straße via Prenzlauer Berg (bovengronds, door Street View-straten), daarna eventueel M1/M4. Bus 100 Zoo ⇄ Alexanderplatz langs de bezienswaardigheden, naast de bestaande Bus 200.
 
-E. Audio — Fase 46 afronden (±1–2 chats)
+E. Street View 2.0 — de echte stad als speelveld (±4 chats, na alle lijnen; besloten 9 nov 2026)
+  Street View blijft de buitenwereld, maar het spel gebeurt in het beeld in plaats van in menu's (Fase 5 + 6):
+  1. Plekken als pins in het panorama (markers op echte coördinaten boven de gevel; tik = interactie).
+  2. Doel + kompas: bovenin "Späti … · 140 m ↗" met meedraaiende pijl, minikaart met eigen positie en de weg terug naar het station.
+  3. Dichtbij = actie: binnen ±25 m verschijnt "Ga naar binnen / Koop / Werk hier" vanzelf.
+  4. Opdrachten op straat: koerierritjes, Pfand zoeken, geruchten over clubs (sluit aan op Fase 23 en 17).
+  Overwogen alternatieven: Google Photorealistic 3D Tiles (indrukwekkend maar zwaar op iPhone/iPad en duurder; hooguit voor een paar speciale plekken), eigen OSM-3D-stad (gratis maar algemene gevels), Mapillary (minder dekking).
+
+F. Audio — Fase 46 afronden (±1–2 chats)
   BVG-geluiden: deurwaarschuwing ("Zurückbleiben bitte"), stationsaankondigingen, rijgeluid, perronsfeer, S-Bahn-geluiden.
 
-F. Onderhoud tussendoor (kleine chats)
+G. Onderhoud tussendoor (kleine chats)
+  * Ritbalk naast het stationsvak (raakt het vak in liggende stand).
+  * Ring deel e: stationsprofielen Ostkreuz (Ringhalle), Südkreuz (glasdak), Gesundbrunnen.
   * GOD-schakelaar voor de betaalde Street View (aan/uit zonder console).
   * Oude tests bijwerken naar de huidige stand (u1-transfer, u5-test, u6-test, u7-test, u7b-test, u3c-test, u4-test).
   * U6-noordstuk Kurt-Schumacher-Platz ⇄ Alt-Tegel toevoegen na de echte heropening (zomer 2027).
   * Treinmodellen: Großprofil-treinen (F/H) voor U5–U9 in plaats van het HK-model.
 
-G. Daarna: Mijlpaal 5 — Berlin Discovery
+H. Daarna: Mijlpaal 5 — Berlin Discovery
   Per lijn ontdekkingen en activiteiten bij de nieuwe stations (Museumsinsel, Checkpoint Charlie, Tempelhofer Feld, Zoo, Spandau Zitadelle, Hackescher Markt, Oberbaumbrücke …), Berlin Stamps en verhalen; daarna Mijlpaal 6 (levende stad) en 7 (carrières en verhaal).
 
-Schatting: C–E samen ongeveer 8–10 chats.
+Schatting: C–F samen ongeveer 12–14 chats.
 
 ⸻
 
