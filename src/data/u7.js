@@ -79,7 +79,7 @@ const RAW = [
 //   Möckernbrücke ⇄ U1/U3 (viaduct), Mehringdamm ⇄ U6, Hermannplatz ⇄ U8 (bord aan het westeinde van het U8-perron).
 //   Neukölln (S-Ring) bestaat nog niet in het spel → trapgat met echt bord, maar afgesloten.
 export const U7_TRANSFERS = {
-  neukoelln: { line: 'S', label: 'S41 S42 S45 S46 S47', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
+  neukoelln: { line: 'S', to: 'S41', station: 'neukoelln', label: 'S41 S42 S45 S46 S47', color: '#008d4f', towards: 'Ringbahn · Flughafen BER' },
   hermannplatz: { line: 'U8', color: '#224f86', station: 20, towards: 'Wittenau · Hermannstraße' },
   mehringdamm: { line: 'U6', color: '#8c6dab', station: 'mehringdamm', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },
   moeckernbruecke: { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'moeckernbruecke', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
@@ -90,7 +90,7 @@ export const U7_TRANSFERS = {
   'fehrbelliner-platz': { line: 'U3', color: '#16683d', station: 'fehrbelliner-platz', towards: 'Warschauer Str. · Krumme Lanke' },
   'wilmersdorfer-strasse': { line: 'S', to: 'S5', station: 'charlottenburg', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · S Charlottenburg' },   // open sinds S-Bahn deel c
   bismarckstrasse: { line: 'U2', color: '#da421e', station: 'bismarckstrasse', towards: 'Pankow · Ruhleben' },
-  jungfernheide: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
+  jungfernheide: { line: 'S', to: 'S41', station: 'jungfernheide', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn' },
   'rathaus-spandau': { line: 'S', label: 'S3 S9', color: '#008d4f', towards: 'Stadtbahn · S3 S9 · Regionalverkehr', closed: true },
 };
 

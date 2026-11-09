@@ -60,13 +60,13 @@ const RAW = [
 //   Unter den Linden ⇄ U5, Stadtmitte ⇄ U2 (bord aan het −z-einde van het U2-perron), Hallesches Tor ⇄ U1/U3.
 //   S-Bahn, U7 en U9 bestaan nog niet in het spel → trapgat met echt bord, maar afgesloten (zoals U3c/U4/U5).
 export const U6_TRANSFERS = {
-  tempelhof: { line: 'S', label: 'S41 S42 S45 S46', color: '#008d4f', towards: 'Ringbahn · Flughafen BER', closed: true },
+  tempelhof: { line: 'S', to: 'S41', station: 'tempelhof', label: 'S41 S42 S45 S46', color: '#008d4f', towards: 'Ringbahn · Flughafen BER' },
   mehringdamm: { line: 'U7', color: '#528dba', station: 'mehringdamm', towards: 'Rathaus Spandau · Rudow' },
   'hallesches-tor': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'hallesches-tor', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
   stadtmitte: { line: 'U2', color: '#da421e', station: 'stadtmitte', towards: 'Pankow · Ruhleben' },
   'unter-den-linden': { line: 'U5', color: '#7e5330', station: 'unter-den-linden', towards: 'Hauptbahnhof · Hönow' },
   friedrichstrasse: { line: 'S', to: 'S5', station: 'friedrichstrasse', label: 'S3 S5 S7 S9', color: '#008d4f', towards: 'Stadtbahn · Westkreuz · Ostkreuz' },   // open sinds S-Bahn deel c (Nord-Süd volgt)
-  wedding: { line: 'S', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn', closed: true },
+  wedding: { line: 'S', to: 'S41', station: 'wedding', label: 'S41 S42', color: '#008d4f', towards: 'Ringbahn' },
   leopoldplatz: { line: 'U9', color: '#f3791d', station: 'leopoldplatz', towards: 'Osloer Str. · Rathaus Steglitz' },
 };
 

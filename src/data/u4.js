@@ -42,7 +42,7 @@ export const U4_TRANSFERS = {
     ],
   },
   'bayerischer-platz': { line: 'U7', color: '#528dba', station: 'bayerischer-platz', towards: 'Rathaus Spandau · Rudow' },
-  'innsbrucker-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
+  'innsbrucker-platz': { line: 'S', to: 'S41', station: 'innsbrucker-platz', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46' },
 };
 
 /** Stations van de U4-wereld. */

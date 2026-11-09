@@ -1152,10 +1152,16 @@ export class LineWorld {
   indexOf(x) { return Math.max(0, Math.min(this.stations.length - 1, Math.round((x - this.stations[0].x) / this.line.spacing))); }
   wanted(index) {
     const st = new Set(), seg = new Set();
-    for (let i = index - 1; i <= index + 1; i++) if (i >= 0 && i < this.stations.length) st.add(i);
+    for (let i = index - 1; i <= index + 1; i++) if (i >= 0 && i < this.stations.length) st.add(i);   // (Ring: kopieën −1 en n hieronder)
     // Ringbahn (S41/S42): ook het stuk Wedding → Gesundbrunnen, aan beide kanten (−1 = vóór het eerste station, n−1 = na het laatste).
-    const lo = this.line.ring ? -1 : 0, hi = this.line.ring ? this.stations.length - 1 : this.stations.length - 2;
+    const n = this.stations.length, lo = this.line.ring ? -1 : 0, hi = this.line.ring ? n - 1 : n - 2;
     for (let i = index - 2; i <= index + 1; i++) if (i >= lo && i <= hi) seg.add(i);
+    if (this.line.ring) {
+      // Deel b: kopiestations aan de naad (−1 = Wedding vóór Gesundbrunnen, n = Gesundbrunnen na Wedding), en vlak bij de
+      // naad ook de overkant al klaar → een trein (met meerijder) springt daar rond zonder dat er iets ontbreekt.
+      if (index <= 1) { st.add(-1); seg.add(-1); st.add(n - 1); st.add(n); seg.add(n - 1); }
+      if (index >= n - 2) { st.add(n); seg.add(n - 1); st.add(0); st.add(-1); seg.add(-1); }
+    }
     return { st, seg };
   }
   /** Bouwt/verwijdert stations rond de speler. active=false → alles verbergen (speler is niet op deze lijn). */
@@ -1183,10 +1189,12 @@ export class LineWorld {
   }
   /** Synchroon alles om index heen bouwen (bij teleport, zodat je niet in het niets staat). */
   prime(index) { const w = this.wanted(index); for (const i of [index, ...w.st]) if (!this.stationGroups.has(i)) this.buildOne('st', i); }
+  /** Ring: alles rond `index` synchroon bouwen (meerijder springt rond de naad). */
+  primeAll(index) { this.prime(index); for (const i of this.wanted(index).seg) if (!this.segmentGroups.has(i)) this.buildOne('seg', i); }
   buildOne(kind, i) {
     const S = this.stations, n = S.length, sp = this.line.spacing;
     // Ring: het tussenstuk rond de "naad" verbindt het laatste en het eerste station (kopie op de andere kant).
-    const a = kind === 'seg' && i < 0 ? { ...S[n - 1], x: S[0].x - sp } : S[i];
+    const a = i < 0 ? { ...S[n - 1], x: S[0].x - sp } : kind === 'st' && i >= n ? { ...S[0], x: S[n - 1].x + sp } : S[i];
     const b = kind === 'seg' ? (i >= n - 1 ? { ...S[0], x: S[n - 1].x + sp } : S[i + 1]) : null;
     const { kit, city } = kind === 'st' ? stationKit(this.line, a, this.m) : segmentKit(this.line, a, b, this.m);
     const g = kit.build(`${this.line.id}:${kind}:${a.id}`);
@@ -1234,5 +1242,5 @@ export class LineWorld {
   }
   dispose(g) { g.traverse(o => { if (o.isMesh) o.geometry.dispose(); }); g.parent?.remove(g); }
   clear() { for (const g of this.stationGroups.values()) this.dispose(g); for (const g of this.segmentGroups.values()) this.dispose(g); this.stationGroups.clear(); this.segmentGroups.clear(); }
-  status() { return { stations: [...this.stationGroups.keys()].map(i => this.stations[i].id), segments: this.segmentGroups.size, built: this.built }; }
+  status() { return { stations: [...this.stationGroups.keys()].map(i => this.stations[i]?.id ?? `kopie:${i}`), segments: this.segmentGroups.size, built: this.built }; }
 }

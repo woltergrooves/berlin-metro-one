@@ -60,28 +60,32 @@ const RAW = [
   ['wedding',             'Wedding',             52.5433212, 13.3683388, 'viaduct', 6, ['U6'],                      '6a4a36'],
 ];
 
-// Overstappen: in deel a zichtbaar (echt bord), maar nog dicht ("overstap opent binnenkort"); deel c opent ze.
-const NOTE = 'overstap opent binnenkort';
-const T = (line, color, towards, extra = {}) => ({ line, color, towards, closed: true, note: NOTE, ...extra });
+// Overstappen (deel c, 9 nov 2026): open, behalve naar de Nord-Süd-Bahn (Südkreuz S2/S25/S26, Schöneberg S1) — die
+// komt later in het spel. Terug: op U2 (Schönhauser Allee) en U8 (Gesundbrunnen, Hermannstraße) een groen S-bord aan het
+// perroneinde (S41_SIGN); op de nieuwe lijnen en de Stadtbahn het eigen trapgat (`to: 'S41'`).
+const NOTE = 'Nord-Süd-Bahn komt later in het spel';
+const T = (line, color, towards, extra = {}) => ({ line, color, towards, ...extra });
 const S_GREEN = '#008d4f';
 const S41_TRANSFERS = {
-  gesundbrunnen: T('U8', '#224f86', 'Wittenau · Hermannstraße', { also: [{ line: 'S', color: S_GREEN }] }),
-  'schoenhauser-allee': T('U2', '#da421e', 'Pankow · Ruhleben'),
-  'frankfurter-allee': T('U5', '#7e5330', 'Hauptbahnhof · Hönow'),
-  ostkreuz: T('S', S_GREEN, 'Stadtbahn · Westkreuz · Erkner', { label: 'S3 S5 S7 S9' }),
-  neukoelln: T('U7', '#528dba', 'Rudow · Rathaus Spandau'),
-  hermannstrasse: T('U8', '#224f86', 'Wittenau · Hermannstraße'),
-  tempelhof: T('U6', '#8c6dab', 'Kurt-Schumacher-Pl. · Alt-Mariendorf'),
-  suedkreuz: T('S', S_GREEN, 'Nord-Süd · Blankenfelde · Teltow', { label: 'S2 S25 S26' }),
-  schoeneberg: T('S', S_GREEN, 'Wannsee · Oranienburg', { label: 'S1' }),
-  'innsbrucker-platz': T('U4', '#ffd900', 'Nollendorfplatz'),
-  bundesplatz: T('U9', '#f3791d', 'Osloer Str. · Rathaus Steglitz'),
-  'heidelberger-platz': T('U3', '#16683d', 'Krumme Lanke · Warschauer Str.'),
-  westkreuz: T('S', S_GREEN, 'Stadtbahn · Spandau · Potsdam', { label: 'S3 S5 S7 S9' }),
-  jungfernheide: T('U7', '#528dba', 'Rudow · Rathaus Spandau'),
-  westhafen: T('U9', '#f3791d', 'Osloer Str. · Rathaus Steglitz'),
-  wedding: T('U6', '#8c6dab', 'Kurt-Schumacher-Pl. · Alt-Mariendorf'),
+  gesundbrunnen: T('U8', '#224f86', 'Wittenau · Hermannstraße', { station: 9 }),
+  'schoenhauser-allee': T('U2', '#da421e', 'Pankow · Ruhleben', { station: 'schoenhauser-allee' }),
+  'frankfurter-allee': T('U5', '#7e5330', 'Hauptbahnhof · Hönow', { station: 'frankfurter-allee' }),
+  ostkreuz: T('S', S_GREEN, 'Stadtbahn · Westkreuz · Erkner', { label: 'S3 S5 S7 S9', to: 'S5', station: 'ostkreuz' }),
+  neukoelln: T('U7', '#528dba', 'Rudow · Rathaus Spandau', { station: 'neukoelln' }),
+  hermannstrasse: T('U8', '#224f86', 'Wittenau · Hermannstraße', { station: 23 }),
+  tempelhof: T('U6', '#8c6dab', 'Kurt-Schumacher-Pl. · Alt-Mariendorf', { station: 'tempelhof' }),
+  suedkreuz: T('S', S_GREEN, 'Nord-Süd · Blankenfelde · Teltow', { label: 'S2 S25 S26', closed: true, note: NOTE }),
+  schoeneberg: T('S', S_GREEN, 'Wannsee · Oranienburg', { label: 'S1', closed: true, note: NOTE }),
+  'innsbrucker-platz': T('U4', '#ffd900', 'Nollendorfplatz', { station: 'innsbrucker-platz', text: '#1a1a1a' }),
+  bundesplatz: T('U9', '#f3791d', 'Osloer Str. · Rathaus Steglitz', { station: 'bundesplatz' }),
+  'heidelberger-platz': T('U3', '#16683d', 'Krumme Lanke · Warschauer Str.', { station: 'heidelberger-platz' }),
+  westkreuz: T('S', S_GREEN, 'Stadtbahn · Spandau · Potsdam', { label: 'S3 S5 S7 S9', to: 'S5', station: 'westkreuz' }),
+  jungfernheide: T('U7', '#528dba', 'Rudow · Rathaus Spandau', { station: 'jungfernheide' }),
+  westhafen: T('U9', '#f3791d', 'Osloer Str. · Rathaus Steglitz', { station: 'westhafen' }),
+  wedding: T('U6', '#8c6dab', 'Kurt-Schumacher-Pl. · Alt-Mariendorf', { station: 'wedding' }),
 };
+/** Bord aan het perroneinde van U2/U8 (terug naar de Ring). */
+export const S41_SIGN = { line: 'S', label: 'S41 S42', color: S_GREEN, towards: 'Ringbahn · S41 ↻ · S42 ↺', hint: 'Übergang Ringbahn' };
 for (const t of Object.values(S41_TRANSFERS)) if (!t.label) t.label = [t, ...(t.also || [])].map(b => b.line).join(' · ');
 
 // Uitgang naar Street View: vast straatpunt per station (de halte ligt in de ingraving of op de dijk; daar vindt Google
@@ -121,6 +125,7 @@ const S_EXITS = {
 export const S41_STATIONS = RAW.map(([id, name, lat, lon, kind, elev, transfers, accent], index) => ({
   line: 'S41', id, name, index, lat, lon, kind, layout: 'island', realLayout: 'island', elev: kind === 'viaduct' ? elev : 0,
   embank: kind === 'viaduct', transfers, wall: '#7a4a3a', accent: '#' + accent, transfer: S41_TRANSFERS[id] || null,
-  exit: S_EXITS[id] ? { lat: S_EXITS[id][0], lon: S_EXITS[id][1] } : null, profile: null, bridge: null, surroundings: null,
+  exit: S_EXITS[id] ? { lat: S_EXITS[id][0], lon: S_EXITS[id][1] } : null, profile: null, bridge: null, surroundings: {},   // deel d: OSM-pakket public/assets/surroundings/s41/<id>.json
+ 
   x: S41_LINE.origin.x + index * S41_LINE.spacing,
 }));

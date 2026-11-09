@@ -12,10 +12,9 @@ const status = { updates: 0, shown: false, text: '', arrived: 0 };
 let el = null, arrivedAt = 0, arrivedFor = null;
 
 const CSS = `
-#routeHudV1{position:absolute;z-index:12;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 48px));transform:translateX(-50%);width:min(460px,64vw);
+#routeHudV1{position:fixed;z-index:30;left:50%;top:max(58px,calc(env(safe-area-inset-top) + 48px));transform:translateX(-50%);width:min(460px,64vw);
   display:none;align-items:center;gap:9px;box-sizing:border-box;padding:6px 6px 6px 9px;border-radius:13px;border:1px solid rgba(255,255,255,.14);
   background:rgba(8,8,8,.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font:13px -apple-system,system-ui,Arial,sans-serif;pointer-events:auto}
-#routeHudV1.below{top:calc(max(58px,calc(env(safe-area-inset-top) + 48px)) + 58px)}
 #routeHudV1.warn{border-color:#ff9f0a;background:rgba(60,30,0,.72)}
 #routeHudV1.done{border-color:#30d158}
 #routeHudV1 .rh-c{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 6px;border-radius:5px;font:800 13px Arial;box-sizing:border-box}
@@ -38,6 +37,34 @@ function ensure() {
   host.appendChild(el);
   return el;
 }
+
+// Plek bepalen (9 nov, melding speler: het balkje viel onder het halte-overzicht linksboven): alle zichtbare
+// HUD-elementen bovenin die horizontaal overlappen met het balkje → het balkje komt eronder (8 px ruimte).
+function layout(e) {
+  const W = innerWidth, H = innerHeight, bw = e.offsetWidth || Math.min(460, W * 0.64), x0 = (W - bw) / 2, x1 = x0 + bw;
+  const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat')) || 0;
+  let top = Math.max(10, safe + 8);
+  const cands = [...document.querySelectorAll('#hud .topbar, #hud .topbar *, #hud > *, body > *')];
+  const rects = [];
+  for (const c of cands) {
+    if (c === e || c.contains(e) || e.contains(c) || c.id === 'leftZone' || c.id === 'rightZone' || c.id === 'hint' || c.id === 'toast') continue;
+    const r = c.getBoundingClientRect();
+    if (r.width < 4 || r.height < 4 || r.width > W * 0.8 || r.height > H * 0.5 || r.top > H * 0.45 || r.bottom < 0) continue;
+    const cs = getComputedStyle(c);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || +cs.opacity === 0) continue;
+    rects.push(r);
+  }
+  // Herhalen: onder het ene element kan het volgende staan (stationsvak → ritbalk).
+  for (let k = 0; k < 6; k++) {
+    let moved = false;
+    for (const r of rects) if (r.left < x1 && r.right > x0 && r.bottom > top && r.top < top + (e.offsetHeight || 44)) { top = r.bottom + 8; moved = true; }
+    if (!moved) break;
+  }
+  const px = Math.round(top) + 'px';
+  if (e.style.top !== px) e.style.top = px;
+  status.top = Math.round(top);
+}
+addEventListener('resize', () => { if (el && status.shown) layout(el); });
 
 function openPlanner() {
   document.querySelector('#phoneBtnV2')?.click();
@@ -66,8 +93,8 @@ function show(chipId, html, cls = '') {
   else { c.style.display = 'none'; }
   const t = e.querySelector('.rh-t'); if (t.innerHTML !== html) t.innerHTML = html;
   e.className = cls;
-  e.classList.toggle('below', !document.querySelector('#routeProgress')?.classList.contains('hidden'));
   e.style.display = 'flex';
+  layout(e);
   status.shown = true; status.text = t.textContent;
 }
 

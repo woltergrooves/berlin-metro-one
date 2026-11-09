@@ -7,7 +7,7 @@
 // Assen zoals LineWorld: x langs de lijn, z dwars (in de ruimte van de lijnwereld), y = 0 = perronvloer.
 // Richting +1 (naar het laatste station) rijdt rechts (z > 0), richting −1 links.
 import * as THREE from 'three';
-import { TrainTimeline } from '../systems/TrainTimeline.js';
+import { TrainTimeline, RingTimeline } from '../systems/TrainTimeline.js';
 import { CONFIG } from '../config.js';
 import { crossSection, HALF } from './LineWorld.js';
 
@@ -44,10 +44,14 @@ export function platformSide(st, dir) {
 export const ALL_TRAINS = [];
 export const WORLDS = {};
 export const isMoving = s => s === 'approaching' || s === 'cruising';
+/** Ringbahn: lengte van de ring (0 = gewone lijn). */
+const ringLen = t => t.line.ring ? t.stations.length * (t.stations[1].x - t.stations[0].x) : 0;
+/** Afstand o − t langs het spoor; op de Ring de kortste weg rond de naad. */
+function along(t, o, x = t.x) { const L = ringLen(t), d = o.x - x; return L ? d - L * Math.round(d / L) : d; }
 /** Is het spoor rond lijnpositie `x` (richting `dir`, spoor van `t`) vrij van andere treinen? Voor terugzetten. */
 export function trackClear(t, x, trains) {
   const key = t.trackZone(x).id;
-  return !trains.some(o => o !== t && o.direction === t.direction && Math.abs(o.x - x) < 2 * HALF_LEN + 8 && o.trackZone(o.x).id === key);
+  return !trains.some(o => o !== t && o.direction === t.direction && Math.abs(along(t, o, x)) < 2 * HALF_LEN + 8 && o.trackZone(o.x).id === key);
 }
 /**
  * Blokbeveiliging op gedeeld spoor: staat er vóór deze trein (zelfde richting, zelfde spoor) een andere
@@ -58,7 +62,7 @@ export function blocked(t, trains) {
   const dir = t.direction, front = t.x + dir * (HALF_LEN + 6), key = t.trackZone(front).id;
   for (const o of trains) {
     if (o === t || o.direction !== dir) continue;
-    const ahead = dir * (o.x - t.x);
+    const ahead = dir * along(t, o);
     if (ahead <= 0 || ahead > 2 * HALF_LEN + 6) continue;
     if (o.trackZone(o.x - dir * HALF_LEN).id === key) return true;
   }
@@ -102,7 +106,7 @@ export class LineTrain {
     this.zones = (zones || [{ id: line.id, stations, origin: line.origin }]).map(z => ({ from: -Infinity, to: Infinity, viewMin: -Infinity, viewMax: Infinity, ...z }));
     this.viewZoneId = null; this.id = `${line.id}-${direction > 0 ? 'A' : 'B'}-${++serial}`;
     const route = stations.map(s => ({ id: s.id, name: s.name, index: s.index, z: s.x }));
-    this.timeline = new TrainTimeline({ id: this.id, line: line.id, stations: route, direction, startStationIndex: startIndex, initialDelaySeconds: delay });
+    this.timeline = new (line.ring ? RingTimeline : TrainTimeline)({ id: this.id, line: line.id, stations: route, direction, startStationIndex: startIndex, initialDelaySeconds: delay });
     // S-Bahn (Fase 45b): de treinen rijden in het echt verder dan de lijnwereld → echte bestemming op film, bord en HUD.
     if (line.dest) Object.defineProperty(this.timeline, 'terminusName', { get() { return line.dest[this.direction > 0 ? 1 : 0]; } });
     this.door = 0; this.lastRecenter = -Infinity; this.rider = false;
@@ -175,7 +179,7 @@ export class LineTrain {
   // lead/maxEta: een tweede lijn op hetzelfde perron (U3 op de U1) komt later, niet tegelijk met de eigen trein.
   maintain(index, now, { waiting = false, lead = 1.5, maxEta = 24, others = null } = {}) {
     if (this.rider || !waiting || !Number.isInteger(index) || index < 0) return false;
-    if (index + this.direction < 0 || index + this.direction >= this.stations.length) return false;
+    if (!this.line.ring && (index + this.direction < 0 || index + this.direction >= this.stations.length)) return false;
     // Niet terugzetten op een plek waar al een andere trein staat of rijdt (gedeeld spoor U1/U3).
     if (others && !trackClear(this, this.stations[index].x - this.direction * CONFIG.train.approachDistance, others)) return false;
     if (this.timeline.stopsUntilStation(index) > CONFIG.train.maxLocalStopsAway) { this.timeline.recenterNear(index, Math.max(lead, CONFIG.train.localLoopDelaySeconds)); this.door = 0; }
@@ -184,7 +188,10 @@ export class LineTrain {
   }
 
   place() {
-    const dir = this.direction, x = this.x, side = this.openSide > 0 ? 'p' : 'n';
+    const dir = this.direction, side = this.openSide > 0 ? 'p' : 'n';
+    // Ringbahn: tekenen op de kopie van de ring die het dichtst bij de speler ligt (rond de naad Wedding ⇄ Gesundbrunnen).
+    const L = ringLen(this), pl = globalThis.__berlinMetroGame?.player;
+    const x = this.drawX = L && pl?.__line === this.zones[0].id ? this.x + L * Math.round((pl.position.x - this.x) / L) : this.x;
     // In welke lijnwereld tekenen? Die van de speler als de trein daar te zien is, anders die van het spoor.
     const view = globalThis.__berlinMetroGame?.player?.__line;
     const vz = this.zones.find(z => z.id === view && x >= z.viewMin && x <= z.viewMax) || null;
@@ -197,7 +204,7 @@ export class LineTrain {
       const dz = trackZ(S, ux + 6, dir) - trackZ(S, ux - 6, dir);
       u.group.position.set(ux, 0, z); u.group.rotation.y = -Math.atan2(dz, 12);
       // Voorbij het eindpunt is er geen tunnel/viaduct: eenheid daar niet tekenen.
-      u.group.visible = ux > first - HALF + 10 && ux < last + HALF - 10;
+      u.group.visible = L ? ux > first - L / this.stations.length - HALF && ux < last + L / this.stations.length + HALF : ux > first - HALF + 10 && ux < last + HALF - 10;
       for (const k of ['p', 'n']) for (const d of u.doors[k]) d.mesh.position.x = d.rest + d.dir * 1.05 * (k === side ? this.door : 0);
     }
   }
@@ -237,7 +244,7 @@ export class DepartureBoards {
     const best = new Map();
     for (const t of trains) {
       const i = t.routeIndex(st.id), dir = t.direction;
-      if (i < 0 || i + dir < 0 || i + dir >= t.stations.length) continue;
+      if (i < 0 || (!t.line.ring && (i + dir < 0 || i + dir >= t.stations.length))) continue;
       const s = t.etaToStation(i), here = t.currentIndex === i && Math.abs(t.x - st.x) < 1 && t.state !== 'cruising';
       const k = `${t.line.id}${dir}`, v = { line: t.line, dir, term: t.timeline.terminusName, s: here ? -1 : s };
       if (!best.has(k) || v.s < best.get(k).s) best.set(k, v);

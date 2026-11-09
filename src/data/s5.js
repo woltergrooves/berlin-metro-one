@@ -59,7 +59,7 @@ const RAW = [
 // (Jannowitzbrücke) staat een groen S-bord aan het perroneinde (S5_SIGN, LineTransfers). Ringbahn: nog dicht.
 const U2O = (st, sub = 'Pankow · Ruhleben') => ({ line: 'U2', station: st, name: 'U2', sub, color: '#da421e' });
 const S_TRANSFERS = {
-  westkreuz: { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn', closed: true },
+  westkreuz: { line: 'S', to: 'S41', station: 'westkreuz', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn' },
   charlottenburg: { line: 'U7', color: '#528dba', station: 'wilmersdorfer-strasse', towards: 'Rudow · Rathaus Spandau (Wilmersdorfer Str.)' },
   'zoologischer-garten': { line: 'U2', color: '#da421e', also: [{ line: 'U9', color: '#f3791d' }], towards: 'Pankow · Ruhleben · Osloer Str.', station: 'zoologischer-garten',
     options: [U2O('zoologischer-garten'), { line: 'U9', station: 'zoologischer-garten', name: 'U9', sub: 'Osloer Str. · Rathaus Steglitz', color: '#f3791d' }] },
@@ -69,7 +69,7 @@ const S_TRANSFERS = {
     options: [U2O('alexanderplatz'), { line: 'U5', station: 'alexanderplatz', name: 'U5', sub: 'Hauptbahnhof · Hönow', color: '#7e5330' }, { line: 'U8', station: 14, name: 'U8', sub: 'Wittenau · Hermannstraße', color: '#224f86' }] },
   jannowitzbruecke: { line: 'U8', color: '#224f86', station: 15, towards: 'Wittenau · Hermannstraße' },
   'warschauer-strasse': { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'warschauer-strasse', towards: 'Uhlandstr. · Krumme Lanke' },
-  ostkreuz: { line: 'S', label: 'S41 S42 S8 S85', color: '#008d4f', towards: 'Ringbahn · Pankow · Grünau', closed: true },
+  ostkreuz: { line: 'S', to: 'S41', station: 'ostkreuz', label: 'S41 S42 S8 S85', color: '#008d4f', towards: 'Ringbahn · Pankow · Grünau' },
 };
 for (const t of Object.values(S_TRANSFERS)) if (t.line !== 'S') t.label = [t, ...(t.also || [])].map(b => b.line).join(' · ');
 

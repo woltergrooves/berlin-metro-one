@@ -20,7 +20,7 @@ const KEEP = 2;                 // hoeveel gebouwde pakketten maximaal tegelijk 
 export class LineSurroundings {
   constructor(world, line, stations) {
     this.world = world; this.line = line;
-    this.stations = stations.filter(s => s.surroundings && s.kind === 'viaduct');
+    this.stations = stations.filter(s => s.surroundings && (s.kind === 'viaduct' || (line.ring && s.kind === 'cutting')));   // Ring: ook de ingravingen
     this.base = new URL(`/assets/surroundings/${line.id.toLowerCase()}/`, location.href);
     this.packs = new Map();       // id → Promise<pack>
     this.built = new Map();       // id → { built, st, usedAt }
@@ -38,6 +38,7 @@ export class LineSurroundings {
     const built = buildPack(pack, {
       line: this.line.id, steel: this.line.steel || '#3f5a4a', clear: zones, sunkWater: !!st.surroundings.sunk,
       ground: x => this.world.groundAt(st.x + x),
+      cutHole: this.line.ring ? x => (this.world.groundAt(st.x + x) > 2 ? 13.9 : 0) : null,
     });
     built.group.position.x = st.x; built.group.updateMatrix?.();
     built.group.userData.lineSurroundings = st.id;

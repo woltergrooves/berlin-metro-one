@@ -60,7 +60,22 @@ for i, (sid, la, lo, el) in enumerate(S5):
     pv = S5[i - 1][1:3] if i else (2 * la - S5[1][1], 2 * lo - S5[1][2])
     nx = S5[i + 1][1:3] if i + 1 < len(S5) else (2 * la - S5[i - 1][1], 2 * lo - S5[i - 1][2])
     LINE_STATIONS['s5-' + sid] = dict(line='S5', id=sid, at=(la, lo), prev=pv, next=nx, elev=float(el))
-BAND = {'S5': (-12.0, 24.0)}
+# Ringbahn S41/S42 (deel d, 9 nov 2026): 27 stations, ingraving of dijk, middenperron. Strook symmetrisch ±22 m
+# (ingraving: bovenrand ±13,1 + hek; dijk: talud). Geen spiegeling (+z = rechts bij rijrichting S41 ↻).
+# Coördinaten = src/data/s41.js; vorige/volgende halte lopen rond. Uitsnede: osm/s41-<id>.osm.
+S41 = [('gesundbrunnen', 52.5491593, 13.3899951, 0), ('schoenhauser-allee', 52.5489522, 13.4164114, 0), ('prenzlauer-allee', 52.5446103, 13.4262424, 0),
+       ('greifswalder-strasse', 52.5398615, 13.4396585, 0), ('landsberger-allee', 52.5288924, 13.4552684, 0), ('storkower-strasse', 52.5235155, 13.4656543, 0),
+       ('frankfurter-allee', 52.5145767, 13.4747039, 6), ('ostkreuz', 52.5027427, 13.4687755, 9), ('treptower-park', 52.4934080, 13.4611736, 6),
+       ('sonnenallee', 52.4725382, 13.4551680, 5), ('neukoelln', 52.4693782, 13.4423656, 6), ('hermannstrasse', 52.4675681, 13.4303522, 0),
+       ('tempelhof', 52.4712316, 13.3835184, 0), ('suedkreuz', 52.4763351, 13.3653382, 8), ('schoeneberg', 52.4792174, 13.3509197, 7),
+       ('innsbrucker-platz', 52.4781680, 13.3406589, 0), ('bundesplatz', 52.4777023, 13.3289611, 0), ('heidelberger-platz', 52.4804521, 13.3113393, 0),
+       ('hohenzollerndamm', 52.4889341, 13.2999556, 0), ('halensee', 52.4960144, 13.2906869, 0), ('westkreuz', 52.5013808, 13.2835436, 0),
+       ('messe-nord', 52.5081700, 13.2839390, 0), ('westend', 52.5187699, 13.2843103, 0), ('jungfernheide', 52.5304735, 13.3002882, 5),
+       ('beusselstrasse', 52.5344182, 13.3300021, 0), ('westhafen', 52.5362865, 13.3449438, 5), ('wedding', 52.5433212, 13.3683388, 6)]
+for i, (sid, la, lo, el) in enumerate(S41):
+    LINE_STATIONS['s41-' + sid] = dict(line='S41', id=sid, at=(la, lo), prev=S41[i - 1][1:3], next=S41[(i + 1) % len(S41)][1:3], elev=float(el))
+BAND = {'S5': (-12.0, 24.0), 'S41': (-22.0, 22.0)}
+ONLY = set(filter(None, os.environ.get('ONLY_LINES', '').split(',')))
 RADIUS = 260.0          # m rond het station
 CORRIDOR = 12.5         # |z| < dit = spoorstrook van het spel (zijwanden G3b op ±9,08)
 LEVEL = 3.4             # verdiepingshoogte Berlijnse Altbau
@@ -152,7 +167,7 @@ def clip_square(pts, h):
     return pts
 
 def is_own_line(tg, line=None):
-    if line == 'S5': return tg.get('railway') == 'light_rail' and tg.get('tunnel') not in ('yes',)
+    if line in ('S5', 'S41'): return tg.get('railway') == 'light_rail' and tg.get('tunnel') not in ('yes',)
     # U1-pakketten: alle bovengrondse metro behalve de U2 is "eigen spoor" (namen in OSM wisselen: U1, Hochbahn …).
     nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
     return tg.get('railway') == 'subway' and tg.get('tunnel') not in ('yes',) and 'U2' not in nm
@@ -163,6 +178,7 @@ def run(src, dst):
         fn = os.path.join(src, slug + '.osm')
         if not os.path.exists(fn): print('ontbreekt', fn); continue
         line = cfg.get('line')
+        if ONLY and line not in ONLY: continue
         root = ET.parse(fn).getroot()
         nodes = {n.get('id'): (float(n.get('lat')), float(n.get('lon'))) for n in root.iter('node') if n.get('lat')}
         ways = {w.get('id'): ([x.get('ref') for x in w.iter('nd')], tagsof(w)) for w in root.iter('way')}
@@ -180,7 +196,7 @@ def run(src, dst):
         dirv = (f0.en(*cfg['next'])[0] - f0.en(*cfg['prev'])[0], f0.en(*cfg['next'])[1] - f0.en(*cfg['prev'])[1]) if cfg['next'] else (p[0] - f0.en(*cfg['prev'])[0], p[1] - f0.en(*cfg['prev'])[1])
         own_layer = 1
         for wid, (nd, tg) in ways.items():
-            if tg.get('railway') != ('light_rail' if line == 'S5' else 'subway'): continue
+            if tg.get('railway') != ('light_rail' if line in ('S5', 'S41') else 'subway'): continue
             nm = (tg.get('name', '') + ' ' + tg.get('ref', '')).upper()
             if line:
                 if not is_own_line(tg, line): continue
@@ -215,7 +231,7 @@ def run(src, dst):
                     if r in nodes:
                         x, z = L(r)
                         if abs(x) < 80 and abs(z) < 45: zs.append(z)
-            mirror = bool(zs) and sum(zs) / len(zs) < 0
+            mirror = line == 'S5' and bool(zs) and sum(zs) / len(zs) < 0
             out['fernZ'] = round(sum(zs) / len(zs), 1) if zs else None
             lo, hi = BAND[line]; band = (-hi, -lo) if mirror else (lo, hi)
             out['mirror'] = mirror

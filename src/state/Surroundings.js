@@ -185,7 +185,15 @@ function build(entry, pack, opts = {}) {
   } else {
     // Vierkant (ruim), opgeknipt bij de vrije zones; verzonken water als gaten in de grond.
     const E = R + 61, cuts = [-E, ...zones.flat().map(v => Math.max(-E, Math.min(E, v))), E];
-    for (let i = 0; i + 1 < cuts.length; i += 2) {
+    // Ringbahn (S41 deel d): open ingraving → geen grond boven het spoor (stroken van 8 m, gat |z| < cutHole(x)).
+    if (opts.cutHole) {
+      for (let i = 0; i + 1 < cuts.length; i += 2) for (let a = cuts[i]; a < cuts[i + 1] - 0.01; a += 8) {
+        const b = Math.min(cuts[i + 1], a + 8), h = opts.cutHole((a + b) / 2);
+        if (h > 0) { ground.flat([[a, -E], [b, -E], [b, -h], [a, -h]], 0, GROUND); ground.flat([[a, h], [b, h], [b, E], [a, E]], 0, GROUND); }
+        else ground.flat([[a, -E], [b, -E], [b, E], [a, E]], 0, GROUND);
+      }
+    }
+    for (let i = 0; i + 1 < cuts.length && !opts.cutHole; i += 2) {
       const a = cuts[i], b = cuts[i + 1]; if (b - a < 0.5) continue;
       const rect = [[a, -E], [b, -E], [b, E], [a, E]];
       const holes = sunk ? pack.w.map(w => unpack(w, 0, s)).filter(p => p.length >= 3) : [];
@@ -198,7 +206,14 @@ function build(entry, pack, opts = {}) {
   }
   const GREEN = [C('#6c8648'), C('#55703d'), C('#6f9550')];
   const centerX = p => p.reduce((a, [x]) => a + x, 0) / p.length;
-  for (const g of pack.g) { const p = unpack(g, 1, s); if (p.length >= 3 && !inZone(centerX(p))) green.flat(p, 0.08, GREEN[g[0]] || GREEN[0]); }
+  // Halfvlak-knippen (Sutherland–Hodgman): groen niet over de ingraving van de Ring.
+  const clipZ = (p, k, sgn) => { const out = []; for (let i = 0; i < p.length; i++) { const A = p[i], B = p[(i + 1) % p.length], ina = sgn * (A[1] - k) >= 0, inb = sgn * (B[1] - k) >= 0;
+    if (ina) out.push(A); if (ina !== inb) { const t = (k - A[1]) / (B[1] - A[1]); out.push([A[0] + (B[0] - A[0]) * t, k]); } } return out; };
+  for (const g of pack.g) {
+    const p = unpack(g, 1, s); if (p.length < 3 || inZone(centerX(p))) continue;
+    const h = opts.cutHole ? Math.max(...p.map(([x]) => opts.cutHole(x)), opts.cutHole(centerX(p))) : 0;
+    for (const q of h > 0 ? [clipZ(p, -h, -1), clipZ(p, h, 1)] : [p]) if (q.length >= 3 && Math.abs(signedArea(q)) > 1) try { green.flat(q, 0.08, GREEN[g[0]] || GREEN[0]); } catch {}
+  }
   for (const w of pack.w) {
     const p = unpack(w, 0, s); if (p.length < 3) continue;
     water.flat(p, WY, WATER);

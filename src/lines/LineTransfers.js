@@ -233,6 +233,7 @@ export const LineTransfers = {
   toU7: i => { const a = apis.find(x => x.id === 'U7'); return a ? toU1(i, a) : false; },
   toU9: i => { const a = apis.find(x => x.id === 'U9'); return a ? toU1(i, a) : false; },
   toS5: i => { const a = apis.find(x => x.id === 'S5'); return a ? toU1(i, a) : false; },
+  toS41: i => { const a = apis.find(x => x.id === 'S41'); return a ? toU1(i, a) : false; },
   status: () => ({ ...status, lines: apis.map(a => a.id), busy, chooser: !!chooser, points: signs.map(s => `${s.pt.kind}:${s.pt.name}`) }), toU1, toU2, toU8,
   flags: () => { const p = game.player; return { line: p.__line, street: p.__streetMode, train: !!p.activeTrain, u8a: p.__u8Active, u8area: p.__u8Area, u8: p.__u8FullStation, y: p.position.y, st: p.currentStation?.id }; },
 };

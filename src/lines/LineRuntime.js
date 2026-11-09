@@ -23,7 +23,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
  * toont (U3: alleen de eigen tak); withTrains/transfers/surroundings schakelen U1b/U1c/U1d-onderdelen in.
  */
 export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}`,
-  route = stations, zones = null, dfiRows = 2, trainsPerDir = 1, guests = [], template = null, decor = null }) {
+  route = stations, zones = null, dfiRows = 2, trainsPerDir = 1, guests = [], template = null, decor = null, dirs = [1, -1] }) {
 // S-Bahn (Fase 45b): guests = [{ line, perDir }] = andere lijnen met eigen treinen op dit spoor (S3/S7/S9 op de
 // Stadtbahn); template = eigen treinmodel (functie → Object3D, bv. BR 481) in plaats van het Blender-HK-model;
 // decor = (world, stations) → { update(player, active), status() } (Fernbahnverkeer).
@@ -32,7 +32,7 @@ export function createLine({ line, stations, godStations = stations.filter(s => 
 const ID = line.id;
 /** Alle treinen die door deze lijnwereld rijden: eigen treinen + gasten (U3-treinen op de U1). */
 const relevant = () => ALL_TRAINS.filter(t => t.zones.some(z => z.id === ID));
-const isGuest = t => t.line.id !== ID;
+const isGuest = t => t.line.id !== ID && !line.ring;   // Ring: de S42 is een volwaardige tegenrichting
 /** Het station van deze wereld waar de trein nu staat (of null). */
 const localStation = t => { const r = t.stations[t.currentIndex]; return stations.find(s => s.id === r?.id && !s.shared) || null; };
 let game = null, world = null, trains = [], boards = null, surround = null, deco = null;
@@ -185,6 +185,7 @@ function ride(p, delta) {
   // Rijdt de trein een andere lijnwereld in (U3 → U1-spoor bij x = 262 en terug)? Dan neemt die lijn de speler over.
   const zone = t.trackZone(t.x), x = t.x + r.ox, origin = zone.origin || line.origin;
   if (zone.id !== ID && WORLDS[zone.id]?.api) WORLDS[zone.id].api.adopt(p, x);
+  if (line.ring && Math.abs(x - p.position.x) > 1000) { world.primeAll(world.indexOf(x)); status.seam = (status.seam || 0) + 1; }   // Ring: rond de naad
   p.position.x = x; p.position.z = origin.z + t.zoneZ(zone, x) + r.oz;
   p.position.y = origin.y + CONFIG.player.eyeHeight;
 }
@@ -245,8 +246,8 @@ function installAudio() {
       let near = 0, speed = 0;
       for (const t of relevant()) {
         if (!t.visibleIn(ID) && p.__lineTrain !== t) continue;
-        const v = Math.abs(t.x - (lastX.get(t) ?? t.x)) * 60; lastX.set(t, t.x);
-        const d = Math.abs(t.x - p.position.x), n = p.__lineTrain === t ? 1 : Math.max(0, 1 - d / 90);
+        const v = Math.min(40, Math.abs(t.x - (lastX.get(t) ?? t.x)) * 60); lastX.set(t, t.x);
+        const d = Math.abs((t.drawX ?? t.x) - p.position.x), n = p.__lineTrain === t ? 1 : Math.max(0, 1 - d / 90);
         if (n > near) { near = n; speed = v; }
         // Kort voor vertrek: het BVG-waarschuwingssignaal.
         const left = (t.timeline.isTerminal ? CONFIG.train.terminalDwellSeconds : CONFIG.train.doorOpenSeconds) - t.timeline.stateTime;
@@ -293,7 +294,7 @@ function installHud() {
     }
     if (el.stationName) el.stationName.textContent = st.name;
     const fmt = s => !Number.isFinite(s) ? '—' : s <= 0.9 ? 'nu' : `${Math.floor(Math.ceil(s) / 60)}:${String(Math.ceil(s) % 60).padStart(2, '0')}`;
-    const here = relevant().map(tr => [tr, tr.routeIndex(st.id)]).filter(([tr, i]) => i >= 0 && i + tr.direction >= 0 && i + tr.direction < tr.stations.length);
+    const here = relevant().map(tr => [tr, tr.routeIndex(st.id)]).filter(([tr, i]) => i >= 0 && (tr.line.ring || (i + tr.direction >= 0 && i + tr.direction < tr.stations.length)));
     const multi = new Set(here.map(([tr]) => tr.line.id)).size > 1;
     const deps = here.sort((a, b) => (line.sbahn ? 0 : b[0].direction - a[0].direction) || a[0].etaToStation(a[1]) - b[0].etaToStation(b[1]))
       .slice(0, 4).map(([tr, i]) => `${multi ? tr.line.id + ' ' : ''}${tr.timeline.terminusName} ${fmt(tr.etaToStation(i))}`);
@@ -344,7 +345,7 @@ function frame() {
   surround?.update(p, active, p.position.x);
   if (active) {
     const list = relevant();
-    for (const t of list) t.group.visible = t.visibleIn(ID) && Math.abs(t.x - p.position.x) < 260;
+    for (const t of list) t.group.visible = t.visibleIn(ID) && Math.abs((t.drawX ?? t.x) - p.position.x) < 260;
     // Meerijden richting een andere lijnwereld: die alvast opbouwen, zodat de overgang naadloos is.
     const rt = p.__lineTrain;
     if (rt) for (const z of rt.zones) {
@@ -370,15 +371,17 @@ async function install() {
         trains = [];
         for (let k = 0; k < trainsPerDir; k++) {
           const off = Math.round(k * (route.length - 1) / trainsPerDir);
-          trains.push(new LineTrain({ line, stations: route, zones, direction: 1, startIndex: off, delay: 4 + k * 3 }));
-          trains.push(new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1 - off, delay: 10 + k * 3 }));
+          // Ringbahn: dirs = [1] (S41 rijdt alleen met de klok mee; de S42 is een gast in de tegenrichting).
+          if (dirs.includes(1)) trains.push(new LineTrain({ line, stations: route, zones, direction: 1, startIndex: off, delay: 4 + k * 3 }));
+          if (dirs.includes(-1)) trains.push(new LineTrain({ line, stations: route, zones, direction: -1, startIndex: route.length - 1 - off, delay: 10 + k * 3 }));
         }
         // Gasten (S3/S7/S9): rijden door deze lijnwereld, verspreid tussen de eigen treinen.
         const own = zones || [{ id: ID, stations, origin: line.origin }];
         guests.forEach((gs, j) => { for (let k = 0; k < (gs.perDir || 1); k++) {
           const off = Number.isInteger(gs.start) ? gs.start : Math.round(((j + 1) / (guests.length + 1) + k / (gs.perDir || 1)) * (route.length - 1)) % (route.length - 1);
-          trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: 1, startIndex: off, delay: 6 + j * 5 }));
-          trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: -1, startIndex: route.length - 1 - off, delay: 12 + j * 5 }));
+          const gd = gs.dirs || [1, -1];
+          if (gd.includes(1)) trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: 1, startIndex: off, delay: 6 + j * 5 }));
+          if (gd.includes(-1)) trains.push(new LineTrain({ line: gs.line, stations: route, zones: own, direction: -1, startIndex: route.length - 1 - off, delay: 12 + j * 5 }));
         } });
         for (const t of trains) { world.root.add(t.group); ALL_TRAINS.push(t); }
       }

@@ -246,3 +246,68 @@ export class TrainTimeline {
     }
   }
 }
+
+// ── Ringbahn (S41/S42, Fase 45 deel b, 9 nov 2026): een route zonder eindpunten ─────────────────────
+// De haltes liggen in de lijnwereld op x = 0, sp, 2·sp … (n−1)·sp; na de laatste halte volgt weer de eerste
+// (op afstand sp). De trein keert nooit: de volgende halte is (index ± 1) modulo n. Midden in het stuk tussen
+// de laatste en de eerste halte springt z met de ringlengte n·sp rond — daar ligt in LineWorld aan beide kanten
+// hetzelfde tussenstuk, dus de sprong is onzichtbaar.
+export class RingTimeline extends TrainTimeline {
+  get sp() { return this.route[1].z - this.route[0].z; }
+  get ringLength() { return this.sp * this.route.length; }
+  get destinationIndex() { const n = this.route.length; return ((this.currentStationIndex + this.direction) % n + n) % n; }
+  get isTerminal() { return false; }
+  /** z van halte `index` in de rijrichting vóór de trein (eventueel een ronde verder). */
+  aheadZ(index) {
+    const L = this.ringLength; let z = this.route[index].z;
+    if (this.direction > 0) { while (z < this.z - 0.05) z += L; while (z - L >= this.z - 0.05) z -= L; }
+    else { while (z > this.z + 0.05) z -= L; while (z + L <= this.z + 0.05) z += L; }
+    return z;
+  }
+  wrap() {
+    const L = this.ringLength, lo = this.route[0].z - this.sp / 2, hi = this.route.at(-1).z + this.sp / 2;
+    if (this.z > hi) this.z -= L; else if (this.z < lo) this.z += L;
+  }
+  get routeProgress() {
+    if (this.state === 'cruising' && this.segmentDestinationIndex != null) return Math.max(0, Math.min(1, 1 - Math.abs(this.aheadZ(this.segmentDestinationIndex) - this.z) / this.sp));
+    return this.state === 'opening-arrival' ? 1 : 0;
+  }
+  get secondsUntilCurrentArrival() {
+    if (this.state === 'waiting-to-approach') return Math.max(0, this.waitSeconds - this.stateTime) + this.approachSeconds;
+    if (this.state === 'approaching') return Math.abs(this.originStation.z - this.z) / CONFIG.train.approachSpeed;
+    return 0;
+  }
+  recenterNear(stationIndex, delaySeconds = CONFIG.train.localLoopDelaySeconds) {
+    this.resetToApproachAt(Math.max(0, Math.min(this.route.length - 1, stationIndex)), delaySeconds);
+    this.setStatus(`${this.line} richting ${this.terminusName} volgt`);
+    return true;
+  }
+  etaToStation(target) {
+    const n = this.route.length, stop = OPEN() + DWELL() + DEPART();
+    if (target < 0 || target >= n) return Infinity;
+    const step = i => ((i + this.direction) % n + n) % n;
+    if (this.state === 'cruising' && this.segmentDestinationIndex != null) {
+      let idx = this.segmentDestinationIndex, t = Math.max(0.3, (1 - this.routeProgress) * RIDE());
+      for (let k = 0; k <= n; k++) { if (idx === target) return t; t += stop + RIDE(); idx = step(idx); }
+      return Infinity;
+    }
+    const current = this.currentStationIndex;
+    if (target === current) return this.secondsUntilCurrentArrival;
+    let t = this.timeUntilDepartureFromCurrent(), idx = current;
+    for (let k = 0; k <= n; k++) { t += RIDE(); idx = step(idx); if (idx === target) return t; t += stop; }
+    return Infinity;
+  }
+  update(delta, opts = {}) {
+    if (this.state !== 'cruising') return super.update(delta, opts);
+    this.stateTime += delta;
+    const target = this.segmentDestinationIndex, tz = this.aheadZ(target);
+    const speedFactor = Math.max(0.22, Math.min(1, Math.abs(tz - this.z) / 22));
+    if (this.moveToward(tz, CONFIG.train.cruiseSpeed * speedFactor, delta)) {
+      this.z = this.route[target].z;
+      this.currentStationIndex = target;
+      this.state = 'opening-arrival';
+      this.stateTime = 0;
+      this.setStatus(`${this.originName} · deuren openen`);
+    } else this.wrap();
+  }
+}

@@ -53,7 +53,7 @@ const RAW = [
 // U3c — overstappen op de eigen tak. U7, U9 en de Ringbahn bestaan nog niet in het spel: het trapgat is er,
 // met het echte overstapbord, maar afgesloten (closed) — de HUD zegt dat die lijn later komt.
 export const U3_TRANSFERS = {
-  'heidelberger-platz': { line: 'S', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46', closed: true },
+  'heidelberger-platz': { line: 'S', to: 'S41', station: 'heidelberger-platz', label: 'S41 S42 S46', color: '#008d4f', towards: 'Ringbahn · S41 S42 S46' },
   'fehrbelliner-platz': { line: 'U7', color: '#528dba', station: 'fehrbelliner-platz', towards: 'Rathaus Spandau · Rudow' },
   spichernstrasse:      { line: 'U9', color: '#f3791d', station: 'spichernstrasse', towards: 'Osloer Straße · Rathaus Steglitz' },
 };
