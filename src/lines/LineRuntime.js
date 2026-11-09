@@ -302,7 +302,7 @@ function installHud() {
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
       ? 'Deuren open · loop naar een deur en stap in.'
       : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (${st.transfer.note || 'nog niet in het spel'}) · wacht op de ${ID} of neem de trap naar buiten.`
-      : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : 'het tunneleinde'}.`
+      : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : line.ring ? stations.at(-1).name : 'het tunneleinde'}.`
       : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
       : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
       : line.ring ? `Ringbahn · wacht op de S41 ↻ of S42 ↺ of neem de trap ${st.kind === 'cutting' ? 'omhoog' : 'naar beneden'} (Ausgang).`

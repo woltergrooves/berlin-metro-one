@@ -1,6 +1,6 @@
 🚇 BERLIN LIFE — ROADMAP 3.0
 
-Bijgewerkt: 9 november 2026 (Ringbahn deel a + routeaanwijzing in de HUD)
+Bijgewerkt: 9 november 2026 (Ringbahn volledig: treinen, overstappen, omgeving)
 
 Hoofddoel: Eerst een groot, authentiek en leuk te verkennen Berlijn bouwen. Daarna die wereld steeds levendiger maken met economie, personages, banen, verhalen en keuzes die echte gevolgen hebben.
 
@@ -58,7 +58,7 @@ HOOFDSTUK 2 — BERLIJN UITBREIDEN
 
 Dit krijgt nu de hoogste ontwikkelprioriteit.
 
-Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig), U8 en U9 — alle U-Bahnlijnen. Daarnaast de S-Bahn Stadtbahn Westkreuz ⇄ Ostkreuz volledig (9 nov: 14 stations, treinen S3/S5/S7/S9, overstappen op alle U-lijnen, echte omgeving met Spreebruggen). Volgende: Fase 45 verder met de Ringbahn S41/S42.
+Stand 8 nov 2026: speelbaar zijn U1, U2, U3, U4, U5 (volledig), U6 (zonder het noordstuk in renovatie), U7 (volledig), U8 en U9 — alle U-Bahnlijnen. Daarnaast de S-Bahn Stadtbahn Westkreuz ⇄ Ostkreuz volledig (9 nov: 14 stations, treinen S3/S5/S7/S9, overstappen op alle U-lijnen, echte omgeving met Spreebruggen) en de Ringbahn S41/S42 (9 nov: 27 stations, rondrijdende treinen, overstappen op U2–U9 en de Stadtbahn, echte omgeving). Volgende: Fase 45 verder met de Nord-Süd-tunnel S1/S2/S25.
 
 ✅ Fase 43 — U1 en U3 (U1 30 okt, U3 31 okt 2026; U4 als extra 1 nov)
 
@@ -115,7 +115,7 @@ Iedere lijn wordt afzonderlijk gebouwd en getest.
 
 Onderdelen (zie het werkplan onderaan):
 * S-Bahn Stadtbahn S3/S5/S7/S9 Westkreuz ⇄ Ostkreuz — ✅ (a 8 nov: 14 stations op het gemetselde boogviaduct met Fernbahnsporen, grote stationshallen, S-Bahnborden, uitgangen; b 9 nov: eigen treinmodel BR 481, S5 + S3/S7/S9 met echte eindpunten, S-Bahn-vertrekbord, ICE/RE als decor; c 9 nov: overstappen op U1/U3, U2, U5, U6, U7, U8, U9 met keuzevenster bij Zoo en Alexanderplatz; d 9 nov: echte OSM-omgeving per station, Spreebruggen, Fernsehturm).
-* Ringbahn S41/S42 — 🟡 a ✅ 9 nov: 27 stations rond het centrum (ingravingen en dijken, rondlopend spoor, uitgangen + Street View, overstappen zichtbaar maar nog dicht). Volgende: b treinen S41 ↻ / S42 ↺, c overstappen, d omgeving.
+* Ringbahn S41/S42 — ✅ (9 nov: a 27 stations rond het centrum, ingravingen en dijken, uitgangen + Street View; b treinen BR 481, S41 ↻ en S42 ↺ rijden eindeloos rond zonder te keren; c overstappen op U2, U3, U4, U5, U6, U7, U8, U9 en de Stadtbahn (Ost-/Westkreuz), Südkreuz/Schöneberg volgen met de Nord-Süd-Bahn; d echte OSM-omgeving bij alle 27 stations, ook langs de ingravingen). Open als afwerking (e): stationsprofielen Ostkreuz/Südkreuz/Gesundbrunnen.
 * Nord-Süd-tunnel S1/S2/S25 — ⬜ met de spookstations-geschiedenis.
 * Tram M10 (en later M1/M4) — ⬜.
 * Bus 100 — ⬜ naast Bus 200.
@@ -245,7 +245,7 @@ Activiteiten ontwikkelen zich in niveaus:
 
 HOOFDSTUK 4 — DAGELIJKS LEVEN EN ECONOMIE
 
-Routeaanwijzing (9 nov 2026): kies je in de BVG-app een bestemming, dan staat de route bovenin het scherm (lijn, richting, haltes, overstap, ‘stap uit bij de volgende halte’), ook tijdens het rijden — zonder de telefoon te openen.
+Routeaanwijzing (9 nov 2026): kies je in de BVG-app een bestemming, dan staat de route bovenin het scherm (lijn, richting, haltes, overstap, ‘stap uit bij de volgende halte’), ook tijdens het rijden — zonder de telefoon te openen. Het balkje schuift automatisch onder het stationsvak linksboven en de ritbalk (fix 9 nov).
 
 Telefoon (8 nov 2026): de in-game telefoon ziet eruit als een echte smartphone — toestelframe met Dynamic Island, statusbalk, beginscherm met widgets (klok, portemonnee, ticket), app-iconen en dock, apps in donkere modus. Inhoud ongewijzigd (Thuis, Jobs, BVG-lijnplan, Chats, Plekken, Stad).
 
@@ -586,7 +586,7 @@ Mijlpaal 4 — U6 en U7 ✅ — U6 ✅ (7 nov), U7 ✅ (U7a 7 nov, U7b 8 nov). U
 
 Nieuwe stadsdelen en belangrijke overstapstations speelbaar maken.
 
-Mijlpaal 4b — S-Bahn en tram (Fase 45) — 🟡 gestart (Stadtbahn ✅ 9 nov)
+Mijlpaal 4b — S-Bahn en tram (Fase 45) — 🟡 gestart (Stadtbahn ✅ 9 nov, Ringbahn ✅ 9 nov)
 
 Het OV-netwerk afmaken met de belangrijkste S-Bahn- en tramlijnen, zodat de hele binnenstad met elkaar verbonden is.
 
@@ -610,7 +610,8 @@ Elke stap: bouwen → headless testen → direct naar de hoofdlink → controle 
 
 A. S-Bahn Stadtbahn ✅ (8–9 nov 2026, deel a–d in twee chats). Nog open als afwerking: S-Bahn-aankondigingen (valt onder E. Audio), drukte op de perrons.
 
-B. Ringbahn S41/S42 (±5–6 chats)
+B. Ringbahn S41/S42 ✅ (9 nov 2026, deel a–d in twee chats). Nog open als afwerking (e): stationsprofielen (Ostkreuz Ringhalle, Südkreuz glasdak, Gesundbrunnen).
+  Oorspronkelijk plan:
   27 stations rond het centrum (Gesundbrunnen, Schönhauser Allee, Ostkreuz, Neukölln, Hermannstraße, Tempelhof, Südkreuz, Innsbrucker Platz, Heidelberger Platz, Westkreuz, Westend, …). Bijzonder: de lijn is een cirkel — het spel moet een rondlopende route aankunnen (S41 met de klok mee, S42 tegen de klok in). Daarna overstappen op bijna alle U-lijnen en op de Stadtbahn (Westkreuz, Ostkreuz). Stappen a–e zoals bij de U-Bahn.
 
 C. Nord-Süd-tunnel S1/S2/S25 (±3 chats)
@@ -631,7 +632,7 @@ F. Onderhoud tussendoor (kleine chats)
 G. Daarna: Mijlpaal 5 — Berlin Discovery
   Per lijn ontdekkingen en activiteiten bij de nieuwe stations (Museumsinsel, Checkpoint Charlie, Tempelhofer Feld, Zoo, Spandau Zitadelle, Hackescher Markt, Oberbaumbrücke …), Berlin Stamps en verhalen; daarna Mijlpaal 6 (levende stad) en 7 (carrières en verhaal).
 
-Schatting: B–E samen ongeveer 13–16 chats.
+Schatting: C–E samen ongeveer 8–10 chats.
 
 ⸻
 
