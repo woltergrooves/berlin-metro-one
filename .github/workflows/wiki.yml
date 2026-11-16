@@ -1,0 +1,30 @@
+# Publiceert docs/wiki/ naar de GitHub-wiki van deze repo (16 nov 2026).
+# Voorwaarde: de wiki bestaat al (eenmalig de eerste pagina via de website aangemaakt).
+name: Wiki bijwerken
+on:
+  push:
+    branches: [fase-1, main]
+    paths: ['docs/wiki/**', '.github/workflows/wiki.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: wiki, cancel-in-progress: false }
+jobs:
+  wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pagina's naar de wiki
+        env:
+          TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git clone "https://x-access-token:${TOKEN}@github.com/${REPO}.wiki.git" wiki
+          rsync -a --delete --exclude .git docs/wiki/ wiki/
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "Wiki al actueel"; exit 0; fi
+          git commit -m "Wiki bijgewerkt vanuit docs/wiki (${GITHUB_SHA::7})"
+          git push
