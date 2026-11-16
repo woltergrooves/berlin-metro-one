@@ -632,6 +632,7 @@ F. Audio — Fase 46 afronden (±1–2 chats)
   BVG-geluiden: deurwaarschuwing ("Zurückbleiben bitte"), stationsaankondigingen, rijgeluid, perronsfeer, S-Bahn-geluiden.
 
 G. Onderhoud tussendoor (kleine chats)
+  * ✅ Mac/desktop-bediening (16 nov 2026): WASD/pijltjes = lopen, klik rechts = muis kijken (Esc = los), E/Enter/spatie = actie, P = telefoon; aanraken blijft hetzelfde (`InputController.bindDesktop`, test `desktop-test.mjs` 13/13).
   * Ritbalk naast het stationsvak (raakt het vak in liggende stand).
   * Ring deel e: stationsprofielen Ostkreuz (Ringhalle), Südkreuz (glasdak), Gesundbrunnen.
   * GOD-schakelaar voor de betaalde Street View (aan/uit zonder console).

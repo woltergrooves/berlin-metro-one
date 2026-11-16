@@ -87,3 +87,7 @@ button { font: inherit; }
   .status { max-width: 38vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .interaction-button { min-width: 150px; min-height: 44px; bottom: max(56px, calc(env(safe-area-inset-bottom) + 48px)); }
 }
+/* Mac/desktop-bediening (16 nov 2026, InputController.bindDesktop) */
+.boot-card .desk-keys { display: none; margin-top: 6px; }
+@media (hover: hover) and (pointer: fine) { .boot-card .desk-keys { display: block; } }
+body.bl-mouselook .look-label { opacity: 0; }

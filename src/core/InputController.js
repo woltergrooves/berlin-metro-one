@@ -16,7 +16,64 @@ export class InputController {
     this.rightLast = { x: 0, y: 0 };
     this.maxStickRadius = 42;
 
+    // Mac/desktop (16 nov 2026): toetsenbord + muis naast de aanraakbediening.
+    this.keys = new Set();
+    this.mouseLook = false;
+
     this.bind();
+    this.bindDesktop();
+  }
+
+  /** WASD/pijltjes = lopen, klik rechts (muis) = muis-kijken (Esc = los), E/Enter/spatie = actie, P = telefoon. */
+  bindDesktop() {
+    const MOVE = { KeyW: 'f', ArrowUp: 'f', KeyS: 'b', ArrowDown: 'b', KeyA: 'l', ArrowLeft: 'l', KeyD: 'r', ArrowRight: 'r' };
+    const typing = (e) => { const t = e.target; return t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)); };
+    const street = () => !!globalThis.__berlinMetroGame?.player?.__streetMode;
+    const visible = (el) => el && !el.classList.contains('hidden') && el.offsetParent !== null && getComputedStyle(el).display !== 'none';
+    document.addEventListener('keydown', (e) => {
+      if (typing(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (MOVE[e.code]) {
+        if (street()) return;                     // Street View: Google loopt zelf met de pijltjes
+        this.keys.add(MOVE[e.code]); this.applyKeys(); e.preventDefault(); return;
+      }
+      if (e.repeat) return;
+      if (e.code === 'KeyE' || e.code === 'Enter' || e.code === 'Space') {
+        const b = document.querySelector('#interactionButton');
+        if (visible(b)) { b.click(); e.preventDefault(); }
+      } else if (e.code === 'KeyP') {
+        const m = document.querySelector('#phoneModalV2'), open = m && getComputedStyle(m).display !== 'none';
+        const b = document.querySelector(open ? '#phoneCloseV2' : '#phoneBtnV2');
+        if (b) { if (document.pointerLockElement) document.exitPointerLock?.(); b.click(); e.preventDefault(); }
+      }
+    });
+    document.addEventListener('keyup', (e) => { if (MOVE[e.code]) { this.keys.delete(MOVE[e.code]); this.applyKeys(); } });
+    addEventListener('blur', () => { this.keys.clear(); this.applyKeys(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) { this.keys.clear(); this.applyKeys(); } });
+
+    // Muis-kijken met pointer lock (alleen bij een echte muis/trackpad; aanraken blijft zoals het was).
+    document.addEventListener('pointerlockchange', () => {
+      this.mouseLook = document.pointerLockElement === this.rightZone;
+      document.body.classList.toggle('bl-mouselook', this.mouseLook);
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!this.mouseLook) return;
+      this.lookX += e.movementX || 0;
+      this.lookY += e.movementY || 0;
+    });
+    if (matchMedia?.('(hover: hover) and (pointer: fine)').matches) {
+      document.body.classList.add('bl-desktop');
+      const label = this.rightZone.querySelector('.look-label');
+      if (label) label.textContent = 'KLIK = MUIS KIJKEN';
+    }
+  }
+
+  /** Toetsen → bewegingsvector (de stick gaat voor zolang je die vasthoudt). */
+  applyKeys() {
+    if (this.leftPointerId !== null) return;
+    const k = this.keys;
+    const y = (k.has('f') ? 1 : 0) - (k.has('b') ? 1 : 0), x = (k.has('r') ? 1 : 0) - (k.has('l') ? 1 : 0);
+    const n = Math.hypot(x, y) || 1;
+    this.moveX = x / n; this.moveY = y / n;
   }
 
   bind() {
@@ -66,9 +123,15 @@ export class InputController {
     this.moveX = 0;
     this.moveY = 0;
     this.stickKnob.style.transform = 'translate(-50%, -50%)';
+    this.applyKeys();
   }
 
   onRightDown(event) {
+    if (event.pointerType === 'mouse' && !this.mouseLook && event.button === 0 && this.rightZone.requestPointerLock) {
+      try { const r = this.rightZone.requestPointerLock(); r?.catch?.(() => {}); } catch {}
+      return;
+    }
+    if (this.mouseLook) return;
     if (this.rightPointerId !== null) return;
     this.rightPointerId = event.pointerId;
     this.rightZone.setPointerCapture(event.pointerId);
