@@ -330,7 +330,7 @@ export const StationProfiles = {
       counts.templates++; applied.set(key, { at: Date.now(), parts: group.children.length });
       return true;
     } catch (e) {
-      counts.failed++; console.warn('[Berlin Life] G3b-profiel overgeslagen', key, e);
+      counts.failed++; console.warn('[Berlin Life] G3b profile skipped', key, e);
       return false;
     }
   },

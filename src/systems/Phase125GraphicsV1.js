@@ -80,6 +80,6 @@ function install(game){
     }});
   game.graphicsFoundationVersion='12.5-V1';
   game.u8PlatformFixVersion='V3';
-  game.ui?.notify?.('Graphics 12.5 · PBR perrons + neutrale U8-materialen actief');
+  game.ui?.notify?.('Graphics 12.5 · PBR platforms + neutral U8 materials active');
 }
 async function boot(){for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.scene&&g?.renderer&&g?.player&&g?.stations){install(g);return}await Tick.sleep(100,'boot.Phase125GraphicsV1')}}boot().catch(e=>console.error('[Metro] Phase 12.5 failed',e));

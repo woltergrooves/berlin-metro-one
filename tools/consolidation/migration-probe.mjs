@@ -27,7 +27,7 @@ const money = page => page.evaluate(() => {
 const ctxA = await browser.newContext({ ...devices['iPad Pro 11 landscape'] });
 const a = await ctxA.newPage();
 await a.goto(oldUrl, { waitUntil: 'load' });
-await boot(a, /Nieuwe/);
+await boot(a, /new save/i);
 await a.evaluate(() => { const g = globalThis.__berlinMetroGame; g.economy.earn(1000, 'Shift loon'); const s = g.metroEconomy; s.balanceCents -= 200; localStorage.setItem('metro-economy-v2', JSON.stringify(s)); g.economy.balanceCents = s.balanceCents; g.economy.earn(500, 'Fooi'); });
 await a.waitForTimeout(2500);
 const before = await money(a);

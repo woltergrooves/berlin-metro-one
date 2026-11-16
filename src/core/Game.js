@@ -107,7 +107,7 @@ export class Game {
         item.parent.remove(item);
         this.ui.onInteractionFocus(null);
         this.ui.updateEconomy(result);
-        this.ui.notify(`+ €0,25 Pfand · ${chunk.station.name}`);
+        this.ui.notify(`+ €0.25 Pfand · ${chunk.station.name}`);
       };
       this.interaction.add(item);
     }

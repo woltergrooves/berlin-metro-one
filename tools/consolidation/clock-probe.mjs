@@ -30,7 +30,7 @@ const read = step => page.evaluate(step => {
 
 const rows = [];
 await page.goto(url, { waitUntil: 'load' });
-await boot(/Nieuwe/);
+await boot(/new save/i);
 rows.push(await read('1 nieuwe save'));
 await page.waitForTimeout(10000);
 rows.push(await read('2 na 10 s'));

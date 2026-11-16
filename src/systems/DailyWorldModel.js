@@ -1,9 +1,9 @@
 export const DAILY_EVENTS = [
-  {id:'busy', emoji:'🚇', title:'Drukke dag', text:'Bij nieuwe bezorgklussen krijg je vandaag 90 seconden extra voor drukte onderweg.', extraSeconds:90},
-  {id:'quiet', emoji:'☕', title:'Rustige dag', text:'Buurtbewoners hebben tijd voor een praatje: bij nieuwe klussen is tot €2 extra fooi mogelijk.', extraTip:200},
-  {id:'packages', emoji:'📦', title:'Veel bestellingen', text:'Kiez Kurier betaalt vandaag 20% meer basisloon voor nieuwe bestellingen.', payMultiplier:1.2},
-  {id:'kotti', emoji:'🌙', title:'Kotti vanavond', text:'Deniz betaalt vandaag €4 extra voor een nachtklus. Vraag hem na 20:00 naar werk.', nightBonus:400},
-  {id:'pfand', emoji:'♻️', title:'Een rondje door de Kiez', text:'Een rustige dag om statiegeld in te leveren, je huur te regelen en bekenden op te zoeken.'}
+  {id:'busy', emoji:'🚇', title:'Busy day', text:'New delivery jobs give you 90 extra seconds today for busy streets on the way.', extraSeconds:90},
+  {id:'quiet', emoji:'☕', title:'Quiet day', text:'Locals have time for a chat: new jobs can give up to €2 extra tip.', extraTip:200},
+  {id:'packages', emoji:'📦', title:'Lots of orders', text:'Kiez Kurier pays 20% more base pay for new orders today.', payMultiplier:1.2},
+  {id:'kotti', emoji:'🌙', title:'Kotti tonight', text:'Deniz pays €4 extra for a night job today. Ask him for work after 20:00.', nightBonus:400},
+  {id:'pfand', emoji:'♻️', title:'A walk around the Kiez', text:'A quiet day to return bottle deposits, sort your rent and look up people you know.'}
 ];
 
 export function currentDay(s) {

@@ -63,7 +63,7 @@ const RAW = [
 // Overstappen (deel c, 9 nov 2026): open, behalve naar de Nord-Süd-Bahn (Südkreuz S2/S25/S26, Schöneberg S1) — die
 // komt later in het spel. Terug: op U2 (Schönhauser Allee) en U8 (Gesundbrunnen, Hermannstraße) een groen S-bord aan het
 // perroneinde (S41_SIGN); op de nieuwe lijnen en de Stadtbahn het eigen trapgat (`to: 'S41'`).
-const NOTE = 'Nord-Süd-Bahn komt later in het spel';
+const NOTE = 'Nord-Süd-Bahn comes later in the game';
 const T = (line, color, towards, extra = {}) => ({ line, color, towards, ...extra });
 const S_GREEN = '#008d4f';
 const S41_TRANSFERS = {

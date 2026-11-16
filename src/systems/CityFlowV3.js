@@ -8,15 +8,15 @@ const now=()=>Date.now(),station=()=>city()?.where?.()?.id||null,asId=s=>String(
 const currentDay=()=>bl()?.state?.phase16Diary?.number||Math.floor((bl()?.state?.clock?.totalMinutes||0)/1440)+1;
 const deadline=18*60*1000;
 const sectors={
-"alexanderplatz":[{id:"alexanderplatz:express-courier",name:"Spoedkoerier · stadsroute",icon:"🚲",detail:"Drie haltes met controles, keuzevrijheid en een echt tijdvenster",episodeLabel:"OPDRACHT"},
-{id:"alexanderplatz:miro-referral",name:"Miro · vervolgcontact",icon:"💬",detail:"Bouw een langdurige band op en ontgrendel een werkgever",episodeLabel:"PRAAT"},
-{id:"alexanderplatz:tower-operations",name:"Fernsehturm · bezoekersstroom",icon:"🗼",detail:"Organiseer een drukke avond zonder bezoekers achter te laten",episodeLabel:"SPEEL"}],
-"rosenthaler-platz":[{id:"rosenthaler-platz:parcel-check",name:"Pakketcontrole · Rosenthaler Platz",icon:"📦",detail:"Controleer het verzegelde pakket voor je het doorbrengt",episodeLabel:"AFHALEN"}],
-"bernauer-strasse":[{id:"bernauer-strasse:route-handoff",name:"Koerierscheckpoint · Bernauer Straße",icon:"🚲",detail:"Bepaal hoe je veilig verdergaat naar de laatste halte",episodeLabel:"CHECKPOINT"},
-{id:"bernauer-strasse:wall-investigation",name:"Muurarchief · Bernauer Straße",icon:"🧱",detail:"Reconstrueer een historisch dossier zonder bronnen te verdraaien",episodeLabel:"ONDERZOEK"}],
-"eberswalder-strasse":[{id:"eberswalder-strasse:delivery-final",name:"Afleverpunt · Eberswalder Straße",icon:"📦",detail:"Controleer de ontvanger en voltooi de U8–U2-koeriersrit",episodeLabel:"AFLEVEREN"}],
-"kottbusser-tor":[{id:"kottbusser-tor:deniz-route",name:"Deniz · routes en vertrouwen",icon:"🧢",detail:"Een nieuwe professionele keuze die je volgende opdrachten beïnvloedt",episodeLabel:"PRAAT"}],
-"olympia-stadion":[{id:"olympia-stadion:stadium-shift",name:"Olympiastadion · crowd control",icon:"🏟️",detail:"Los een stadionincident in drie stappen op",episodeLabel:"SPEEL"}]
+"alexanderplatz":[{id:"alexanderplatz:express-courier",name:"Rush courier · city route",icon:"🚲",detail:"Three stops with checks, freedom of choice and a real time window",episodeLabel:"JOB"},
+{id:"alexanderplatz:miro-referral",name:"Miro · vervolgcontact",icon:"💬",detail:"Build a long-term relationship and unlock an employer",episodeLabel:"TALK"},
+{id:"alexanderplatz:tower-operations",name:"Fernsehturm · visitor flow",icon:"🗼",detail:"Run a busy night without leaving visitors behind",episodeLabel:"PLAY"}],
+"rosenthaler-platz":[{id:"rosenthaler-platz:parcel-check",name:"Pakketcontrole · Rosenthaler Platz",icon:"📦",detail:"Check the sealed parcel before you pass it on",episodeLabel:"PICK UP"}],
+"bernauer-strasse":[{id:"bernauer-strasse:route-handoff",name:"Courier checkpoint · Bernauer Straße",icon:"🚲",detail:"Decide how to continue safely to the last stop",episodeLabel:"CHECKPOINT"},
+{id:"bernauer-strasse:wall-investigation",name:"Wall archive · Bernauer Straße",icon:"🧱",detail:"Reconstruct a historical file without twisting the sources",episodeLabel:"INVESTIGATE"}],
+"eberswalder-strasse":[{id:"eberswalder-strasse:delivery-final",name:"Drop-off point · Eberswalder Straße",icon:"📦",detail:"Check the recipient and complete the U8–U2 courier run",episodeLabel:"DELIVER"}],
+"kottbusser-tor":[{id:"kottbusser-tor:deniz-route",name:"Deniz · routes and trust",icon:"🧢",detail:"A new professional choice that affects your next jobs",episodeLabel:"TALK"}],
+"olympia-stadion":[{id:"olympia-stadion:stadium-shift",name:"Olympiastadion · crowd control",icon:"🏟️",detail:"Resolve a stadium incident in three steps",episodeLabel:"PLAY"}]
 };
 const known=new Set(Object.values(sectors).flat().map(a=>a.id));
 let lastHudDay=0;
@@ -60,125 +60,125 @@ const page=(title,text,actions=[],extras=[])=>({title,text,actions,extras});
 const fmt=m=>{const s=Math.ceil(Math.max(0,m)/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
 const elapsed=m=>m?Math.max(0,deadline-(now()-m.startedAt)):0;
 const missionSteps=[
-{station:"rosenthaler-platz",name:"Rosenthaler Platz",id:"rosenthaler-platz:parcel-check",hint:"Het label begint met R en de controlesticker vermeldt 41"},
-{station:"bernauer-strasse",name:"Bernauer Straße",id:"bernauer-strasse:route-handoff",hint:"Kies een route langs de gedenkplaats of door het drukke overstappunt"},
-{station:"eberswalder-strasse",name:"Eberswalder Straße",id:"eberswalder-strasse:delivery-final",hint:"Ontvanger Hartmann · order EX-24 · afgesproken bij de fietsenstalling"}];
+{station:"rosenthaler-platz",name:"Rosenthaler Platz",id:"rosenthaler-platz:parcel-check",hint:"The label starts with R and the check sticker says 41"},
+{station:"bernauer-strasse",name:"Bernauer Straße",id:"bernauer-strasse:route-handoff",hint:"Choose a route past the memorial or through the busy transfer point"},
+{station:"eberswalder-strasse",name:"Eberswalder Straße",id:"eberswalder-strasse:delivery-final",hint:"Recipient Hartmann · order EX-24 · arranged at the bike shelter"}];
 function careerRank(p){
  const j=journal(),t=(p.missionsComplete||0)+(old?.state?.deliveries||0);
  const trust=(old?.state?.miroTrust||0)+(old?.state?.denizTrust||0)+(p.contactTasks.miro?.trust||0)+(p.contactTasks.deniz?.trust||0);
- return p.careerRank=t>=6&&trust>=5?"Ervaren bezorger":t>=3?"Stadskoerier":t>=1?"Junior koerier":"Starter";
+ return p.careerRank=t>=6&&trust>=5?"Experienced courier":t>=3?"City courier":t>=1?"Junior courier":"Starter";
 }
 function missionInfo(p){
  const m=p?.mission;if(!m)return [];
- return ["Bestemming: "+missionSteps[m.step]?.name,"Tijd over: "+fmt(elapsed(m)),"Beloning bij correcte aflevering: €24 + mogelijke fooi",
-  "Route U8 → U2; eerdere beslissingen tellen mee"];
+ return ["Destination: "+missionSteps[m.step]?.name,"Time left: "+fmt(elapsed(m)),"Reward for correct delivery: €24 + possible tip",
+  "Route U8 → U2; earlier decisions count"];
 }
 function missionView(id){
  const p=state(),m=p?.mission,step=missionSteps.findIndex(x=>x.id===id);
  if(id==="alexanderplatz:express-courier"){
-  if(m&&elapsed(m)>0)return page("Spoedkoerier · rit loopt","Deze bestelling is nog onderweg. "+missionSteps[m.step]?.hint,[choice("route","Bekijk de route"),choice("cancel","Annuleer de rit")],missionInfo(p));
-  if(m&&elapsed(m)<=0)return page("Spoedkoerier · verlopen","De deadline is voorbij. Je kunt dit pakket niet meer succesvol afleveren.",[choice("clear","Registreer de gemiste deadline")]);
-  if(p.missionLastDay===currentDay())return page("Spoedkoerier · vandaag afgerond","Vandaag is je route al voltooid. Morgen is er weer een contract beschikbaar.",[],["Koeriersniveau: "+careerRank(p)]);
-  if(old?.state?.shift)return page("Spoedkoerier","Je hebt nog een korte bezorging naar Hermannplatz openstaan. Rond die eerst af.");
+  if(m&&elapsed(m)>0)return page("Rush courier · run in progress","This order is still on its way. "+missionSteps[m.step]?.hint,[choice("route","View the route"),choice("cancel","Cancel the run")],missionInfo(p));
+  if(m&&elapsed(m)<=0)return page("Rush courier · expired","The deadline has passed. You can no longer deliver this parcel successfully.",[choice("clear","Register the missed deadline")]);
+  if(p.missionLastDay===currentDay())return page("Rush courier · completed today","Your route is already done today. Another contract will be available tomorrow.",[],["Courier level: "+careerRank(p)]);
+  if(old?.state?.shift)return page("Rush courier","You still have a short delivery to Hermannplatz open. Finish that first.");
   const ref=journal()?.leads?.courierNetwork;
-  return page("Spoedkoerier · drie haltes",
-    "Dispatch zoekt iemand voor een route met een verzegelcontrole, een routebeslissing en een gecontroleerde aflevering. Neem de U8 naar Rosenthaler Platz, reis daarna via Bernauer Straße en stap over richting Eberswalder Straße (U2).",
-    [choice("accept","Accepteer de 18-minutenrit"),choice("route","Bekijk alle controles")],
-    ["Basisloon €24 · maximaal €3 fooi"+(ref?" · netwerkbonus €2":""),"Je verdient pas geld na de correcte aflevering"]);
+  return page("Rush courier · three stops",
+    "Dispatch is looking for someone for a route with a seal check, a route decision and a verified delivery. Take the U8 to Rosenthaler Platz, then travel via Bernauer Straße and transfer towards Eberswalder Straße (U2).",
+    [choice("accept","Accept the 18-minute run"),choice("route","View all checks")],
+    ["Base pay €24 · up to €3 tip"+(ref?" · netwerkbonus €2":""),"You only earn money after the correct delivery"]);
  }
- if(!m)return page("Geen lopende rit","Er is geen actieve lange koeriersrit. Kijk bij de koeriersdesk op Alexanderplatz.",[],["Je bestaande korte koeriersritten worden niet aangepast."]);
- if(elapsed(m)<=0)return page("Bezorging verlopen","De 18 minuten zijn voorbij. Er wordt niets uitbetaald.",[choice("clear","Rit beëindigen")]);
- if(step!==m.step)return page("Koeriersroute","Je bent bij een checkpoint dat nog niet aan de beurt is.",[],missionInfo(p));
+ if(!m)return page("No run in progress","There's no active long courier run. Check the courier desk at Alexanderplatz.",[],["Your existing short courier runs are not changed."]);
+ if(elapsed(m)<=0)return page("Delivery expired","The 18 minutes are over. Nothing is paid out.",[choice("clear","End run")]);
+ if(step!==m.step)return page("Courier route","You're at a checkpoint that isn't up yet.",[],missionInfo(p));
  if(m.step===0)return page("Rosenthaler Platz · verzegelcontrole",
-   "Dispatch: 'Laat het pakket alleen door als de code overeenkomt met de vrachtbrief. De routecode begint met R. Op de verzegeling staan de cijfers 41.' Het pakket is klaar voor transport.",
-   [choice("seal-r14","Controlekaart R-14"),choice("seal-r41","Verzegeling R-41"),choice("seal-41r","Handgeschreven 41-R")],missionInfo(p));
- if(m.step===1)return page("Bernauer Straße · routekeuze",
-   "Het is druk rond de gedenkplaats. Dispatch biedt drie routes. Je hoeft geen ja/nee-quiz op te lossen: snelheid, veiligheid en contact met de buurt hebben andere gevolgen.",
-   [choice("safe","Langs de rustige straat, met tijd voor voetgangers"),
-    choice("fast","Steek rechtstreeks door de drukke groep voor de ingang"),
-    choice("helper","Vraag een lokale medewerker om een veilige doorgang")],missionInfo(p));
- return page("Eberswalder Straße · aflevering",
-   "Je bereikt het afleverpunt. De ontvanger heet Hartmann, de order is EX-24 en de overdracht is afgesproken bij de fietsenstalling. Controleer de informatie voordat je het pakket afgeeft.",
-   [choice("handoff-correct","Persoon bij de fietsenstalling noemt 'Hartmann' en EX-24"),
-    choice("handoff-kiosk","Kioskmedewerker noemt EX-42 en biedt aan het pakket te bewaren"),
-    choice("handoff-corner","Persoon bij de tram zegt alleen dat het pakket voor hem is")],missionInfo(p));
+   "Dispatch: 'Only pass the parcel on if the code matches the waybill. The route code starts with R. The seal shows the digits 41.' The parcel is ready for transport.",
+   [choice("seal-r14","Check card R-14"),choice("seal-r41","Seal R-41"),choice("seal-41r","Handwritten 41-R")],missionInfo(p));
+ if(m.step===1)return page("Bernauer Straße · route choice",
+   "It's busy around the memorial. Dispatch offers three routes. You don't have to solve a yes/no quiz: speed, safety and contact with the neighbourhood have different consequences.",
+   [choice("safe","Along the quiet street, with time for pedestrians"),
+    choice("fast","Cut straight through the busy group in front of the entrance"),
+    choice("helper","Ask a local worker for a safe way through")],missionInfo(p));
+ return page("Eberswalder Straße · delivery",
+   "You reach the drop-off point. The recipient is Hartmann, the order is EX-24 and the handover was arranged at the bike shelter. Check the information before you hand over the parcel.",
+   [choice("handoff-correct","Person at the bike shelter says 'Hartmann' and EX-24"),
+    choice("handoff-kiosk","Kiosk worker says EX-42 and offers to keep the parcel"),
+    choice("handoff-corner","Person at the tram only says the parcel is for him")],missionInfo(p));
 }
 function missionChoose(id,key){
- const p=state();if(!p)return page("Geen save","Start eerst een spel om voortgang vast te leggen.");
- if(!approve(id))return page("Andere locatie","Deze opdracht moet buiten bij de juiste halte worden uitgevoerd.");
+ const p=state();if(!p)return page("No save","Start a game first to record progress.");
+ if(!approve(id))return page("Other location","This job has to be done outside at the right stop.");
  let m=p.mission;
- if(key==="route")return page("Koeriersroute · checklist",
- "De rit start op Alexanderplatz en stopt achtereenvolgens bij drie U-Bahn-haltes. De echte timer blijft lopen terwijl je door de metro reist.",
- [choice("back","Terug naar opdracht")],missionInfo(p).concat(missionSteps.map((x,i)=>(i+1)+". "+x.name+" · "+x.hint)));
+ if(key==="route")return page("Courier route · checklist",
+ "The run starts at Alexanderplatz and stops at three U-Bahn stops in turn. The real timer keeps running while you travel through the metro.",
+ [choice("back","Back to job")],missionInfo(p).concat(missionSteps.map((x,i)=>(i+1)+". "+x.name+" · "+x.hint)));
  if(key==="back")return missionView(id);
- if(key==="clear"&&m&&elapsed(m)<=0){p.mission=null;log("Deadline verlopen · geen betaling","courier");return missionView(id)}
- if(key==="cancel"&&m){p.mission=null;log("Koeriersroute geannuleerd · geen betaling","courier");return missionView(id)}
+ if(key==="clear"&&m&&elapsed(m)<=0){p.mission=null;log("Deadline expired · no payment","courier");return missionView(id)}
+ if(key==="cancel"&&m){p.mission=null;log("Courier route cancelled · no payment","courier");return missionView(id)}
  if(key==="accept"&&id==="alexanderplatz:express-courier"&&!m&&p.missionLastDay!==currentDay()&&!old?.state?.shift){
   p.mission={startedAt:now(),step:0,misses:0,safe:0,helper:0,choices:[],reward:2400};
-  log("Driehaltesrit aangenomen: Rosenthaler Platz → Bernauer Straße → Eberswalder Straße","courier");
+  log("Three-stop run accepted: Rosenthaler Platz → Bernauer Straße → Eberswalder Straße","courier");
   return missionView(id);
  }
  if(!m||elapsed(m)<=0)return missionView(id);
  if(id!==missionSteps[m.step].id)return missionView(id);
  if(key==="retry")return missionView(id);
  if(m.step===0){
-  if(key!=="seal-r41"){m.misses++;log("Controlecode niet overeenkomend bij Rosenthaler Platz","courier");return page("Verzegeling niet geaccepteerd","De vrachtbrief en sticker komen niet overeen. Je houdt het pakket vast en controleert opnieuw.",[choice("retry","Controle opnieuw uitvoeren")],missionInfo(p))}
-  if(key==="seal-r41"){m.step=1;m.choices.push("Seal R-41 gecontroleerd");log("Verzegelcontrole geslaagd. Volgende halte: Bernauer Straße","courier");return page("Pakket gecontroleerd","De route is vrijgegeven. Reis met de U8 door naar Bernauer Straße.",[],missionInfo(p))}
+  if(key!=="seal-r41"){m.misses++;log("Check code doesn't match at Rosenthaler Platz","courier");return page("Seal not accepted","The waybill and sticker don't match. You keep the parcel and check again.",[choice("retry","Run the check again")],missionInfo(p))}
+  if(key==="seal-r41"){m.step=1;m.choices.push("Seal R-41 checked");log("Seal check passed. Next stop: Bernauer Straße","courier");return page("Parcel checked","The route is cleared. Ride the U8 on to Bernauer Straße.",[],missionInfo(p))}
  }
  if(m.step===1&&["safe","fast","helper"].includes(key)){
   m.choices.push(key);m.safe=key==="safe"?1:0;m.helper=key==="helper"?1:0;
   if(key==="fast"){m.misses++;rep("hospitality",-1)}
   if(key==="safe")rep("hospitality",1);
   if(key==="helper")rep("hospitality",2);
-  m.step=2;log("Bernauer Straße-route gekozen: "+({safe:"rustige route",fast:"snelle route",helper:"lokale hulp"}[key]),"courier");
-  return page("Routebeslissing opgeslagen","Je rijdt nu via Alexanderplatz naar de U2 richting Eberswalder Straße. "+(key==="fast"?"Je won wat tijd, maar de haast telt tegen je betrouwbaarheid.":"De route werd zonder gedrang afgelegd."),[],missionInfo(p));
+  m.step=2;log("Bernauer Straße route chosen: "+({safe:"quiet route",fast:"fast route",helper:"local help"}[key]),"courier");
+  return page("Route decision saved","You're now riding via Alexanderplatz to the U2 towards Eberswalder Straße. "+(key==="fast"?"You gained some time, but the rush counts against your reliability.":"The route was covered without pushing."),[],missionInfo(p));
  }
  if(m.step===2&&key.startsWith("handoff-")){
-  if(key!=="handoff-correct"){m.misses++;log("Ontvanger kon code niet bevestigen","courier");return page("Ontvanger niet geverifieerd","Deze persoon heeft niet de juiste gegevens. Je geeft het pakket niet af en kunt verder controleren.",[choice("retry","Probeer opnieuw")],missionInfo(p))}
+  if(key!=="handoff-correct"){m.misses++;log("Recipient couldn't confirm the code","courier");return page("Recipient not verified","This person doesn't have the right details. You don't hand over the parcel and can keep checking.",[choice("retry","Try again")],missionInfo(p))}
   const tip=m.misses===0&&elapsed(m)>=3*60*1000?300:0,network=journal()?.leads?.courierNetwork?200:0;
   const cents=m.reward+tip+network;
-  if(!canPay())return page("Betaling nog niet beschikbaar","Het geldsysteem is niet geladen. De bezorging blijft open en wordt niet als betaald geregistreerd.",[choice("retry","Probeer opnieuw")]);
-  if(!grant(cents,"Loon koeriersrit Rosenthaler → Eberswalder"+(tip?" + fooi":"")))return page("Betaling mislukt","Er is nog niets als afgeleverd gemarkeerd. Probeer opnieuw.",[choice("retry","Probeer betaling opnieuw")]);
+  if(!canPay())return page("Payment not available yet","The money system isn't loaded. The delivery stays open and isn't recorded as paid.",[choice("retry","Try again")]);
+  if(!grant(cents,"Courier run pay Rosenthaler → Eberswalder"+(tip?" + tip":"")))return page("Payment failed","Nothing has been marked as delivered yet. Try again.",[choice("retry","Retry payment")]);
   const copied={...m};p.mission=null;p.missionsComplete++;p.missionLastDay=currentDay();
   const st=bl()?.state;if(st){st.career??={};st.career.courierDeliveries=(st.career.courierDeliveries||0)+1}
-  rep("hospitality",2);stamp("berlin:long-route","Koeriersroute Alexanderplatz–Eberswalder Straße");
-  log("Driehaltesrit afgerond voor €"+(cents/100).toFixed(2).replace(".",",")+".","courier");
-  return page("Aflevering geslaagd","Hartmann bevestigt EX-24. Het pakket is overgedragen en je beloning is op je rekening gezet.",[],
-  ["Basisloon: €24"+(tip?" · fooi: €3":"")+(network?" · netwerkbonus: €2":""),"Reputatie +2 · totaal voltooide lange ritten: "+p.missionsComplete,"Koeriersniveau: "+careerRank(p),"Gemaakte keuzes: "+copied.choices.join(", ")]);
+  rep("hospitality",2);stamp("berlin:long-route","Courier route Alexanderplatz–Eberswalder Straße");
+  log("Three-stop run completed for €"+(cents/100).toFixed(2)+".","courier");
+  return page("Delivery successful","Hartmann confirms EX-24. The parcel has been handed over and your reward has been added to your account.",[],
+  ["Base pay: €24"+(tip?" · tip: €3":"")+(network?" · netwerkbonus: €2":""),"Reputation +2 · total long runs completed: "+p.missionsComplete,"Courier level: "+careerRank(p),"Choices made: "+copied.choices.join(", ")]);
  }
  return missionView(id);
 }
 const who={miro:{location:"alexanderplatz:miro-referral",name:"Miro",min:2},deniz:{location:"kottbusser-tor:deniz-route",name:"Deniz",min:2}};
 function contactView(id){
  const p=state(),q=id.endsWith("miro-referral")?"miro":"deniz",person=who[q],baseline=old?.state?.[q+"Trust"]||0,t=p.contactTasks[q]||null;
- if(t?.done)return page(person.name+" · vertrouwensband",t.summary,[],["Vertrouwensniveau: "+baseline+" + "+(t.trust||0),"Contact in je telefoon: ja"]);
- if(baseline<person.min)return page(person.name+" · vervolgcontact","Je kent "+person.name+" nog niet goed genoeg. Ga eerst met hem in gesprek en bouw vertrouwen op.",[],["Benodigd vertrouwen: "+person.min,"Huidig vertrouwen: "+baseline]);
- if(q==="miro")return page("Miro · een echte introductie",
- "Miro: 'Ik kan je aan een organisator voorstellen. Wat zet jij op papier voordat je toezegt?'",
- [choice("miro-contract","Ik wil taken, werktijden en betaling zwart-op-wit"),
- choice("miro-cash","Als ik contant betaald krijg is een contract niet nodig"),
- choice("miro-trial","Laat me één dienst proefdraaien en dan praten we verder")],
- ["Een goede introductie is geen automatische baan. Je antwoord verandert het aanbod."]);
- return page("Deniz · samenwerken op Kotti",
-  "Deniz: 'Een koerier is een levering kwijt. Dispatch is al boos en de klant wacht. Wat leg jij nu vast om beide kanten verder te helpen?'",
-  [choice("deniz-proof","Tijdlijn, aflevercode en contactpogingen vastleggen"),
-   choice("deniz-guess","Snel een willekeurig aflevermoment invullen zodat het ticket dicht kan"),
-   choice("deniz-help","De klant bellen én bewijs aan dispatch sturen")],
-  ["Je keuze kan later een bonus of nieuwe opdracht vrijspelen."]);
+ if(t?.done)return page(person.name+" · trust bond",t.summary,[],["Trust level: "+baseline+" + "+(t.trust||0),"Contact in your phone: yes"]);
+ if(baseline<person.min)return page(person.name+" · vervolgcontact","You don't know "+person.name+" well enough yet. Talk to him first and build trust.",[],["Trust needed: "+person.min,"Current trust: "+baseline]);
+ if(q==="miro")return page("Miro · a real introduction",
+ "Miro: 'I can introduce you to an organiser. What do you put on paper before you commit?'",
+ [choice("miro-contract","I want tasks, working hours and pay in black and white"),
+ choice("miro-cash","If I get paid in cash I don't need a contract"),
+ choice("miro-trial","Let me do one trial shift and then we'll talk further")],
+ ["A good introduction isn't an automatic job. Your answer changes the offer."]);
+ return page("Deniz · working together at Kotti",
+  "Deniz: 'A courier has lost a delivery. Dispatch is already angry and the customer is waiting. What do you record now to help both sides?'",
+  [choice("deniz-proof","Record the timeline, delivery code and contact attempts"),
+   choice("deniz-guess","Quickly fill in a random delivery time so the ticket can be closed"),
+   choice("deniz-help","Call the customer and send proof to dispatch")],
+  ["Your choice can unlock a bonus or a new job later."]);
 }
 function contactChoose(id,key){
- if(!approve(id))return page("Andere locatie","Praat met dit contact buiten bij de juiste halte.");
+ if(!approve(id))return page("Other location","Talk to this contact outside at the right stop.");
  const p=state(),q=id.endsWith("miro-referral")?"miro":"deniz",oldTrust=old?.state?.[q+"Trust"]||0;
  if(oldTrust<2)return contactView(id);
  if(p.contactTasks[q]?.done)return contactView(id);
  const pool=q==="miro"?{
- "miro-contract":[2,"Miro waardeert je voorbereiding. Hij bewaart je naam voor een officiële kennismaking.",true],
- "miro-cash":[-1,"Miro: 'Zonder afspraken sta je straks met lege handen. Eerst iets vastleggen.'",false],
- "miro-trial":[1,"Miro kan je bij een kennismakingsdienst introduceren, mits de voorwaarden helder zijn.",true]
+ "miro-contract":[2,"Miro appreciates your preparation. He keeps your name for an official introduction.",true],
+ "miro-cash":[-1,"Miro: 'Without agreements you'll end up empty-handed. Get something on paper first.'",false],
+ "miro-trial":[1,"Miro can introduce you for an introductory shift, as long as the conditions are clear.",true]
  }:{
- "deniz-proof":[2,"Deniz vindt je werkwijze precies en controleerbaar.",true],
- "deniz-guess":[-2,"Deniz wil niet samenwerken als bewijs wordt verzonnen.",false],
- "deniz-help":[2,"Deniz waardeert dat je klant en dispatch betrokken houdt.",true]
+ "deniz-proof":[2,"Deniz finds your way of working precise and verifiable.",true],
+ "deniz-guess":[-2,"Deniz won't work with you if evidence gets made up.",false],
+ "deniz-help":[2,"Deniz appreciates that you keep the customer and dispatch involved.",true]
  };
  if(!pool[key])return contactView(id);
  const [gain,summary,lead]=pool[key];
@@ -186,52 +186,52 @@ function contactChoose(id,key){
  if(lead){const j=journal();j.leads[q==="miro"?"nightlifeIntroduction":"courierNetwork"]=true;j.contacts[q]=true}
  rep(q==="miro"?"nightlife":"hospitality",gain);
  log(personLabel(q)+": "+summary,"contact");
- return page(personLabel(q)+" · beslissing genomen",summary,[],["Vertrouwen "+(gain>=0?"+":"")+gain,"Vervolgcontact opgeslagen"+(lead?" · nieuw carrièrepad beschikbaar":"")]);
+ return page(personLabel(q)+" · decision made",summary,[],["Trust "+(gain>=0?"+":"")+gain,"Follow-up contact saved"+(lead?" · new career path available":"")]);
 }
 const personLabel=q=>q==="miro"?"Miro":"Deniz";
 const SCRIPTS={
-"alexanderplatz:tower-operations":{name:"Fernsehturm · bezoekersstroom",intro:"De avondvoorstelling zit bijna vol. Een rolstoelgebruiker heeft een tijdslot geboekt; tegelijk dringen wachtenden zonder reservering voor. Je coördineert de toegang.",steps:[
-{question:"De rij loopt op. Wat regel je eerst?",actions:[
-["tower-access","Aparte toegankelijke rij openen zonder de reservering te negeren",2],
-["tower-quota","Alle wachtenden toelaten om de rij snel te laten verdwijnen",-2],
-["tower-announce","Uitleg geven en de reserveringslijst per tijdslot controleren",1]]},
-{question:"Een lift valt kort uit. Een groep wil meteen naar boven.",actions:[
-["tower-elevator","De lift tijdelijk uit dienst melden en beschikbare alternatieven uitleggen",2],
-["tower-stairs","Iedereen via de trap sturen, ook bezoekers die dat niet kunnen",-2],
-["tower-delay","Wachten op een technische controle en de tijdsloten herplannen",1]]}
+"alexanderplatz:tower-operations":{name:"Fernsehturm · visitor flow",intro:"The evening show is almost full. A wheelchair user has booked a time slot; at the same time people without a booking are pushing in. You coordinate access.",steps:[
+{question:"The queue is growing. What do you sort out first?",actions:[
+["tower-access","Open a separate accessible queue without ignoring the booking",2],
+["tower-quota","Let everyone waiting in so the queue disappears quickly",-2],
+["tower-announce","Explain and check the booking list per time slot",1]]},
+{question:"A lift briefly breaks down. A group wants to go up right away.",actions:[
+["tower-elevator","Report the lift temporarily out of service and explain the available alternatives",2],
+["tower-stairs","Send everyone up the stairs, including visitors who can't use them",-2],
+["tower-delay","Wait for a technical check and reschedule the time slots",1]]}
 ],reward:600,rep:"hospitality"},
-"olympia-stadion:stadium-shift":{name:"Olympiastadion · crowd control",intro:"Voor een stadionactiviteit is de westelijke uitgang drukker dan verwacht. Je krijgt een portofoon, maar je hebt geen onbeperkte mensen tot je beschikking.",steps:[
-{question:"De druk verplaatst zich richting een smal hek. Wat doe je?",actions:[
-["stadium-relief","Extra stewards inzetten bij het knelpunt en een tweede uitlooproute openen",2],
-["stadium-lock","De tweede route dichtzetten om het publiek bij elkaar te houden",-2],
-["stadium-info","Via omroep en duidelijke borden de bezoekers spreiden",1]]},
-{question:"Een bezoeker meldt dat iemand onwel wordt in de mensenmassa.",actions:[
-["stadium-medical","EHBO oproepen en ruimte vrijhouden voor hulpverleners",2],
-["stadium-continue","De bestaande stroom aanhouden en pas later ingrijpen",-2],
-["stadium-pause","De instroom tijdelijk afremmen en hulpverleners de locatie doorgeven",1]]}
+"olympia-stadion:stadium-shift":{name:"Olympiastadion · crowd control",intro:"For a stadium event the west exit is busier than expected. You get a radio, but you don't have unlimited people available.",steps:[
+{question:"The pressure is shifting towards a narrow gate. What do you do?",actions:[
+["stadium-relief","Deploy extra stewards at the bottleneck and open a second exit route",2],
+["stadium-lock","Close the second route to keep the crowd together",-2],
+["stadium-info","Spread visitors out with announcements and clear signs",1]]},
+{question:"A visitor reports that someone is feeling unwell in the crowd.",actions:[
+["stadium-medical","Call first aid and keep space clear for responders",2],
+["stadium-continue","Keep the current flow going and only step in later",-2],
+["stadium-pause","Temporarily slow the inflow and give responders the location",1]]}
 ],reward:800,rep:"hospitality"},
-"bernauer-strasse:wall-investigation":{name:"Muurarchief · getuigenis",intro:"In een klein archief liggen een getuigenverklaring, een kaart uit dezelfde periode en een later krantenartikel. Je maakt een korte reconstructie van gebeurtenissen rond de Berlijnse Muur.",steps:[
-{question:"Een getuige dateert de gebeurtenis anders dan een archiefstuk. Hoe ga je om met dit verschil?",actions:[
-["wall-sources","Beide versies naast elkaar zetten en dateringen verifiëren",2],
-["wall-memory","De persoonlijkste verklaring automatisch als vaststaand feit opnemen",-1],
-["wall-archive","De verklaring weggooien omdat het archiefstuk officieel is",-1]]},
-{question:"Een foto is zonder bijschrift teruggevonden. Een collega wil een precieze locatie toevoegen.",actions:[
-["wall-mark","De locatie als voorlopig markeren en aanvullend onderzoek noemen",2],
-["wall-guess","De meest aansprekende plek als definitief bijschrift gebruiken",-2],
-["wall-ignore","De foto bewaren, maar het ontbrekende bijschrift expliciet melden",1]]}
+"bernauer-strasse:wall-investigation":{name:"Wall archive · testimony",intro:"A small archive holds a witness statement, a map from the same period and a later newspaper article. You make a short reconstruction of events around the Berlin Wall.",steps:[
+{question:"A witness dates the event differently from an archive document. How do you handle the difference?",actions:[
+["wall-sources","Put both versions side by side and verify the dates",2],
+["wall-memory","Automatically record the most personal statement as established fact",-1],
+["wall-archive","Throw away the statement because the archive document is official",-1]]},
+{question:"A photo has been found without a caption. A colleague wants to add an exact location.",actions:[
+["wall-mark","Mark the location as provisional and mention further research",2],
+["wall-guess","Use the most appealing place as the final caption",-2],
+["wall-ignore","Keep the photo, but explicitly report the missing caption",1]]}
 ],reward:0,rep:"bvg"}
 };
 function scenarioView(id){
  const p=state(),def=SCRIPTS[id],work=p.landmarks[id]||null;
- if(!def)return page("Geen activiteit","Deze locatie is nog niet uitgewerkt.");
- if(work?.done)return page(def.name,work.summary,[],["Berlin Stamp geregistreerd","Hoogste score: "+work.score,"Berlin Knowledge: "+(journal()?.knowledge||0)]);
- if(!work)return page(def.name,def.intro,[choice("scenario-start","Begin de opdracht")],["Een activiteit met eigen beslissingen en gevolgen, geen algemene kennisquiz"]);
- const step=def.steps[work.step];return page(def.name+" · deel "+(work.step+1),step.question,
- step.actions.map(a=>choice(a[0],a[1])),["Je eerdere keuzes blijven opgeslagen","Tussenscore: "+work.score]);
+ if(!def)return page("No activity","This location hasn't been worked out yet.");
+ if(work?.done)return page(def.name,work.summary,[],["Berlin Stamp registered","High score: "+work.score,"Berlin Knowledge: "+(journal()?.knowledge||0)]);
+ if(!work)return page(def.name,def.intro,[choice("scenario-start","Start the job")],["An activity with its own decisions and consequences, not a general knowledge quiz"]);
+ const step=def.steps[work.step];return page(def.name+" · part "+(work.step+1),step.question,
+ step.actions.map(a=>choice(a[0],a[1])),["Your earlier choices stay saved","Interim score: "+work.score]);
 }
 function scenarioChoose(id,key){
- const p=state(),def=SCRIPTS[id];if(!approve(id))return page("Andere locatie","Je kunt dit alleen buiten bij deze halte uitvoeren.");
- if(!def)return page("Niet beschikbaar","Deze activiteit bestaat niet.");
+ const p=state(),def=SCRIPTS[id];if(!approve(id))return page("Other location","You can only do this outside at this stop.");
+ if(!def)return page("Not available","This activity doesn't exist.");
  if(p.landmarks[id]?.done)return scenarioView(id);
  if(key==="scenario-start"&&!p.landmarks[id]){p.landmarks[id]={step:0,score:0,startedAt:now(),choices:[]};save();return scenarioView(id)}
  const work=p.landmarks[id];if(!work)return scenarioView(id);
@@ -242,16 +242,16 @@ function scenarioChoose(id,key){
  if(work.step<def.steps.length){save();return scenarioView(id)}
  const pass=work.score>=1,reward=pass?def.reward:0;
  // A passed paid shift cannot be considered done until its payout succeeded.
- if(reward&&!grant(reward,def.name+" · loon")){
+ if(reward&&!grant(reward,def.name+" · pay")){
   work.step=def.steps.length-1;work.score-=selection[2];work.choices.pop();
-  return page("Betaling niet beschikbaar","Het financiële systeem is nog niet klaar; je voortgang blijft op de laatste keuze staan.",[choice(key,"Probeer de laatste beslissing opnieuw")]);
+  return page("Payment not available","The money system isn't ready yet; your progress stays at the last choice.",[choice(key,"Retry the last decision")]);
  }
- work.done=true;work.summary=pass?"Je team verwerkt je keuzes als een werkbaar, onderbouwd plan.":"Je plan is vastgelegd, maar de risico's wegen zwaarder dan de voordelen. Een herkansing kan op een volgende activiteit.";
+ work.done=true;work.summary=pass?"Your team turns your choices into a workable, well-founded plan.":"Your plan has been recorded, but the risks outweigh the benefits. You can try again on a next activity.";
  rep(def.rep,pass?2:0);
  stamp(id,def.name,pass?1:0);
- log(def.name+" afgerond: score "+work.score+(reward?", loon €"+(reward/100):""),"location");
- return page(def.name+" · afgerond",work.summary,[],
- ["Score: "+work.score,pass?"Berlin Knowledge +1 · reputatie +2":"Geen reputatiebonus",reward?"Uitbetaald: €"+(reward/100):"Geen financiële beloning"]);
+ log(def.name+" completed: score "+work.score+(reward?", pay €"+(reward/100):""),"location");
+ return page(def.name+" · completed",work.summary,[],
+ ["Score: "+work.score,pass?"Berlin Knowledge +1 · reputation +2":"No reputation bonus",reward?"Paid out: €"+(reward/100):"No financial reward"]);
 }
 function foundation(){
  const c=bl()?.state?.clock,eco=window.BerlinPhase34?.economy,save=window.BerlinSaveGuard?.validate?.()||{},d=window.BerlinDiscoveryV2,sv=window.BerlinStreetView2,
@@ -259,51 +259,51 @@ function foundation(){
  return [
  ["Game State & save",!!bl()?.state&&!!window.BerlinSaveSlots&&save.storageAvailable!==false],
  ["Spelklok & kalender",Number.isFinite(c?.minute)&&Number.isInteger(c?.day)&&!!bl()?.state?.phase16Diary],
- ["Geld & transacties",Number.isFinite(eco?.cash)&&(eco.bank===null||Number.isFinite(eco?.bank))&&Array.isArray(eco?.tx)],
- ["Discovery & registraties",!!d?.registry&&d.validate?.().ok===true],
- ["Street View (één interface)",!!ov?.root&&!!window.BerlinCleanStreet&&window.BerlinCleanStreet.inspect?.().oldPresent?.length===0],
- ["Virtuele nabijheid",typeof api?.proximity==="function"&&typeof sv?.getPanorama==="function"]
+ ["Money & transactions",Number.isFinite(eco?.cash)&&(eco.bank===null||Number.isFinite(eco?.bank))&&Array.isArray(eco?.tx)],
+ ["Discovery & registrations",!!d?.registry&&d.validate?.().ok===true],
+ ["Street View (one interface)",!!ov?.root&&!!window.BerlinCleanStreet&&window.BerlinCleanStreet.inspect?.().oldPresent?.length===0],
+ ["Virtual proximity",typeof api?.proximity==="function"&&typeof sv?.getPanorama==="function"]
  ];
 }
 function statusView(){
  const p=state(),m=p?.mission,j=journal(),checks=foundation(),s=bl()?.state;
- return page("Stadsstatus · voortgang",
- "Je voortgang is gekoppeld aan de actieve savegame. Werkgevers, contacten, Berlin Stamps, kalender en het geldsysteem worden afzonderlijk gecontroleerd.",
- [choice("status-route","Koerierroute"),choice("status-relations","Relaties & carrière"),choice("status-journal","Berlin Stamps & dagboek"),choice("status-save","Save-informatie"),choice("status-system","Technische status 1–6")],
- ["Koeriersniveau: "+careerRank(p),"Lange koeriersritten: "+(p?.missionsComplete||0)+(old?.state?.deliveries?" · korte ritten: "+old.state.deliveries:""),
+ return page("City status · progress",
+ "Your progress is linked to the active savegame. Employers, contacts, Berlin Stamps, calendar and the money system are checked separately.",
+ [choice("status-route","Courier route"),choice("status-relations","Relationships & career"),choice("status-journal","Berlin Stamps & diary"),choice("status-save","Save information"),choice("status-system","Technische status 1–6")],
+ ["Courier level: "+careerRank(p),"Long courier runs: "+(p?.missionsComplete||0)+(old?.state?.deliveries?" · short runs: "+old.state.deliveries:""),
  "Berlin Stamps: "+(j?.stamps?.length||0)+" · Knowledge: "+(j?.knowledge||0),
- "Speldag: "+currentDay()+(m?" · rit actief bij "+missionSteps[m.step].name:""),
- "Fases 1–6: "+checks.filter(x=>x[1]).length+"/"+checks.length+" basiscontroles gevonden"]);
+ "Game day: "+currentDay()+(m?" · run active at "+missionSteps[m.step].name:""),
+ "Phases 1–6: "+checks.filter(x=>x[1]).length+"/"+checks.length+" basic checks found"]);
 }
 function statusChoose(key){
  const p=state(),j=journal(),m=p?.mission;
- if(key==="status-journal")return page("Berlin Stamps · reisdagboek",
- "Dit overzicht is gekoppeld aan de actieve savegame. Voltooide opdrachten en gesprekken blijven bij je volgende speelsessie beschikbaar.",
- [choice("status-back","Terug naar overzicht")],
+ if(key==="status-journal")return page("Berlin Stamps · travel diary",
+ "This overview is linked to the active savegame. Completed jobs and conversations stay available in your next play session.",
+ [choice("status-back","Back to overview")],
  ["Berlin Stamps: "+(j?.stamps?.length||0),"Berlin Knowledge: "+(j?.knowledge||0),
- "Lange koerierritten voltooid: "+(p?.missionsComplete||0),
- ...((j?.entries||[]).slice(0,8).map(x=>"• "+(x.name||"Berlijn")+(x.text?": "+x.text:"")))]);
- if(key==="status-save")return page("Savebeheer",
- "Je spel wordt lokaal opgeslagen in de browser. Verschillende Vercel-testlinks delen die opslag niet automatisch.",
- [choice("status-back","Terug naar overzicht")],
- ["Exporteer een kopie via Telefoon → Stad & planning → Save.",
- "Gebruik voorlopig dezelfde testlink om op dezelfde save door te spelen.",
- "De automatische overdracht tussen testlinks is nog niet ingeschakeld."]);
- if(key==="status-route")return page("Koerierroutes",m?"Actieve lange route: "+missionSteps[m.step]?.name+".":"Geen lange route actief.",[choice("status-back","Terug naar overzicht")],
- [...(m?missionInfo(p):["Volgende meerhaltesroute: Alexanderplatz → Rosenthaler Platz → Bernauer Straße → Eberswalder Straße"]),
- "Afgeronde lange routes: "+(p.missionsComplete||0),"Afgeronde korte routes: "+(old?.state?.deliveries||0)]);
- if(key==="status-relations")return page("Relaties en carrière",
- "Contacten en werkgevers onthouden je keuzes. Introducerende gesprekken kun je op Alexanderplatz (Miro) of Kottbusser Tor (Deniz) voeren.",
- [choice("status-back","Terug naar overzicht")],
- ["Miro vertrouwen: "+(old?.state?.miroTrust||0)+" + "+(p.contactTasks.miro?.trust||0),
- "Deniz vertrouwen: "+(old?.state?.denizTrust||0)+" + "+(p.contactTasks.deniz?.trust||0),
- "Nightlife introductie: "+(j?.leads?.nightlifeIntroduction?"ja":"nog niet"),
- "Koeriernetwerk: "+(j?.leads?.courierNetwork?"ja":"nog niet"),
- "Nightlife reputatie: "+(bl()?.state?.reputation?.nightlife||0),"Hospitality reputatie: "+(bl()?.state?.reputation?.hospitality||0),
- "Huidige carrièrerang: "+careerRank(p)]);
- if(key==="status-system")return page("Fundament 1–6 · verificatie",
- "Dit zijn basiscontroles op geladen subsystemen. Een succesvolle controle vervangt geen mobiele test van treinritten, Street View en saveherstel.",
- [choice("status-back","Terug naar overzicht")],foundation().map(([name,ok])=>(ok?"✓ ":"⚠ ")+name));
+ "Long courier runs completed: "+(p?.missionsComplete||0),
+ ...((j?.entries||[]).slice(0,8).map(x=>"• "+(x.name||"Berlin")+(x.text?": "+x.text:"")))]);
+ if(key==="status-save")return page("Save management",
+ "Your game is saved locally in the browser. Different Vercel test links don't share that storage automatically.",
+ [choice("status-back","Back to overview")],
+ ["Export a copy via Phone → City & planning → Save.",
+ "For now, use the same test link to keep playing on the same save.",
+ "Automatic transfer between test links isn't enabled yet."]);
+ if(key==="status-route")return page("Courier routes",m?"Active long route: "+missionSteps[m.step]?.name+".":"No long route active.",[choice("status-back","Back to overview")],
+ [...(m?missionInfo(p):["Next multi-stop route: Alexanderplatz → Rosenthaler Platz → Bernauer Straße → Eberswalder Straße"]),
+ "Completed long routes: "+(p.missionsComplete||0),"Completed short routes: "+(old?.state?.deliveries||0)]);
+ if(key==="status-relations")return page("Relationships and career",
+ "Contacts and employers remember your choices. You can have introductory conversations at Alexanderplatz (Miro) or Kottbusser Tor (Deniz).",
+ [choice("status-back","Back to overview")],
+ ["Miro trust: "+(old?.state?.miroTrust||0)+" + "+(p.contactTasks.miro?.trust||0),
+ "Deniz trust: "+(old?.state?.denizTrust||0)+" + "+(p.contactTasks.deniz?.trust||0),
+ "Nightlife introduction: "+(j?.leads?.nightlifeIntroduction?"ja":"not yet"),
+ "Courier network: "+(j?.leads?.courierNetwork?"ja":"not yet"),
+ "Nightlife reputation: "+(bl()?.state?.reputation?.nightlife||0),"Hospitality reputation: "+(bl()?.state?.reputation?.hospitality||0),
+ "Current career rank: "+careerRank(p)]);
+ if(key==="status-system")return page("Foundation 1–6 · verification",
+ "These are basic checks on loaded subsystems. A passing check doesn't replace a mobile test of train rides, Street View and save recovery.",
+ [choice("status-back","Back to overview")],foundation().map(([name,ok])=>(ok?"✓ ":"⚠ ")+name));
  return statusView();
 }
 function view(id){
@@ -319,7 +319,7 @@ function choose(id,key){
  if(id==="alexanderplatz:miro-referral"||id==="kottbusser-tor:deniz-route")return contactChoose(id,key);
  if(SCRIPTS[id])return scenarioChoose(id,key);
  if(id==="alexanderplatz:vacatures"&&key==="shift-accept"&&state()?.mission)
-  return page("Eerst je rit afmaken","Je hebt al een lange koeriersroute. Rond deze af voordat je een tweede rit accepteert.");
+  return page("Finish your run first","You already have a long courier route. Finish it before you accept a second run.");
  return old.choose(id,key);
 }
 let originalActivities=null;
@@ -335,7 +335,7 @@ function install(){
    const list=originalActivities(),s=c.where?.();
    if(!s?.id)return list;
    const id=s.id+":city-status";
-   return list.some(x=>x.id===id)?list:list.concat([{id,station:s.id,name:"Stadsstatus & voortgang",icon:"📓",detail:"Koerier, contacten, Berlin Stamps en zes basiscontroles",episodeLabel:"OVERZICHT",dist:0}]);
+   return list.some(x=>x.id===id)?list:list.concat([{id,station:s.id,name:"City status & progress",icon:"📓",detail:"Courier, contacts, Berlin Stamps and six basic checks",episodeLabel:"OVERVIEW",dist:0}]);
   };
  }
  return true;

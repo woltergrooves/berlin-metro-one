@@ -32,7 +32,7 @@ steps.beforeStart = { t: T(), ...(await snap('02-ready')) };
 try { await page.tap('#startButton', { timeout: 5000 }); } catch (e) { errors.push('START ' + e.message.slice(0, 200)); }
 await page.waitForTimeout(3000);
 steps.afterStart = { t: T(), ...(await snap('03-after-start')) };
-const choice = page.locator('button.saveChoice, button:has-text("Nieuwe save")').first();
+const choice = page.locator('button.saveChoice, button:has-text("new save")').first();
 if (await choice.count()) { try { await choice.tap({ timeout: 5000 }); steps.saveChoice = T(); } catch (e) { errors.push('SAVE ' + e.message.slice(0, 200)); } }
 await page.waitForTimeout(Number(waitMs));
 steps.ingame = { t: T(), ...(await snap('04-ingame')) };

@@ -5,8 +5,8 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const ctx = await browser.newContext({ ...devices['iPad Pro 11 landscape'] });
 const page = await ctx.newPage();
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 await page.waitForFunction(() => document.querySelector('#svCounterGod') && window.BerlinStreetView2, null, { timeout: 200000 });

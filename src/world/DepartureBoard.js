@@ -93,7 +93,7 @@ export class DepartureBoard {
     ctx.fillText(`Richtung ${this.train.terminusName}`, 22, 194);
     ctx.fillStyle = '#756d3e';
     ctx.font = '650 17px ui-monospace, SFMono-Regular, Menlo, monospace';
-    ctx.fillText('Testbetrieb · Countdown gekoppeld aan trein', 22, 230);
+    ctx.fillText('Testbetrieb · Countdown linked to train', 22, 230);
 
     this.texture.needsUpdate = true;
   }

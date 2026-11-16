@@ -25,9 +25,9 @@
     return status;
    }
    const values=collect(),keys=Object.keys(values);
-   if(!keys.length){status={...status,available:false,error:"Geen bestaande opgeslagen speldata gevonden bij start."};return status}
+   if(!keys.length){status={...status,available:false,error:"No existing saved game data found at startup."};return status}
    const payload=JSON.stringify({type:"berlin-life-backup",schema:1,origin:location.origin,createdAt:new Date().toISOString(),values});
-   if(payload.length>MAX_SIZE){status={...status,error:"Save groter dan veilige back-uplimiet; export blijft mogelijk.",entries:keys.length};return status}
+   if(payload.length>MAX_SIZE){status={...status,error:"Save is larger than the safe backup limit; export is still possible.",entries:keys.length};return status}
    localStorage.setItem(KEY,payload);
    status={...status,available:true,created:true,entries:keys.length,error:null};
   }catch(e){status={...status,available:false,error:String(e?.message||e)}}

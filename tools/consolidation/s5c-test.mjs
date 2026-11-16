@@ -16,8 +16,8 @@ page.on('console', m => { if (m.type() === 'error' && !/CORS|Failed to load reso
 let pass = 0, fail = 0;
 const check = (name, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'OK  ' : 'FOUT', name, info); };
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 await page.waitForFunction(() => ['S5', 'U1', 'U5', 'U6', 'U7', 'U9'].every(l => globalThis.BerlinLines?.[l]?.status().installed), null, { timeout: 300000 });

@@ -22,7 +22,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
  * Runtime voor één lijn. stations = de stations van de lijnwereld (LineWorld); godStations = welke het GOD-menu
  * toont (U3: alleen de eigen tak); withTrains/transfers/surroundings schakelen U1b/U1c/U1d-onderdelen in.
  */
-export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `Nieuw: ${line.id}`,
+export function createLine({ line, stations, godStations = stations.filter(s => !s.shared), withTrains = true, transfers = false, surroundings = false, label = `New: ${line.id}`,
   route = stations, zones = null, dfiRows = 2, trainsPerDir = 1, guests = [], template = null, decor = null, dirs = [1, -1] }) {
 // S-Bahn (Fase 45b): guests = [{ line, perDir }] = andere lijnen met eigen treinen op dit spoor (S3/S7/S9 op de
 // Stadtbahn); template = eigen treinmodel (functie → Object3D, bv. BR 481) in plaats van het Blender-HK-model;
@@ -118,7 +118,7 @@ function tryBoard(p, st, lz, nz) {
     if (Math.abs(ox) > HALF_LEN || !nearDoor(ox)) continue;
     p.__lineTrain = t; t.rider = true; p.__lineRide = { ox, oz: side * (INSIDE_W - 0.05) };
     status.boardings++;
-    game.ui?.notify?.(`${t.line.id} richting ${t.timeline.terminusName}`);
+    game.ui?.notify?.(`${t.line.id} towards ${t.timeline.terminusName}`);
     return true;
   }
   return false;
@@ -137,7 +137,7 @@ function move(p, delta) {
   const ez = transferZ(cs);
   if (st.transfer && Math.abs(nx - TRANSFER_X) < 3.1 && Math.abs(nz - ez) < 1.0) {   // overstaptrap (U1c)
     if (!st.transfer.closed) { fromLine(st); return; }
-    if (!closedHinted) { closedHinted = true; game.ui?.notify?.(`Übergang ${st.transfer.label || st.transfer.line} · ${st.transfer.note || 'die lijn komt later in het spel'}`); }
+    if (!closedHinted) { closedHinted = true; game.ui?.notify?.(`Übergang ${st.transfer.label || st.transfer.line} · ${st.transfer.note || 'that line comes later in the game'}`); }
     return;   // U3c: afgesloten (U7/U9/Ring nog niet gebouwd) → hek houdt je tegen
   }
   if (Math.abs(nx - TRANSFER_X) > 5) closedHinted = false;
@@ -286,30 +286,30 @@ function installHud() {
       if (el.routeStartLabel) el.routeStartLabel.textContent = tl.originName;
       if (el.routeEndLabel) el.routeEndLabel.textContent = end ? 'Endstation' : tl.destinationName;
       if (el.stationName) el.stationName.textContent = tl.state === 'cruising' ? 'Unterwegs' : tl.originName;
-      if (el.trainStatus) el.trainStatus.textContent = `${L.id} richting ${tl.terminusName}`;
-      if (el.hint) el.hint.textContent = end ? `${tl.originName} · eindpunt. Stap uit bij een open deur.`
-        : tl.state === 'boarding' ? `Deuren open · uitstappen kan nu · volgende halte ${tl.destinationName}.`
+      if (el.trainStatus) el.trainStatus.textContent = `${L.id} towards ${tl.terminusName}`;
+      if (el.hint) el.hint.textContent = end ? `${tl.originName} · terminus. Get off at an open door.`
+        : tl.state === 'boarding' ? `Doors open · you can get off now · next stop ${tl.destinationName}.`
         : `Nächster Halt: ${tl.destinationName}.`;
       return;
     }
     if (el.stationName) el.stationName.textContent = st.name;
-    const fmt = s => !Number.isFinite(s) ? '—' : s <= 0.9 ? 'nu' : `${Math.floor(Math.ceil(s) / 60)}:${String(Math.ceil(s) % 60).padStart(2, '0')}`;
+    const fmt = s => !Number.isFinite(s) ? '—' : s <= 0.9 ? 'now' : `${Math.floor(Math.ceil(s) / 60)}:${String(Math.ceil(s) % 60).padStart(2, '0')}`;
     const here = relevant().map(tr => [tr, tr.routeIndex(st.id)]).filter(([tr, i]) => i >= 0 && (tr.line.ring || (i + tr.direction >= 0 && i + tr.direction < tr.stations.length)));
     const multi = new Set(here.map(([tr]) => tr.line.id)).size > 1;
     const deps = here.sort((a, b) => (line.sbahn ? 0 : b[0].direction - a[0].direction) || a[0].etaToStation(a[1]) - b[0].etaToStation(b[1]))
       .slice(0, 4).map(([tr, i]) => `${multi ? tr.line.id + ' ' : ''}${tr.timeline.terminusName} ${fmt(tr.etaToStation(i))}`);
     if (el.trainStatus) el.trainStatus.textContent = deps.join(' · ') || ID;
     if (el.hint) el.hint.textContent = here.some(([tr]) => tr.boardableAtStation(st))
-      ? 'Deuren open · loop naar een deur en stap in.'
-      : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (${st.transfer.note || 'nog niet in het spel'}) · wacht op de ${ID} of neem de trap naar buiten.`
-      : st.transfer ? `Overstap ${st.transfer.label || st.transfer.line}: trapgat aan de kant van ${st.index > 0 ? stations[st.index - 1].name : line.ring ? stations.at(-1).name : 'het tunneleinde'}.`
-      : !withTrains ? `${ID}-treinen volgen binnenkort · neem de trap naar buiten (Ausgang).`
-      : st.embank ? `Bovengronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
-      : line.ring ? `Ringbahn · wacht op de S41 ↻ of S42 ↺ of neem de trap ${st.kind === 'cutting' ? 'omhoog' : 'naar beneden'} (Ausgang).`
-      : line.sbahn ? `S-Bahn op het Stadtbahnviaduct · wacht op de S-Bahn of neem de trap naar beneden (Ausgang).`
-      : st.kind === 'viaduct' ? `Hochbahn boven de straat · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`
-      : st.kind === 'cutting' ? `Open ingraving · wacht op de ${ID} of neem de trap omhoog naar buiten (Ausgang).`
-      : `Ondergronds station · wacht op de ${ID} of neem de trap naar buiten (Ausgang).`;
+      ? 'Doors open · walk to a door and get on.'
+      : st.transfer?.closed ? `Übergang ${st.transfer.label || st.transfer.line} (${st.transfer.note || 'not in the game yet'}) · wait for the ${ID} or take the stairs outside.`
+      : st.transfer ? `Transfer ${st.transfer.label || st.transfer.line}: stairwell on the side of ${st.index > 0 ? stations[st.index - 1].name : line.ring ? stations.at(-1).name : 'the tunnel end'}.`
+      : !withTrains ? `${ID} trains coming soon · take the stairs outside (Ausgang).`
+      : st.embank ? `Above-ground station · wait for the ${ID} or take the stairs outside (Ausgang).`
+      : line.ring ? `Ringbahn · wait for the S41 ↻ or S42 ↺ or take the stairs ${st.kind === 'cutting' ? 'up' : 'down'} (Ausgang).`
+      : line.sbahn ? `S-Bahn on the Stadtbahn viaduct · wait for the S-Bahn or take the stairs down (Ausgang).`
+      : st.kind === 'viaduct' ? `Hochbahn above the street · wait for the ${ID} or take the stairs outside (Ausgang).`
+      : st.kind === 'cutting' ? `Open cutting · wait for the ${ID} or take the stairs up to the street (Ausgang).`
+      : `Underground station · wait for the ${ID} or take the stairs outside (Ausgang).`;
   };
 }
 

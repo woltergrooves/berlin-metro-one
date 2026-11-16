@@ -56,10 +56,10 @@ const enter = async (choiceRe) => {
 };
 
 await page.goto(url, { waitUntil: 'load', timeout: 60000 });
-await step('enter-new-save', () => enter(/Nieuwe save/));
+await step('enter-new-save', () => enter(/new save/i));
 await step('god-open', () => tapText(/GOD/));
 await step('god-plus-50', () => tapText(/\+€50/));
-await step('god-close', () => tapText(/GOD|✕|sluit/i));
+await step('god-close', () => tapText(/GOD|✕|close/i));
 const beforeReload = steps.at(-1).balance;
 await step('to-exit', async () => {
   // place the player just before the Alexanderplatz exit, then push the stick in all four directions
@@ -69,12 +69,12 @@ await step('to-exit', async () => {
 });
 await page.waitForTimeout(4000);
 await step('street-view', async () => '');
-await step('sv-activities', () => tapText(/Activiteiten/));
-await step('sv-activities-close', () => tapText(/✕|sluit|close|terug/i));
+await step('sv-activities', () => tapText(/Activities/));
+await step('sv-activities-close', () => tapText(/✕|close|back/i));
 await step('sv-back-to-ubahn', () => tapText(/U-Bahn/));
 const ls = await page.evaluate(() => Object.fromEntries(Object.keys(localStorage).filter(k => !k.startsWith('metro-street-v41:')).map(k => [k, localStorage.getItem(k).length])));
 await page.reload({ waitUntil: 'load' });
-await step('reload-continue-save', () => enter(/^(?!.*Nieuwe)/));
+await step('reload-continue-save', () => enter(/^(?!.*new save)/i));
 const afterReload = steps.at(-1).balance;
 await browser.close();
 const report = { url, steps, errors, savegame: { beforeReload, afterReload, restored: beforeReload === afterReload, keys: ls } };

@@ -9,6 +9,6 @@ import { sbahnTemplate } from './SBahnTrains.js';
 
 export const S41 = createLine({ line: S41_LINE, stations: S41_STATIONS, withTrains: true, trainsPerDir: 4, dirs: [1],
   guests: [{ line: S42_LINE, perDir: 4, dirs: [-1] }], template: sbahnTemplate, dfiRows: 2, transfers: S41_SIGN, surroundings: true,
-  label: 'Nieuw: Ringbahn (S41 ↻ · S42 ↺)' });
+  label: 'New: Ringbahn (S41 ↻ · S42 ↺)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), S41 };
 S41.install();

@@ -38,7 +38,7 @@ const read = (label) => page.evaluate((label) => {
 
 const rows = [];
 await page.goto(url, { waitUntil: 'load' });
-rows.push({ labels: await boot(/Nieuwe/) });
+rows.push({ labels: await boot(/new save/i) });
 rows.push(await read('1 nieuwe save'));
 await page.evaluate(() => globalThis.__berlinMetroGame.economy.earn(1000, 'Shift loon'));
 rows.push(await read('2 earn €10 via EconomySystem'));
@@ -53,7 +53,7 @@ rows.push(await read('5 na herladen + doorgaan'));
 if (mode === 'full') {
   await page.waitForTimeout(2500);
   await page.reload({ waitUntil: 'load' });
-  rows.push({ labels: await boot(/Nieuwe/) });
+  rows.push({ labels: await boot(/new save/i) });
   rows.push(await read('6 opnieuw nieuwe save'));
 }
 console.log(JSON.stringify({ rows, errors: [...new Set(errors)].slice(0, 15), logs: logs.slice(-15), consoleErrors: [...new Set(cerr)] }, null, 1));

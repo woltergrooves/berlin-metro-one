@@ -2,7 +2,7 @@
 // Schönhauser Allee, Eberswalder Straße, Olympia-Stadion, Ruhleben).
 //
 // Per station één klein pakket (public/assets/surroundings/<slug>.json, gemaakt met tools/g4/osm2pack.py uit
-// OpenStreetMap — © OpenStreetMap-bijdragers, ODbL). Het pakket laadt pas als je in de buurt bent en verdwijnt
+// OpenStreetMap — © OpenStreetMap contributors, ODbL). Het pakket laadt pas als je in de buurt bent en verdwijnt
 // weer als je ver weg bent. Alles staat in het assenstelsel van het Blender-sjabloon (x langs het spoor richting
 // het volgende station, z dwars, y=0 perronvloer) en hangt aan het geïnstalleerde station (BlenderStationsV1).
 //
@@ -474,7 +474,7 @@ function legacyBlockers(parent) {
 
 // ── Beheer ──────────────────────────────────────────────────────────────────────────────────────────────
 function loadPack(slug) {
-  if (!packs.has(slug)) packs.set(slug, fetch(new URL(slug + '.json', BASE)).then(r => { if (!r.ok) throw new Error('G4-pakket ' + r.status); return r.json(); })
+  if (!packs.has(slug)) packs.set(slug, fetch(new URL(slug + '.json', BASE)).then(r => { if (!r.ok) throw new Error('G4 pack ' + r.status); return r.json(); })
     .catch(e => { packs.delete(slug); throw e; }));
   return packs.get(slug);
 }
@@ -488,7 +488,7 @@ function dispose(entry) {
 }
 function ensureCredit() {
   if (credit || typeof document === 'undefined') return credit;
-  credit = document.createElement('div'); credit.id = 'g4OsmCredit'; credit.textContent = '© OpenStreetMap-bijdragers';
+  credit = document.createElement('div'); credit.id = 'g4OsmCredit'; credit.textContent = '© OpenStreetMap contributors';
   credit.style.cssText = 'position:fixed;left:calc(env(safe-area-inset-left,0px) + 6px);bottom:calc(env(safe-area-inset-bottom,0px) + 3px);z-index:5;font:600 9px Arial;color:#fff;opacity:.55;text-shadow:0 1px 2px #000;pointer-events:none;display:none';
   document.body.appendChild(credit); return credit;
 }
@@ -511,8 +511,8 @@ function update() {
           e.built = build(e, pack); e.root.add(e.built.group); counts.built++;
           for (const o of legacyBlockers(e.parent)) { e.hidden.set(o, o.visible); o.visible = false; }
           lastNight = -1;
-        } catch (err) { counts.failed++; console.warn('[Berlin Life] G4-omgeving overgeslagen', e.slug, err); }
-      }).catch(err => { e.loading = false; e.failedAt = performance.now(); counts.failed++; console.warn('[Berlin Life] G4-pakket niet geladen', e.slug, err); });
+        } catch (err) { counts.failed++; console.warn('[Berlin Life] G4 surroundings skipped', e.slug, err); }
+      }).catch(err => { e.loading = false; e.failedAt = performance.now(); counts.failed++; console.warn('[Berlin Life] G4 pack not loaded', e.slug, err); });
     } else if ((d > FAR || (e !== nearest && d > NEAR * 0.6)) && e.built) dispose(e);
     if (e.built) {
       const vis = show && d < NEAR && e === nearest; e.built.group.visible = vis; anyVisible ||= vis;
@@ -560,7 +560,7 @@ export const Surroundings = {
   unregister(root) { const e = entries.get(root); if (e) { dispose(e); entries.delete(root); } },
   status() {
     return { version: VERSION, packs: SLUGS.length, registered: entries.size, loaded: [...entries.values()].filter(e => e.built).map(e => e.slug),
-      visible: [...entries.values()].filter(e => e.built?.group.visible).map(e => e.slug), ...counts, attribution: '© OpenStreetMap-bijdragers' };
+      visible: [...entries.values()].filter(e => e.built?.group.visible).map(e => e.slug), ...counts, attribution: '© OpenStreetMap contributors' };
   },
 };
 globalThis.BerlinSurroundings = Surroundings;

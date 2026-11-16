@@ -10,7 +10,7 @@ page.on('pageerror', e => errors.push(String(e.message || e).slice(0, 300)));
 const euro = s => s ? Math.round(parseFloat(s.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.')) * 100) : null;
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForSelector('button.saveChoice:visible', { timeout: 300000 });
-await page.locator('button.saveChoice:visible').filter({ hasText: /Nieuwe/ }).first().tap();
+await page.locator('button.saveChoice:visible').filter({ hasText: /new save/i }).first().tap();
 await page.waitForSelector('#startButton:not([disabled])', { timeout: 120000 });
 await page.tap('#startButton');
 await page.waitForTimeout(10000);

@@ -141,7 +141,7 @@ export function subscribe(fn, intervalMs = 1000) {
 }
 
 export const BerlinState = {
-  version: 'Game State 2.0 · stap 4 (één save-formaat, één portemonnee, één klok)',
+  version: 'Game State 2.0 · step 4 (one save format, one wallet, one clock)',
   snapshot, consistency, subscribe,
   /** De enige portemonnee (stap 3). */
   wallet,
@@ -153,4 +153,4 @@ export const BerlinState = {
   get saves() { return globalThis.BerlinSaveSlots ?? null; },
 };
 globalThis.BerlinState = BerlinState;
-console.info('[Berlin Life] Game State 2.0: centrale state beschikbaar als BerlinState (stap 1–4)');
+console.info('[Berlin Life] Game State 2.0: central state available as BerlinState (steps 1–4)');

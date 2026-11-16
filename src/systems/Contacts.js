@@ -43,10 +43,10 @@ function addMessage(s, id, text, day) {
 }
 
 function dailyText(id, s, day) {
-  if (id === 'miro') return day % 2 ? `Dag ${day}: ik heb vandaag weer koeriersritten vanaf Alexander.` : 'Als je geld nodig hebt: check de Späti. Nieuwe ritten.';
-  if (id === 'lea') return (s.home?.nextRentDay - day) <= 1 ? 'Kleine reminder: de huur komt eraan.' : 'Alles rustig in de Altbau vandaag.';
+  if (id === 'miro') return day % 2 ? `Day ${day}: I've got courier runs from Alexander again today.` : 'If you need money: check the Späti. New runs.';
+  if (id === 'lea') return (s.home?.nextRentDay - day) <= 1 ? 'Small reminder: rent is coming up.' : 'All quiet in the Altbau today.';
   const m = clock.minute;
-  return (m >= 1320 || m < 360) ? 'Kotti is nog wakker. Nachtwerk komt later.' : 'Vanavond ben ik rond Kotti.';
+  return (m >= 1320 || m < 360) ? 'Kotti is still awake. Night work comes later.' : 'I\'ll be around Kotti tonight.';
 }
 
 /** Eén keer per speldag: berichtjes van contacten die je al ontmoet hebt. */

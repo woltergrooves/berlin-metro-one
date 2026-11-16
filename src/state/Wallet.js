@@ -18,7 +18,7 @@ import { readSection, writeSection } from './Store.js';
 
 const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const getItem = k => { try { return localStorage.getItem(k); } catch { return null; } };
-const setItem = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { console.warn('[Berlin Life] Opslaan mislukt', k, e?.name || e); } };
+const setItem = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { console.warn('[Berlin Life] Saving failed', k, e?.name || e); } };
 const slot = () => globalThis.BerlinSaveSlots?.active || 'main';
 
 // ── beginsaldo bepalen ─────────────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ if (cents !== null) {
 let notifyQueued = false;
 function set(next, reason) {
   const v = Math.round(Number(next));
-  if (!Number.isFinite(v)) { console.warn('[Berlin Life] Ongeldig saldo genegeerd:', next, reason); return; }
+  if (!Number.isFinite(v)) { console.warn('[Berlin Life] Invalid balance ignored:', next, reason); return; }
   if (v === cents) return;
   const before = cents;
   cents = v;
@@ -142,4 +142,4 @@ export const wallet = {
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 };
 
-console.info(`[Berlin Life] Game State 2.0 stap 3: één portemonnee actief · beginsaldo uit ${start.source}${cents === null ? '' : ` (€${(cents / 100).toFixed(2)})`}`);
+console.info(`[Berlin Life] Game State 2.0 step 3: one wallet active · starting balance from ${start.source}${cents === null ? '' : ` (€${(cents / 100).toFixed(2)})`}`);

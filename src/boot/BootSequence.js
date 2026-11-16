@@ -17,9 +17,10 @@ const logLife = label => e => console.error(`[Berlin Life] ${label}`, e);
 
 // ── 1. Startknop vergrendelen, GLB-modellen, veilige save-basis ─────────────────────────────
 const berlinStartButton = document.getElementById('startButton');
-if (berlinStartButton) { berlinStartButton.disabled = true; berlinStartButton.textContent = 'Berlijn laden…'; }
-void import('../systems/BlenderStationsV1.js').catch(e => console.warn('[Berlin Life] Stationmodel kan niet laden', e));
-void import('../systems/BlenderTrainsV1.js').catch(e => console.warn('[Berlin Life] Treinmodel kan niet laden', e));
+if (berlinStartButton) { berlinStartButton.disabled = true; berlinStartButton.textContent = 'Loading Berlin…'; }
+await import('../state/EnglishSaveMigration.js').catch(logLife('English save migration'));   // EN-1: old Dutch save texts → English, once
+void import('../systems/BlenderStationsV1.js').catch(e => console.warn('[Berlin Life] Station model failed to load', e));
+void import('../systems/BlenderTrainsV1.js').catch(e => console.warn('[Berlin Life] Train model failed to load', e));
 await import('../systems/BlenderNPCsV1.js').catch(logLife('NPC pipeline'));
 await import('../systems/BlenderPropsV1.js').catch(logLife('Prop pipeline'));
 await import('../systems/SafeSaveBootstrapV1.js');
@@ -60,7 +61,7 @@ async function installOptionalFullU8() {
     await mod.installU8FullLine?.(game, hud);
   } catch (error) {
     console.error('[Metro] Full U8 disabled:', error);
-    hud.notify?.('Volledige U8 kon niet laden · basisgame blijft actief.');
+    hud.notify?.('Full U8 failed to load · base game stays active.');
   }
 }
 

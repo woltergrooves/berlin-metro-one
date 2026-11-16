@@ -1,7 +1,7 @@
 // Berlin Life — LineSurroundings (Mijlpaal 1, U1d): de echte omgeving langs een nieuwe lijn.
 //
 // Per viaductstation één OSM-pakket (public/assets/surroundings/<lijn>/<id>.json, gemaakt met
-// tools/g4/osm2pack.py — © OpenStreetMap-bijdragers, ODbL). Het bouwen zelf deelt de code met G4
+// tools/g4/osm2pack.py — © OpenStreetMap contributors, ODbL). Het bouwen zelf deelt de code met G4
 // (Surroundings.buildPack): gebouwen met Berlijnse gevels, wegen, groen, water, bomen, 's avonds ramen.
 //
 // Net als bij de U2 staat alleen het pakket van het dichtstbijzijnde station er: de stations liggen in het
@@ -29,7 +29,7 @@ export class LineSurroundings {
     this.lastTint = 0; this.lastNight = -1; this.visible = false;
   }
   load(id) {
-    if (!this.packs.has(id)) this.packs.set(id, fetch(new URL(id + '.json', this.base)).then(r => { if (!r.ok) throw new Error('U1d-pakket ' + r.status); return r.json(); })
+    if (!this.packs.has(id)) this.packs.set(id, fetch(new URL(id + '.json', this.base)).then(r => { if (!r.ok) throw new Error('U1d pack ' + r.status); return r.json(); })
       .catch(e => { this.packs.delete(id); throw e; }));
     return this.packs.get(id);
   }
@@ -59,8 +59,8 @@ export class LineSurroundings {
       this.load(st.id).then(pack => {
         this.loading = null;
         try { if (!this.built.has(st.id)) this.build(st, pack); }
-        catch (err) { this.counts.failed++; this.failed.set(st.id, performance.now()); console.warn('[Berlin Life] U1d-omgeving overgeslagen', st.id, err); }
-      }).catch(err => { this.loading = null; this.counts.failed++; this.failed.set(st.id, performance.now()); console.warn('[Berlin Life] U1d-pakket niet geladen', st.id, err); });
+        catch (err) { this.counts.failed++; this.failed.set(st.id, performance.now()); console.warn('[Berlin Life] U1d surroundings skipped', st.id, err); }
+      }).catch(err => { this.loading = null; this.counts.failed++; this.failed.set(st.id, performance.now()); console.warn('[Berlin Life] U1d pack not loaded', st.id, err); });
     }
     // Tonen: het doelpakket als het er is, anders het vorige (tot het nieuwe klaar is).
     let show = target && this.built.get(target.id);
@@ -88,6 +88,6 @@ export class LineSurroundings {
     }
   }
   status() {
-    return { packs: this.stations.map(s => s.id), built: [...this.built.keys()], visible: this.visible ? this.current : null, loading: this.loading, ...this.counts, attribution: '© OpenStreetMap-bijdragers' };
+    return { packs: this.stations.map(s => s.id), built: [...this.built.keys()], visible: this.visible ? this.current : null, loading: this.loading, ...this.counts, attribution: '© OpenStreetMap contributors' };
   }
 }

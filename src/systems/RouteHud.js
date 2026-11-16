@@ -29,7 +29,7 @@ function ensure() {
   const host = document.querySelector('#hud') || document.body;
   if (!document.querySelector('#routeHudCss')) { const st = document.createElement('style'); st.id = 'routeHudCss'; st.textContent = CSS; document.head.appendChild(st); }
   el = document.createElement('div'); el.id = 'routeHudV1'; el.setAttribute('role', 'status');
-  el.innerHTML = '<span class="rh-c"></span><div class="rh-t"></div><button class="rh-x" aria-label="Route stoppen">×</button>';
+  el.innerHTML = '<span class="rh-c"></span><div class="rh-t"></div><button class="rh-x" aria-label="Stop route">×</button>';
   el.querySelector('.rh-x').addEventListener('click', e => { e.stopPropagation(); stop(); });
   el.addEventListener('click', openPlanner);
   // Geen joystick/kijken starten als je op het balkje tikt.
@@ -98,8 +98,8 @@ function show(chipId, html, cls = '') {
   status.shown = true; status.text = t.textContent;
 }
 
-const haltes = n => `${n} ${n === 1 ? 'halte' : 'haltes'}`;
-const then = (r, k) => r.legs[k] ? ` · dan <b>${esc(r.legs[k].chip || r.legs[k].line)}</b> richting ${esc(r.legs[k].dir)}` : '';
+const haltes = n => `${n} ${n === 1 ? 'stop' : 'stops'}`;
+const then = (r, k) => r.legs[k] ? ` · then <b>${esc(r.legs[k].chip || r.legs[k].line)}</b> towards ${esc(r.legs[k].dir)}` : '';
 
 function update(game) {
   status.updates++;
@@ -111,15 +111,15 @@ function update(game) {
   const from = tl ? (moving ? tl.destinationName : tl.originName) : N.here(game);
   if (!from) return hide();
   const r = N.plan(from, dest);
-  if (!r) return show(null, `🧭 Geen route naar <b>${esc(dest)}</b><small>Deze halte is nog niet met de trein bereikbaar · tik voor de BVG-app</small>`);
+  if (!r) return show(null, `🧭 No route to <b>${esc(dest)}</b><small>This stop can't be reached by train yet · tap for the BVG app</small>`);
 
   // Aangekomen (of bijna).
   if (!r.legs.length) {
-    if (rd && moving) return show(rd.line, `Stap uit bij de volgende halte: <b>${esc(dest)}</b><small>🧭 bestemming</small>`);
-    if (rd) return show(rd.line, `<b>Stap nu uit</b> · ${esc(dest)} ✓<small>🧭 bestemming bereikt</small>`, 'done');
+    if (rd && moving) return show(rd.line, `Get off at the next stop: <b>${esc(dest)}</b><small>🧭 destination</small>`);
+    if (rd) return show(rd.line, `<b>Get off now</b> · ${esc(dest)} ✓<small>🧭 destination reached</small>`, 'done');
     if (arrivedFor !== dest) { arrivedFor = dest; arrivedAt = performance.now(); status.arrived++; }
     if (performance.now() - arrivedAt > 8000) { stop(); return; }
-    return show(null, `✓ Aangekomen in <b>${esc(dest)}</b><small>Route afgerond</small>`, 'done');
+    return show(null, `✓ Arrived at <b>${esc(dest)}</b><small>Route complete</small>`, 'done');
   }
   arrivedFor = null;
   const leg = r.legs[0], here = currentLine(p), mins = `±${Math.max(1, r.minutes)} min`;
@@ -127,26 +127,26 @@ function update(game) {
   if (rd) {
     // In de trein. Andere lijn nodig → hier (of bij de volgende halte) overstappen.
     if (leg.line !== rd.line) {
-      const what = `overstappen op <b>${esc(leg.chip || leg.line)}</b> richting ${esc(leg.dir)}`;
-      return show(leg.chip || leg.line, moving ? `Stap uit bij de volgende halte: <b>${esc(from)}</b><small>daar ${what} · ${mins}</small>` : `<b>Stap nu uit</b> · ${what}<small>${esc(from)} → ${esc(leg.to)} · ${haltes(leg.stops)} · ${mins}</small>`);
+      const what = `change to the <b>${esc(leg.chip || leg.line)}</b> towards ${esc(leg.dir)}`;
+      return show(leg.chip || leg.line, moving ? `Get off at the next stop: <b>${esc(from)}</b><small>there ${what} · ${mins}</small>` : `<b>Get off now</b> · ${what}<small>${esc(from)} → ${esc(leg.to)} · ${haltes(leg.stops)} · ${mins}</small>`);
     }
     // Verkeerde richting? (alleen waar de haltevolgorde van de planner gelijk is aan die van de lijnwereld)
     if (rd.dir && leg.sign && rd.line !== 'U3' && rd.line !== 'U2' && rd.dir !== leg.sign) {
-      return show(leg.chip || leg.line, `⚠ <b>Verkeerde richting</b> · stap uit ${moving ? 'bij ' + esc(from) : 'nu'}<small>neem de ${esc(leg.chip || leg.line)} richting ${esc(leg.dir)} · ${esc(dest)}</small>`, 'warn');
+      return show(leg.chip || leg.line, `⚠ <b>Wrong direction</b> · get off ${moving ? 'at ' + esc(from) : 'now'}<small>take the ${esc(leg.chip || leg.line)} towards ${esc(leg.dir)} · ${esc(dest)}</small>`, 'warn');
     }
     const left = leg.stops + (moving ? 1 : 0);
-    if (moving && leg.stops === 0) return show(leg.chip || leg.line, `Stap uit bij de volgende halte: <b>${esc(leg.to)}</b><small>${r.legs[1] ? `daar overstappen op ${esc(r.legs[1].chip || r.legs[1].line)} richting ${esc(r.legs[1].dir)}` : '🧭 bestemming'} · ${mins}</small>`);
-    return show(leg.chip || leg.line, `Blijf zitten · nog <b>${haltes(left)}</b> tot ${esc(leg.to)}<small>${r.legs[1] ? `daar overstappen op ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 ' + esc(dest)} · ${mins}</small>`);
+    if (moving && leg.stops === 0) return show(leg.chip || leg.line, `Get off at the next stop: <b>${esc(leg.to)}</b><small>${r.legs[1] ? `change there to the ${esc(r.legs[1].chip || r.legs[1].line)} towards ${esc(r.legs[1].dir)}` : '🧭 destination'} · ${mins}</small>`);
+    return show(leg.chip || leg.line, `Stay on · <b>${haltes(left)}</b> to go to ${esc(leg.to)}<small>${r.legs[1] ? `change there to the ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 ' + esc(dest)} · ${mins}</small>`);
   }
   // In de oude U8-trein (eigen systeem, geen tijdlijn hier): alleen haltes tellen.
   if (globalThis.__berlinMetroU8Passenger && here === 'U8') {
-    if (leg.line !== 'U8') return show(leg.chip || leg.line, `<b>Stap uit</b> in ${esc(from)} · overstappen op <b>${esc(leg.chip || leg.line)}</b><small>richting ${esc(leg.dir)} · ${mins}</small>`);
-    return show('U8', leg.stops <= 1 ? `Stap uit bij <b>${esc(leg.to)}</b><small>${r.legs[1] ? `daar overstappen op ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 bestemming'} · ${mins}</small>`
-      : `In de U8 · nog <b>${haltes(leg.stops)}</b> tot ${esc(leg.to)}<small>${r.legs[1] ? `daar overstappen op ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 ' + esc(dest)} · ${mins}</small>`);
+    if (leg.line !== 'U8') return show(leg.chip || leg.line, `<b>Get off</b> at ${esc(from)} · change to the <b>${esc(leg.chip || leg.line)}</b><small>towards ${esc(leg.dir)} · ${mins}</small>`);
+    return show('U8', leg.stops <= 1 ? `Get off at <b>${esc(leg.to)}</b><small>${r.legs[1] ? `change there to the ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 destination'} · ${mins}</small>`
+      : `On the U8 · <b>${haltes(leg.stops)}</b> to go to ${esc(leg.to)}<small>${r.legs[1] ? `change there to the ${esc(r.legs[1].chip || r.legs[1].line)}` : '🧭 ' + esc(dest)} · ${mins}</small>`);
   }
   // Op het perron / in de hal.
-  const verb = here && here !== leg.line ? 'Overstappen: neem' : 'Neem';
-  return show(leg.chip || leg.line, `${verb} de <b>${esc(leg.chip || leg.line)}</b> richting <b>${esc(leg.dir)}</b><small>${haltes(leg.stops)} · uitstappen ${esc(leg.to)}${then(r, 1)} · ${mins}</small>`);
+  const verb = here && here !== leg.line ? 'Transfer: take' : 'Take';
+  return show(leg.chip || leg.line, `${verb} the <b>${esc(leg.chip || leg.line)}</b> towards <b>${esc(leg.dir)}</b><small>${haltes(leg.stops)} · get off at ${esc(leg.to)}${then(r, 1)} · ${mins}</small>`);
 }
 
 function install() {

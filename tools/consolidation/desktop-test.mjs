@@ -14,8 +14,8 @@ page.on('console', m => { if (m.type() === 'error' && !/CORS|Failed to load reso
 let pass = 0, fail = 0;
 const check = (name, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'OK  ' : 'FOUT', name, info); };
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 await page.waitForFunction(() => globalThis.__berlinMetroGame?.player, null, { timeout: 200000 });
@@ -25,7 +25,7 @@ const pos = () => page.evaluate(() => { const g = globalThis.__berlinMetroGame, 
 const P = () => page.evaluate(() => { const p = globalThis.__berlinMetroGame.player; return { x: p.position.x, z: p.position.z, yaw: p.yaw, pitch: p.pitch, mx: p.input.moveX, my: p.input.moveY }; });
 const deskKeys = await page.evaluate(() => getComputedStyle(document.querySelector('.desk-keys')).display);
 check('Mac-uitleg op het startscherm (muis)', deskKeys === 'block', deskKeys);
-check('LOOK-label met muis-uitleg', await page.evaluate(() => /MUIS/.test(document.querySelector('.look-label').textContent)));
+check('LOOK-label met muis-uitleg', await page.evaluate(() => /MOUSE/.test(document.querySelector('.look-label').textContent)));
 await page.mouse.click(5, 5);
 // Lopen met W, dan diagonaal W+D, loslaten = stil.
 let a = await P();

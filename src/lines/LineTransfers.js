@@ -37,11 +37,11 @@ async function go(label, jump) {
   const f = fader();
   f.style.opacity = '1';
   await Tick.sleep(300, 'transfer.fade');
-  try { jump(); } catch (e) { console.error('[Metro] overstap mislukt', e); }
+  try { jump(); } catch (e) { console.error('[Metro] transfer failed', e); }
   status.transfers++; status.last = label;
   await Tick.sleep(260, 'transfer.fade');
   f.style.opacity = '0';
-  game.ui?.notify?.(`Overgestapt · ${label}`);
+  game.ui?.notify?.(`Transferred · ${label}`);
   await Tick.sleep(500, 'transfer.fade');
   busy = false;
   return true;
@@ -107,8 +107,8 @@ function choose(t, fromU = false) {
     + 'padding:12px;border-radius:14px;background:#0d1a2ee8;border:1px solid #ffffff30;color:#fff;font:700 14px Arial;width:min(340px,86vw);box-shadow:0 8px 30px #0008';
   const btn = (o, i) => `<button data-i="${i}" style="display:flex;align-items:center;gap:10px;min-height:48px;padding:6px 10px;border-radius:10px;border:1px solid #ffffff30;background:#1b4d9b;color:#fff;font:700 14px Arial;text-align:left">`
     + `<span style="min-width:34px;padding:4px 6px;border-radius:5px;background:${o.color};color:${o.text || '#fff'};text-align:center">${o.line}</span><span>${o.name}<br><span style="font-weight:400;font-size:12px;opacity:.8">${o.sub || ''}</span></span></button>`;
-  chooser.innerHTML = `<div>Übergang · waar wil je heen?</div>${t.options.map(btn).join('')}`
-    + '<button data-i="x" style="min-height:40px;border-radius:10px;border:1px solid #ffffff30;background:#ffffff18;color:#fff;font:700 13px Arial">Blijf op dit perron</button>';
+  chooser.innerHTML = `<div>Übergang · where do you want to go?</div>${t.options.map(btn).join('')}`
+    + '<button data-i="x" style="min-height:40px;border-radius:10px;border:1px solid #ffffff30;background:#ffffff18;color:#fff;font:700 13px Arial">Stay on this platform</button>';
   const close = () => { chooser?.remove(); chooser = null; };
   chooser.querySelectorAll('button').forEach(b => {
     const pick = ev => { ev.preventDefault(); ev.stopPropagation(); const i = b.dataset.i; close(); if (i !== 'x') goTo(t.options[+i]); };
@@ -199,7 +199,7 @@ function frame(delta) {
       if (lx < -U8_END) hit = pt; else if (lx < -U8_END + 9) close = pt;
     }
   }
-  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`${close.hint} · loop het trapgat in`); }
+  if (close && hinted !== close) { hinted = close; game.ui?.notify?.(`${close.hint} · walk into the stairwell`); }
   if (!close && !hit) hinted = null;
   // Oude bewegingsbewakers zetten de speler soms een frame terug → niet meteen op 0 zetten, langzaam laten zakken.
   if (hit) lastHit = hit;

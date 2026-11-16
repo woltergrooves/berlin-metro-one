@@ -7,6 +7,6 @@
 import { U7_LINE, U7_STATIONS, U7_SIGN } from '../data/u7.js';
 import { createLine } from './LineRuntime.js';
 
-export const U7 = createLine({ line: U7_LINE, stations: U7_STATIONS, withTrains: true, trainsPerDir: 5, transfers: U7_SIGN, surroundings: false, label: 'Nieuw: U7 (Rudow ⇄ Rathaus Spandau)' });
+export const U7 = createLine({ line: U7_LINE, stations: U7_STATIONS, withTrains: true, trainsPerDir: 5, transfers: U7_SIGN, surroundings: false, label: 'New: U7 (Rudow ⇄ Rathaus Spandau)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U7 };
 U7.install();

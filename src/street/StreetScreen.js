@@ -16,7 +16,7 @@ import { readSection, writeSection } from '../state/Store.js';
 const ECON_KEY = 'metro-economy-v2';
 const WALK_M_PER_MIN = 80;
 const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');
-const euro = c => `€${((c || 0) / 100).toFixed(2).replace('.', ',')}`;
+const euro = c => `€${((c || 0) / 100).toFixed(2)}`;
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const LINE_COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#f0d722', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405', S41: '#ad5937' };
@@ -38,21 +38,21 @@ const KINDS = {
   bar:    { label: 'Bar', emoji: '🍻', color: '#b0569c', group: 'uit', hours: [17, 27], sit: 30, items: [
     ['bier', 'Bier', 450, '🍺'], ['radler', 'Radler', 420, '🍋'], ['mate', 'Club-Mate', 350, '🧉']] },
   club:   { label: 'Club', emoji: '🎧', color: '#7c4dbd', group: 'uit', hours: [23, 31], club: { cost: 1500, minutes: 180 } },
-  mall:   { label: 'Warenhuis', emoji: '🏬', color: '#4f8fd6', group: 'winkel', hours: [10, 20], sit: 30, items: [
+  mall:   { label: 'Department store', emoji: '🏬', color: '#4f8fd6', group: 'winkel', hours: [10, 20], sit: 30, items: [
     ['parfum', 'Parfum', 3900, '🧴'], ['pralinen', 'Pralinen', 1290, '🍫'], ['schal', 'Schal', 2900, '🧣'], ['jacket', 'Jacke', 8900, '🧥']] },
-  clothes:{ label: 'Kleding', emoji: '👕', color: '#4f8fd6', group: 'winkel', hours: [11, 20], items: [
+  clothes:{ label: 'Clothing', emoji: '👕', color: '#4f8fd6', group: 'winkel', hours: [11, 20], items: [
     ['shirt', 'Vintage Shirt', 1800, '👕'], ['cap', 'Cap', 1400, '🧢'], ['tote', 'Tote Bag', 900, '👜'], ['jacket', 'Jacke', 4500, '🧥']] },
-  books:  { label: 'Boeken & platen', emoji: '📚', color: '#4f8fd6', group: 'winkel', hours: [10, 20], items: [
+  books:  { label: 'Books & records', emoji: '📚', color: '#4f8fd6', group: 'winkel', hours: [10, 20], items: [
     ['buch', 'Buch', 1200, '📕'], ['platte', 'Schallplatte', 2200, '💿'], ['postkarte', 'Postkarte', 150, '💌']] },
-  culture:{ label: 'Cultuur', emoji: '🎭', color: '#3fa7a0', group: 'zien', hours: [10, 23], ticket: { cost: 1200, minutes: 90 } },
-  sight:  { label: 'Bezienswaardigheid', emoji: '📸', color: '#2fa36b', group: 'zien', hours: null, stamp: true },
+  culture:{ label: 'Culture', emoji: '🎭', color: '#3fa7a0', group: 'zien', hours: [10, 23], ticket: { cost: 1200, minutes: 90 } },
+  sight:  { label: 'Sight', emoji: '📸', color: '#2fa36b', group: 'zien', hours: null, stamp: true },
   park:   { label: 'Park', emoji: '🌳', color: '#3b9a4a', group: 'zien', hours: null, rest: 30 },
   market: { label: 'Markt', emoji: '🧺', color: '#c9a23a', group: 'winkel', hours: [9, 18], items: [
     ['obst', 'Obst', 300, '🍎'], ['gemuese', 'Gemüse', 350, '🥕'], ['blumen', 'Blumen', 600, '💐']] },
 };
-const GROUPS = [['alles', 'Alles'], ['eten', 'Eten & drinken'], ['winkel', 'Winkels'], ['uit', 'Uitgaan'], ['zien', 'Zien'], ['werk', 'Werk & verhalen']];
+const GROUPS = [['alles', 'Alles'], ['eten', 'Food & drink'], ['winkel', 'Shops'], ['uit', 'Going out'], ['zien', 'Sights'], ['werk', 'Work & stories']];
 // Weergavenamen voor spullen uit oudere systemen (zelfde tas).
-const OLD_ITEMS = { mate: ['Club-Mate', '🧉'], wasser: ['Wasser', '💧'], cola: ['Cola', '🥤'], chips: ['Chips', '🥔'], riegel: ['Schokoriegel', '🍫'], kaugummi: ['Kaugummi', '🟢'], delivery_package: ['Pakket (levering)', '📦'] };
+const OLD_ITEMS = { mate: ['Club-Mate', '🧉'], wasser: ['Wasser', '💧'], cola: ['Cola', '🥤'], chips: ['Chips', '🥔'], riegel: ['Schokoriegel', '🍫'], kaugummi: ['Kaugummi', '🟢'], delivery_package: ['Parcel (delivery)', '📦'] };
 const ITEM_NAMES = { ...OLD_ITEMS };
 for (const k of Object.values(KINDS)) for (const [id, n, , e] of k.items || []) ITEM_NAMES[id] ??= [n, e];
 
@@ -80,8 +80,8 @@ function saveEcon(s) {
   globalThis.BerlinLife?.save?.();
 }
 function pay(cents, what) {
-  const s = econ(); if (!s) { notify('Portemonnee niet beschikbaar'); return false; }
-  if ((s.balanceCents || 0) < cents) { notify(`Nog ${euro(cents - (s.balanceCents || 0))} nodig voor ${what}`); return false; }
+  const s = econ(); if (!s) { notify('Wallet not available'); return false; }
+  if ((s.balanceCents || 0) < cents) { notify(`Still need ${euro(cents - (s.balanceCents || 0))} for ${what}`); return false; }
   s.balanceCents -= cents; saveEcon(s); return true;
 }
 const clock = () => globalThis.BerlinState?.clock;
@@ -95,7 +95,7 @@ function isOpen(kind) {
   const [a, b] = k.hours, m = minuteOfDay() / 60;
   return (m >= a && m < b) || (m + 24 >= a && m + 24 < b);
 }
-const hoursText = kind => { const h = KINDS[kind]?.hours; if (!h) return 'altijd open'; const f = v => `${String(v % 24).padStart(2, '0')}:00`; return `${f(h[0])}–${f(h[1])}`; };
+const hoursText = kind => { const h = KINDS[kind]?.hours; if (!h) return 'always open'; const f = v => `${String(v % 24).padStart(2, '0')}:00`; return `${f(h[0])}–${f(h[1])}`; };
 
 // ── Buurtpakket ────────────────────────────────────────────────────────────────────────────────
 async function loadPack(name) {
@@ -119,7 +119,7 @@ function showAt(lat, lng, heading, opts = {}) {
   const sv = globalThis.BerlinStreetView2, pano = sv?.getPanorama?.();
   if (sv?.state?.mode === 'programmable' && pano?.setPosition) {
     try {   // alleen loopbare Google-straatpanorama's (geen geüploade 360°-foto's zonder pijlen) — fix 8 nov
-      if (sv.placeOutdoor) sv.placeOutdoor(lat, lng, heading || 0, opts).then(ok => { if (!ok && opts.exclude) notify('Geen ander loopbaar standpunt hier in de buurt'); });
+      if (sv.placeOutdoor) sv.placeOutdoor(lat, lng, heading || 0, opts).then(ok => { if (!ok && opts.exclude) notify('No other walkable viewpoint nearby'); });
       else { pano.setPosition({ lat, lng }); pano.setPov?.({ heading: heading || 0, pitch: 0 }); }
       sv.state.paidLoads = (sv.state.paidLoads || 0) + 1; return;
     } catch {}
@@ -186,18 +186,18 @@ function buildUi() {
   const root = document.createElement('div'); root.id = 'bls';
   root.innerHTML = `
     <div class="bar">
-      <div class="where pill"><span class="badges"></span><span class="t"><b class="name">Berlijn</b><small class="sub">Street View</small></span></div>
-      <div class="stats pill"><span class="clk">--:--</span><span class="money">€0,00</span><span class="pf">♻ 0</span><span class="tk">🎫 —</span><button class="bag" aria-label="Tas">🎒</button></div>
+      <div class="where pill"><span class="badges"></span><span class="t"><b class="name">Berlin</b><small class="sub">Street View</small></span></div>
+      <div class="stats pill"><span class="clk">--:--</span><span class="money">€0.00</span><span class="pf">♻ 0</span><span class="tk">🎫 —</span><button class="bag" aria-label="Bag">🎒</button></div>
     </div>
     <div class="bottom">
       <button class="back">← U-Bahn</button>
-      <button class="buurt">🗺 Buurt</button>
-      <button class="move" title="Ander standpunt in de buurt">🔄</button>
+      <button class="buurt">🗺 Area</button>
+      <button class="move" title="Other viewpoint nearby">🔄</button>
       <button class="here" style="display:none"></button>
     </div>`;
   document.body.appendChild(root);
   const sheet = document.createElement('div'); sheet.id = 'bls-sheet';
-  sheet.innerHTML = `<header><button class="x back2" aria-label="Terug">‹</button><b class="title">Buurt</b><button class="x close" aria-label="Sluiten">✕</button></header><div class="scroll"></div>`;
+  sheet.innerHTML = `<header><button class="x back2" aria-label="Back">‹</button><b class="title">Area</b><button class="x close" aria-label="Close">✕</button></header><div class="scroll"></div>`;
   document.body.appendChild(sheet);
   const q = s => root.querySelector(s);
   ui = { root, sheet, q, body: sheet.querySelector('.scroll'), title: sheet.querySelector('.title'), back2: sheet.querySelector('.back2') };
@@ -221,9 +221,9 @@ function renderHud() {
   const key = [lines.join(), ctx?.name, placeName, c?.hhmm, c?.weekdayName, s?.balanceCents, s?.pfand, tk].join('|');
   if (key === lastHud) return; lastHud = key;
   ui.q('.badges').innerHTML = [...new Set(lines)].map(l => `<span class="badge" style="background:${LINE_COLORS[l] || '#555'};color:${l === 'U4' ? '#1a1a1a' : '#fff'}">${esc(l)}</span>`).join('');
-  ui.q('.name').textContent = ctx?.name || 'Berlijn';
+  ui.q('.name').textContent = ctx?.name || 'Berlin';
   ui.q('.back').textContent = /^S/.test(ctx?.line || '') ? '← S-Bahn' : '← U-Bahn';   // S-Bahn Stadtbahn (Fase 45)
-  ui.q('.sub').textContent = placeName ? `📍 bij ${placeName}` : 'Buiten bij de halte';
+  ui.q('.sub').textContent = placeName ? `📍 at ${placeName}` : 'Outside at the stop';
   ui.q('.clk').textContent = `${c?.weekdayName ? c.weekdayName.slice(0, 2) + ' ' : ''}${c?.hhmm || '--:--'}`;
   ui.q('.money').textContent = `💶 ${euro(s?.balanceCents)}`;
   ui.q('.pf').textContent = `♻ ${s?.pfand || 0}`;
@@ -245,7 +245,7 @@ function episodes() {
 function openList() {
   sheetOpen = true; cardIndex = -1; cardEpisode = null;
   showSheet(); ui.back2.style.visibility = 'hidden';
-  ui.title.textContent = `${ctx?.name || 'Buurt'} · buurt`;
+  ui.title.textContent = `${ctx?.name || 'Area'} · area`;
   const places = pack?.places || [], eps = episodes();
   const chips = GROUPS.filter(([g]) => g === 'alles' || (g === 'werk' ? eps.length : places.some(p => KINDS[p.kind]?.group === g)))
     .map(([g, n]) => `<button data-g="${g}" class="${g === filter ? 'on' : ''}">${n}</button>`).join('');
@@ -256,18 +256,18 @@ function openList() {
     .map(({ p, i, d }) => {
       const k = KINDS[p.kind], open = isOpen(p.kind), stamp = k.stamp && street().stamps[stampKey(p)];
       return `<button class="row${atPlace(i) ? ' here' : ''}" data-i="${i}"><span class="e">${k.emoji}</span><span class="n"><b>${esc(p.name)}</b>` +
-        `<small><span class="dot" style="background:${open ? '#3ccf7a' : '#e05a4f'}"></span>${k.label}${k.hours ? (open ? ' · open' : ' · dicht') : ''}${stamp ? ' · ✅ stempel' : ''}</small></span>` +
-        `<span class="d">${atPlace(i) ? 'hier' : `${Math.round(d)} m · ${walkMin(d)} min`}</span></button>`;
+        `<small><span class="dot" style="background:${open ? '#3ccf7a' : '#e05a4f'}"></span>${k.label}${k.hours ? (open ? ' · open' : ' · closed') : ''}${stamp ? ' · ✅ stempel' : ''}</small></span>` +
+        `<span class="d">${atPlace(i) ? 'here' : `${Math.round(d)} m · ${walkMin(d)} min`}</span></button>`;
     }).join('');
   const work = (filter === 'alles' || filter === 'werk') && eps.length
-    ? `<h4>Werk & verhalen</h4>` + eps.map(a => `<button class="row" data-ep="${esc(a.id)}"><span class="e">${a.icon || '💼'}</span><span class="n"><b>${esc(a.name)}</b><small>${esc(a.detail || 'Verhaal')}</small></span><span class="d">›</span></button>`).join('')
+    ? `<h4>Work & stories</h4>` + eps.map(a => `<button class="row" data-ep="${esc(a.id)}"><span class="e">${a.icon || '💼'}</span><span class="n"><b>${esc(a.name)}</b><small>${esc(a.detail || 'Story')}</small></span><span class="d">›</span></button>`).join('')
     : '';
   const pfandKey = `${norm(ctx?.name)}:${here?.place ?? -1}:${dayNumber()}`;
   ui.body.innerHTML = `<canvas width="640" height="640"></canvas><div class="credit">${esc(pack?.credit || '')}</div>` +
     `<div class="chips">${chips}</div>` +
-    (here?.place >= 0 ? `<button class="wide go" data-home="1">🚇 Terug naar de ingang van ${esc(ctx?.name || 'de halte')} (${walkMin(dist(here, { x: 0, y: 0 }))} min)</button>` : '') +
-    (street().pfandSearched[pfandKey] ? '' : `<button class="wide" data-pfand="1"><span>♻ Zoek Pfand in de buurt</span><small class="muted">5 min</small></button>`) +
-    (places.length ? (rows || '<p class="muted">Niets in deze categorie.</p>') : `<p class="muted">Voor deze halte zijn nog geen plekken geladen.</p>`) + work;
+    (here?.place >= 0 ? `<button class="wide go" data-home="1">🚇 Back to the entrance of ${esc(ctx?.name || 'the stop')} (${walkMin(dist(here, { x: 0, y: 0 }))} min)</button>` : '') +
+    (street().pfandSearched[pfandKey] ? '' : `<button class="wide" data-pfand="1"><span>♻ Look for Pfand nearby</span><small class="muted">5 min</small></button>`) +
+    (places.length ? (rows || '<p class="muted">Nothing in this category.</p>') : `<p class="muted">No places loaded for this stop yet.</p>`) + work;
   ui.body.querySelectorAll('.chips button').forEach(b => { b.onclick = () => { filter = b.dataset.g; openList(); }; });
   ui.body.querySelectorAll('button[data-i]').forEach(b => { b.onclick = () => openPlace(+b.dataset.i); });
   ui.body.querySelectorAll('button[data-ep]').forEach(b => { b.onclick = () => openEpisode(b.dataset.ep); });
@@ -326,13 +326,13 @@ function drawMap(cv) {
 const stampKey = p => `${norm(p.name)}@${Math.round(p.lat * 1e4)},${Math.round(p.lon * 1e4)}`;
 function facts(p) {
   const f = [];
-  if (p.start_date) f.push(`Sinds ${p.start_date}`);
+  if (p.start_date) f.push(`Since ${p.start_date}`);
   if (p.architect) f.push(`Architect: ${p.architect}`);
-  if (p.artist_name) f.push(`Kunstenaar: ${p.artist_name}`);
-  if (p.historic) f.push(({ memorial: 'Gedenkteken', monument: 'Monument', building: 'Historisch gebouw', church: 'Kerk', bridge: 'Historische brug', city_gate: 'Stadspoort', wayside_cross: 'Wegkruis', memorial_plaque: 'Gedenkplaat', stolperstein: 'Stolperstein' })[p.historic] || 'Historische plek');
+  if (p.artist_name) f.push(`Artist: ${p.artist_name}`);
+  if (p.historic) f.push(({ memorial: 'Memorial', monument: 'Monument', building: 'Historic building', church: 'Church', bridge: 'Historic bridge', city_gate: 'City gate', wayside_cross: 'Wayside cross', memorial_plaque: 'Memorial plaque', stolperstein: 'Stolperstein' })[p.historic] || 'Historic site');
   if (p.memorial === 'stolperstein' && !p.historic) f.push('Stolperstein');
   if (p.cuisine) f.push(p.cuisine.replace(/_/g, ' ').replace(/;/g, ', '));
-  if (p.opening_hours) f.push(`Openingstijden (OSM): ${p.opening_hours}`);
+  if (p.opening_hours) f.push(`Opening hours (OSM): ${p.opening_hours}`);
   return f;
 }
 function wikiUrl(p) {
@@ -351,23 +351,23 @@ function openPlace(i) {
   const wiki = wikiUrl(p);
   let actions = '';
   if (!at) {
-    actions = `<button class="wide go" data-act="walk">🚶 Loop erheen · ${Math.round(d)} m · ${walkMin(d)} min</button>`;
+    actions = `<button class="wide go" data-act="walk">🚶 Walk there · ${Math.round(d)} m · ${walkMin(d)} min</button>`;
   } else if (k.hours && !open) {
-    actions = `<p>🔒 Nu dicht. Open ${hoursText(p.kind)}.</p>`;
+    actions = `<p>🔒 Closed now. Opens ${hoursText(p.kind)}.</p>`;
   } else {
-    if (k.items) actions += `<h4>Kopen · je hebt ${euro(s?.balanceCents)}</h4><div class="grid">` + k.items.map(([id, n, c, e]) => `<button data-buy="${id}"><span>${e} ${esc(n)}</span><b>${euro(c)}</b></button>`).join('') + `</div>`;
-    if (k.pfand) actions += `<button class="wide yes" data-act="pfand"><span>♻ Pfand inleveren (${s?.pfand || 0} × €0,25)</span><b>${euro((s?.pfand || 0) * 25)}</b></button>`;
-    if (k.sit) actions += `<button class="wide" data-act="sit"><span>🪑 Even zitten</span><small class="muted">${k.sit} min</small></button>`;
-    if (k.meal) actions += `<button class="wide" data-act="meal"><span>🍽️ Uit eten</span><b>${euro(k.meal.cost)} · ${k.meal.minutes} min</b></button>`;
-    if (k.ticket) actions += `<button class="wide" data-act="ticket"><span>🎟️ Kaartje kopen en naar binnen</span><b>${euro(k.ticket.cost)} · ${k.ticket.minutes} min</b></button>`;
-    if (k.club) actions += `<button class="wide gold" data-act="club"><span>🎧 In de rij voor de deur</span><b>${euro(k.club.cost)}</b></button>`;
-    if (k.rest) actions += `<button class="wide" data-act="rest"><span>🌳 Pauze in het groen</span><small class="muted">${k.rest} min</small></button>`;
-    if (k.stamp) actions += stamped ? `<div class="stamp">✅ Berlin Stamp verzameld</div>` : `<button class="wide gold" data-act="stamp"><span>📸 Bekijk en verzamel de Berlin Stamp</span><small>10 min</small></button>`;
-    actions += `<button class="wide" data-act="look"><span>👀 Kijk rond in Street View</span><small class="muted">sluit dit venster</small></button>`;
+    if (k.items) actions += `<h4>Buy · you have ${euro(s?.balanceCents)}</h4><div class="grid">` + k.items.map(([id, n, c, e]) => `<button data-buy="${id}"><span>${e} ${esc(n)}</span><b>${euro(c)}</b></button>`).join('') + `</div>`;
+    if (k.pfand) actions += `<button class="wide yes" data-act="pfand"><span>♻ Return Pfand (${s?.pfand || 0} × €0.25)</span><b>${euro((s?.pfand || 0) * 25)}</b></button>`;
+    if (k.sit) actions += `<button class="wide" data-act="sit"><span>🪑 Sit for a while</span><small class="muted">${k.sit} min</small></button>`;
+    if (k.meal) actions += `<button class="wide" data-act="meal"><span>🍽️ Eat out</span><b>${euro(k.meal.cost)} · ${k.meal.minutes} min</b></button>`;
+    if (k.ticket) actions += `<button class="wide" data-act="ticket"><span>🎟️ Buy a ticket and go in</span><b>${euro(k.ticket.cost)} · ${k.ticket.minutes} min</b></button>`;
+    if (k.club) actions += `<button class="wide gold" data-act="club"><span>🎧 Queue at the door</span><b>${euro(k.club.cost)}</b></button>`;
+    if (k.rest) actions += `<button class="wide" data-act="rest"><span>🌳 Take a break in the green</span><small class="muted">${k.rest} min</small></button>`;
+    if (k.stamp) actions += stamped ? `<div class="stamp">✅ Berlin Stamp collected</div>` : `<button class="wide gold" data-act="stamp"><span>📸 View and collect the Berlin Stamp</span><small>10 min</small></button>`;
+    actions += `<button class="wide" data-act="look"><span>👀 Look around in Street View</span><small class="muted">closes this window</small></button>`;
   }
-  ui.body.innerHTML = `<div class="card"><div class="muted">${k.label}${k.hours ? ` · ${open ? 'open' : 'dicht'} · ${hoursText(p.kind)}` : ''} · ${at ? 'je bent hier' : `${Math.round(d)} m`}${visits ? ` · ${visits}× bezocht` : ''}</div>${info}` +
-    (wiki ? `<button class="wide" data-act="wiki"><span>📖 Meer lezen</span><small class="muted">Wikipedia</small></button>` : '') + `</div>` + actions +
-    `<button class="wide" data-act="list" style="margin-top:12px">‹ Terug naar de buurt</button>`;
+  ui.body.innerHTML = `<div class="card"><div class="muted">${k.label}${k.hours ? ` · ${open ? 'open' : 'closed'} · ${hoursText(p.kind)}` : ''} · ${at ? 'you are here' : `${Math.round(d)} m`}${visits ? ` · ${visits}× visited` : ''}</div>${info}` +
+    (wiki ? `<button class="wide" data-act="wiki"><span>📖 Read more</span><small class="muted">Wikipedia</small></button>` : '') + `</div>` + actions +
+    `<button class="wide" data-act="list" style="margin-top:12px">‹ Back to the area</button>`;
   ui.body.querySelectorAll('[data-buy]').forEach(b => { b.onclick = () => buy(p, b.dataset.buy); });
   ui.body.querySelectorAll('[data-act]').forEach(b => { b.onclick = () => act(p, i, b.dataset.act, wiki); });
 }
@@ -377,7 +377,7 @@ function walkTo(i) {
   passTime(min); status.walks++;
   here = { x: p.x, y: p.y, place: i };
   showAt(p.lat, p.lon, bearing(from, p));
-  notify(`${min} min gelopen · ${p.name}`);
+  notify(`${min} min walked · ${p.name}`);
   renderHud();
 }
 // Ingang = het straatpunt waar je naar buiten kwam (S-Bahn: eigen straatpunt), anders de halte uit het buurtpakket.
@@ -388,7 +388,7 @@ function goHome() {
   const min = walkMin(dist(here, { x: 0, y: 0 })); passTime(min);
   here = { x: 0, y: 0, place: -1 };
   showAt(homeLat(), homeLon(), ctx?.heading || 0);
-  notify(`Terug bij de ingang van ${ctx?.name}`); renderHud(); openList();
+  notify(`Back at the entrance of ${ctx?.name}`); renderHud(); openList();
 }
 function nudge() {
   // Ander standpunt: kleine stap rond de huidige plek (Google kiest het dichtstbijzijnde panorama).
@@ -397,7 +397,7 @@ function nudge() {
   const n = (nudge.n = ((nudge.n || 0) + 1) % 6), a = n * Math.PI / 3, r = 28;
   const cur = globalThis.BerlinStreetView2?.getPanorama?.()?.getPano?.() || null;   // altijd een ánder, loopbaar panorama
   showAt(base.lat + Math.cos(a) * r / 111320, base.lon + Math.sin(a) * r / (111320 * Math.cos(base.lat * Math.PI / 180)), (n * 60) % 360, { exclude: cur });
-  notify('Ander standpunt');
+  notify('Other viewpoint');
 }
 function visit(p) { const s = street(), k = stampKey(p); s.visits[k] = (s.visits[k] || 0) + 1; saveStreet(s); }
 function buy(p, id) {
@@ -405,7 +405,7 @@ function buy(p, id) {
   if (!pay(it[2], it[1])) return;
   const s = econ(); s.surfaceItems[id] = (s.surfaceItems[id] || 0) + 1; saveEcon(s);
   status.buys++; visit(p); passTime(2);
-  notify(`${it[3]} ${it[1]} gekocht · ${euro(it[2])}`);
+  notify(`${it[3]} ${it[1]} bought · ${euro(it[2])}`);
   openPlace(cardIndex);
 }
 function act(p, i, a, wiki) {
@@ -415,13 +415,13 @@ function act(p, i, a, wiki) {
   if (a === 'look') return closeSheet();
   if (a === 'wiki' && wiki) { window.open(wiki, '_blank', 'noopener'); return; }
   if (a === 'pfand') {
-    const s = econ(), n = s?.pfand || 0; if (!n) return notify('Je hebt geen Pfand bij je.');
+    const s = econ(), n = s?.pfand || 0; if (!n) return notify('You\'re not carrying any Pfand.');
     s.pfand = 0; s.balanceCents = (s.balanceCents || 0) + n * 25; saveEcon(s); passTime(3); visit(p);
-    notify(`♻ ${n} flessen ingeleverd · +${euro(n * 25)}`);
-  } else if (a === 'sit') { passTime(k.sit); visit(p); notify(`${k.sit} minuten bij ${p.name}`); }
-  else if (a === 'rest') { passTime(k.rest); visit(p); notify(`Pauze in ${p.name}`); }
-  else if (a === 'meal') { if (!pay(k.meal.cost, 'eten')) return; passTime(k.meal.minutes); visit(p); notify(`Gegeten bij ${p.name} · ${euro(k.meal.cost)}`); }
-  else if (a === 'ticket') { if (!pay(k.ticket.cost, 'een kaartje')) return; passTime(k.ticket.minutes); visit(p); notify(`${p.name} bezocht`); }
+    notify(`♻ ${n} bottles returned · +${euro(n * 25)}`);
+  } else if (a === 'sit') { passTime(k.sit); visit(p); notify(`${k.sit} minutes at ${p.name}`); }
+  else if (a === 'rest') { passTime(k.rest); visit(p); notify(`Break at ${p.name}`); }
+  else if (a === 'meal') { if (!pay(k.meal.cost, 'eten')) return; passTime(k.meal.minutes); visit(p); notify(`Ate at ${p.name} · ${euro(k.meal.cost)}`); }
+  else if (a === 'ticket') { if (!pay(k.ticket.cost, 'a ticket')) return; passTime(k.ticket.minutes); visit(p); notify(`${p.name} visited`); }
   else if (a === 'club') return clubDoor(p);
   else if (a === 'stamp') {
     const s = street(), key = stampKey(p);
@@ -437,15 +437,15 @@ function act(p, i, a, wiki) {
 // Clubdeur: kans hangt af van de avond (vroeg = makkelijker), je kleding (tas) en een vaste dobbelsteen per nacht.
 function clubDoor(p) {
   const s = street(), key = `${stampKey(p)}:${dayNumber()}`;
-  if (s.clubs[key] === 'no') { notify('De portier herkent je nog van eerder vannacht. Vandaag niet.'); return; }
+  if (s.clubs[key] === 'no') { notify('The doorman remembers you from earlier tonight. Not today.'); return; }
   const e = econ(), dressed = (e?.surfaceItems?.jacket || 0) + (e?.surfaceItems?.shirt || 0) > 0;
   const h = minuteOfDay() / 60, late = (h >= 23 ? h - 23 : h + 1) / 8;     // 0 om 23:00 … 1 om 07:00
   const roll = (hash(key) % 100) / 100, chance = 0.55 + (dressed ? 0.2 : 0) - late * 0.25;
   passTime(25);
-  if (roll > chance) { s.clubs[key] = 'no'; saveStreet(s); notify('Portier: „Heute nicht.“ Je mag er vannacht niet in.'); return openPlace(cardIndex); }
-  if (!pay(KINDS.club.club.cost, 'de entree')) return;
+  if (roll > chance) { s.clubs[key] = 'no'; saveStreet(s); notify('Doorman: „Heute nicht.“ You\'re not getting in tonight.'); return openPlace(cardIndex); }
+  if (!pay(KINDS.club.club.cost, 'the entry')) return;
   s.clubs[key] = 'in'; saveStreet(s); passTime(KINDS.club.club.minutes); visit(p);
-  notify(`🎧 Binnen bij ${p.name}! Drie uur later sta je weer buiten.`);
+  notify(`🎧 Inside at ${p.name}! Three hours later you're back outside.`);
   openPlace(cardIndex);
 }
 function searchPfand(key) {
@@ -453,7 +453,7 @@ function searchPfand(key) {
   s.pfandSearched[key] = true; saveStreet(s); passTime(5);
   const e = econ(), r = hash(key) % 100, n = r < 30 ? 0 : r < 75 ? 1 : r < 93 ? 2 : 3;
   if (e && n) { e.pfand = (e.pfand || 0) + n; saveEcon(e); }
-  notify(n ? `♻ ${n} lege fles${n > 1 ? 'sen' : ''} gevonden` : 'Niets gevonden. Iemand was je voor.');
+  notify(n ? `♻ ${n} empty bottle${n > 1 ? 'sen' : ''} found` : 'Nothing found. Someone beat you to it.');
   openList();
 }
 
@@ -462,10 +462,10 @@ function openEpisode(id, view) {
   const ep = globalThis.BerlinCityEpisodes; const v = view || ep?.view?.(id); if (!v) return;
   sheetOpen = true; cardEpisode = id; cardIndex = -1;
   showSheet(); ui.back2.style.visibility = 'visible';
-  ui.title.textContent = v.title || 'Verhaal';
+  ui.title.textContent = v.title || 'Story';
   ui.body.innerHTML = `<div class="card"><p>${esc(v.text || '')}</p>${(v.extras || []).filter(Boolean).map(t => `<div class="muted">${esc(t)}</div>`).join('')}</div>` +
     (v.actions || []).map(o => `<button class="wide" data-o="${esc(o.id)}"><span>${esc(o.label)}</span>${o.detail ? `<small class="muted">${esc(o.detail)}</small>` : ''}</button>`).join('') +
-    `<button class="wide" data-act="list" style="margin-top:12px">‹ Terug naar de buurt</button>`;
+    `<button class="wide" data-act="list" style="margin-top:12px">‹ Back to the area</button>`;
   ui.body.querySelectorAll('[data-o]').forEach(b => { b.onclick = () => { let next = null; try { next = ep.choose(id, b.dataset.o); } catch (e) { console.error(e); } openEpisode(id, next || undefined); }; });
   ui.body.querySelector('[data-act="list"]').onclick = openList;
 }
@@ -474,12 +474,12 @@ function openEpisode(id, view) {
 function openBag() {
   const s = econ(), items = Object.entries(s?.surfaceItems || {}).filter(([, n]) => n > 0);
   sheetOpen = true; cardIndex = -1; cardEpisode = null;
-  showSheet(); ui.back2.style.visibility = 'visible'; ui.title.textContent = '🎒 Tas';
+  showSheet(); ui.back2.style.visibility = 'visible'; ui.title.textContent = '🎒 Bag';
   const st = street(), stamps = Object.values(st.stamps);
   ui.body.innerHTML = `<div class="card"><div>💶 ${euro(s?.balanceCents)} · ♻ ${s?.pfand || 0} Pfand</div></div>` +
-    (items.length ? items.map(([id, n]) => { const [name, e] = ITEM_NAMES[id] || [id, '📦']; return `<div class="row"><span class="e">${e}</span><span class="n"><b>${esc(name)}</b></span><span class="d">×${n}</span></div>`; }).join('') : '<p class="muted">Je tas is leeg.</p>') +
-    `<h4>Berlin Stamps (${stamps.length})</h4>` + (stamps.length ? stamps.slice(-30).reverse().map(x => `<div class="row"><span class="e">📸</span><span class="n"><b>${esc(x.name)}</b><small>${esc(x.station || '')} · dag ${x.day}</small></span></div>`).join('') : '<p class="muted">Nog geen stempels. Bekijk bezienswaardigheden in de buurt.</p>') +
-    `<button class="wide" data-act="list" style="margin-top:12px">‹ Terug naar de buurt</button>`;
+    (items.length ? items.map(([id, n]) => { const [name, e] = ITEM_NAMES[id] || [id, '📦']; return `<div class="row"><span class="e">${e}</span><span class="n"><b>${esc(name)}</b></span><span class="d">×${n}</span></div>`; }).join('') : '<p class="muted">Your bag is empty.</p>') +
+    `<h4>Berlin Stamps (${stamps.length})</h4>` + (stamps.length ? stamps.slice(-30).reverse().map(x => `<div class="row"><span class="e">📸</span><span class="n"><b>${esc(x.name)}</b><small>${esc(x.station || '')} · day ${x.day}</small></span></div>`).join('') : '<p class="muted">No stamps yet. Visit sights in the area.</p>') +
+    `<button class="wide" data-act="list" style="margin-top:12px">‹ Back to the area</button>`;
   ui.body.querySelector('[data-act="list"]').onclick = openList;
 }
 
@@ -518,7 +518,7 @@ async function install() {
         if (on) { if (!ui.root.classList.contains('on')) onOpen(ov.context); renderHud(); }
       });
       status.installed = true;
-      console.info('[Berlin Life] StreetScreen: één Street View-scherm (HUD, buurt, plekken)');
+      console.info('[Berlin Life] StreetScreen: one Street View screen (HUD, area, places)');
       return;
     }
     await Tick.sleep(150, 'boot.StreetScreen');

@@ -18,13 +18,13 @@ page.on('pageerror', e => errors.push(String(e.message || e).slice(0, 200)));
 page.on('console', m => { const t = m.text(); if (/ready|timed out|failed|klaar|disabled/i.test(t)) msgs.add(`[${m.type()}] ${t.replace(/\d+(\.\d+)?/g, '#')}`.slice(0, 160)); });
 const T0 = Date.now();
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
 // Bij de save-keuze wachten de meeste opstartlussen nog: 5 s stil meten.
 const m0 = await page.evaluate(() => ({ ...window.__bw(), w: window.BerlinTick?.stats?.wakeups ?? null, n: window.BerlinTick?.list?.().filter(t => t.kind === 'once').length ?? null }));
 await page.waitForTimeout(5000);
 const m1 = await page.evaluate(() => ({ ...window.__bw(), w: window.BerlinTick?.stats?.wakeups ?? null, n: window.BerlinTick?.list?.().filter(t => t.kind === 'once').length ?? null }));
 const atSaveMenu5s = { setTimeoutCallbacks: m1.timeouts - m0.timeouts, short: m1.t100 - m0.t100, tickWakeups: m1.w == null ? null : m1.w - m0.w, sleepers: m1.n };
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 const tStart = Date.now();

@@ -7,6 +7,6 @@
 import { U5_LINE, U5_STATIONS, U5_SIGN } from '../data/u5.js';
 import { createLine } from './LineRuntime.js';
 
-export const U5 = createLine({ line: U5_LINE, stations: U5_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U5_SIGN, surroundings: true, label: 'Nieuw: U5 (Hauptbahnhof ⇄ Hönow)' });
+export const U5 = createLine({ line: U5_LINE, stations: U5_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U5_SIGN, surroundings: true, label: 'New: U5 (Hauptbahnhof ⇄ Hönow)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U5 };
 U5.install();

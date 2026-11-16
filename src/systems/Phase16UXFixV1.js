@@ -10,7 +10,7 @@ function findSurfacePanel(){
     if(el.id==='streetReturnOnlyV1') return false;
     const t=(el.innerText||'').trim();
     if(!t||t.length>900) return false;
-    const hits=['Ausgang A','Ausgang B','Andere straatpositie','Open in Google','Volgende positie','Buitenpositie'].filter(x=>t.toLowerCase().includes(x.toLowerCase())).length;
+    const hits=['Ausgang A','Ausgang B','Other street position','Open in Google','Next position','Outdoor position'].filter(x=>t.toLowerCase().includes(x.toLowerCase())).length;
     return hits>=2;
   })||null;
 }
@@ -24,7 +24,7 @@ function returnButton(){
   if(b) return b;
   b=document.createElement('button');
   b.id='streetReturnOnlyV1';
-  b.textContent='↓ TERUG NAAR U-BAHN';
+  b.textContent='↓ BACK TO U-BAHN';
   b.style.cssText='display:none;position:fixed;left:12px;bottom:max(14px,env(safe-area-inset-bottom));z-index:15100;border:1px solid #ffffff38;border-radius:11px;padding:11px 14px;background:#10151bea;color:#fff;font:900 12px Arial;box-shadow:0 9px 30px #000a;backdrop-filter:blur(10px);pointer-events:auto';
   b.onclick=()=>{
     if(originalReturn&&document.contains(originalReturn)){ try{originalReturn.click();return;}catch{} }
@@ -32,7 +32,7 @@ function returnButton(){
     const hit=candidates.find(x=>RETURN_RE.test((x.innerText||x.textContent||'').trim()));
     if(hit){try{hit.click();return;}catch{}}
     const game=globalThis.__berlinMetroGame;
-    if(game?.ui?.notify) game.ui.notify('Gebruik de stationuitgang om terug te keren.');
+    if(game?.ui?.notify) game.ui.notify('Use the station exit to go back.');
   };
   document.body.appendChild(b);
   return b;

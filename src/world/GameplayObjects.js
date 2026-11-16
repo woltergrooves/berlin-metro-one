@@ -54,7 +54,7 @@ function createTicketMachine(parent, station) {
   parent.add(group);
   group.userData.interaction = {
     kind: 'ticket-machine',
-    label: 'Ticketautomaat gebruiken',
+    label: 'Use ticket machine',
     stationId: station.id,
   };
   return group;
@@ -68,7 +68,7 @@ function createBottle(parent, station, slot, x, z, material) {
   group.add(mesh(GEO.cap, MAT.cap, [0, 0.505, 0]));
   group.userData.interaction = {
     kind: 'pfand',
-    label: 'Pfand oppakken · +€0,25',
+    label: 'Pfand pick up · +€0.25',
     id: `${station.id}-pfand-${slot}`,
     stationId: station.id,
   };
@@ -82,7 +82,7 @@ function createCan(parent, station, slot, x, z, material) {
   group.add(mesh(GEO.can, material, [0, 0.18, 0]));
   group.userData.interaction = {
     kind: 'pfand',
-    label: 'Pfand oppakken · +€0,25',
+    label: 'Pfand pick up · +€0.25',
     id: `${station.id}-pfand-${slot}`,
     stationId: station.id,
   };

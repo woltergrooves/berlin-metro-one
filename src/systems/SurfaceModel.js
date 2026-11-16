@@ -18,10 +18,10 @@ export function busTicketValid(s,route){
   return !!route && (s.ticket?.type==='AB' && s.ticket.remainingMinutes>0 || s.ticket?.type==='SHORT' && s.ticket.remainingStops>=route.stops);
 }
 export function planBusRide(s,from,to,now=Date.now()){
-  if(['waiting','riding'].includes(s.surfaceTravel?.status))return {ok:false,reason:'Je bent al onderweg.'};
+  if(['waiting','riding'].includes(s.surfaceTravel?.status))return {ok:false,reason:'You\'re already on your way.'};
   const route=busRoute(from,to);
-  if(!route)return {ok:false,reason:'Deze busverbinding is hier niet beschikbaar.'};
-  if(!busTicketValid(s,route))return {ok:false,reason:route.stops>3?'Voor deze rit heb je een geldig Berlin AB-ticket nodig.':'Koop eerst een geldig ticket bij de automaat.'};
+  if(!route)return {ok:false,reason:'This bus connection isn\'t available here.'};
+  if(!busTicketValid(s,route))return {ok:false,reason:route.stops>3?'You need a valid Berlin AB ticket for this ride.':'Buy a valid ticket at the machine first.'};
   const wait=Math.min(2500,(6000-now%6000)%6000);
   s.surfaceTravel={...route,id:`bus200-${now}`,status:'waiting',plannedAt:now,departAt:now+wait,arriveAt:now+wait+route.seconds*1000};
   return {ok:true,ride:s.surfaceTravel};

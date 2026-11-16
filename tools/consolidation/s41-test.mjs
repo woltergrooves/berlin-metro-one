@@ -17,8 +17,8 @@ page.on('console', m => { if (m.type() === 'error' && !/CORS|Failed to load reso
 let pass = 0, fail = 0;
 const check = (name, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'OK  ' : 'FOUT', name, info); };
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 await page.waitForFunction(() => globalThis.BerlinLines?.S41?.status().installed && globalThis.BerlinRouteHud, null, { timeout: 200000 });
@@ -88,22 +88,22 @@ let h = await hud();
 check('HUD: geen route = niets', !h.shown, JSON.stringify(h));
 await page.evaluate(() => globalThis.BerlinPhoneNetz.setDest('Jannowitzbrücke'));
 h = await hud(); await shot('route_hud_perron');
-check('HUD: neem de S richting Ostkreuz', h.shown && /Neem de/.test(h.text) && /Ostkreuz/.test(h.text) && /4 haltes/.test(h.text), JSON.stringify(h));
+check('HUD: neem de S richting Ostkreuz', h.shown && /Take the/.test(h.text) && /Ostkreuz/.test(h.text) && /4 stops/.test(h.text), JSON.stringify(h));
 await page.evaluate(() => globalThis.BerlinPhoneNetz.setDest('Mehringdamm'));   // via U6 (Friedrichstraße)
 h = await hud();
-check('HUD: met overstap', h.shown && /dan/.test(h.text) && /U6/.test(h.text), JSON.stringify(h));
+check('HUD: met overstap', h.shown && /then/.test(h.text) && /U6/.test(h.text), JSON.stringify(h));
 // Rijdend in de S-Bahn richting Ostkreuz.
 await page.evaluate(() => globalThis.BerlinPhoneNetz.setDest('Jannowitzbrücke'));
 const rode = await page.evaluate(() => { try { globalThis.BerlinLines.S5.board(6, 1); } catch (e) { return String(e); } return !!globalThis.__berlinMetroGame.player.__lineTrain; });
 await page.waitForTimeout(2000);
 h = await hud(); await shot('route_hud_rit');
-check('HUD rijdend: blijf zitten / stap uit', rode === true && h.shown && /(Blijf zitten|Stap)/.test(h.text), JSON.stringify({ rode, h }));
+check('HUD rijdend: blijf zitten / stap uit', rode === true && h.shown && /(Stay on|Get off)/.test(h.text), JSON.stringify({ rode, h }));
 await page.evaluate(() => globalThis.BerlinLines.S5.leave?.());
 // Aangekomen + × stoppen.
 await page.evaluate(() => globalThis.BerlinLines.S5.enter(10));
 await page.waitForTimeout(2500);
 h = await hud();
-check('HUD: aangekomen', h.shown && /Aangekomen/.test(h.text), JSON.stringify(h));
+check('HUD: aangekomen', h.shown && /Arrived/.test(h.text), JSON.stringify(h));
 await page.evaluate(() => { globalThis.BerlinPhoneNetz.setDest('Zoologischer Garten'); globalThis.BerlinRouteHud.update(); document.querySelector('#routeHudV1 .rh-x').click(); });
 h = await hud();
 check('HUD: × stopt de route', !h.shown && !(await page.evaluate(() => globalThis.BerlinPhoneNetz.dest)), JSON.stringify(h));

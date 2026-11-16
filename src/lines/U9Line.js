@@ -5,6 +5,6 @@
 import { U9_LINE, U9_STATIONS, U9_SIGN } from '../data/u9.js';
 import { createLine } from './LineRuntime.js';
 
-export const U9 = createLine({ line: U9_LINE, stations: U9_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U9_SIGN, surroundings: false, label: 'Nieuw: U9 (Osloer Straße ⇄ Rathaus Steglitz)' });
+export const U9 = createLine({ line: U9_LINE, stations: U9_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U9_SIGN, surroundings: false, label: 'New: U9 (Osloer Straße ⇄ Rathaus Steglitz)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U9 };
 U9.install();

@@ -80,12 +80,12 @@ function render() {
     ? all.flatMap(l => l.stations.filter(s => s.name.toLowerCase().includes(x)).map(s => ({ l, s })))
     : (all.find(l => l.id === sel)?.stations || []).map(s => ({ l: all.find(z => z.id === sel), s }));
   const L = all.find(l => l.id === sel);
-  if (count) count.textContent = x ? `${rows.length} haltes gevonden op alle lijnen` : `${L.id} · ${L.stations[0]?.name} ⇄ ${L.stations.at(-1)?.name} · ${L.stations.length} haltes`;
+  if (count) count.textContent = x ? `${rows.length} stops found on all lines` : `${L.id} · ${L.stations[0]?.name} ⇄ ${L.stations.at(-1)?.name} · ${L.stations.length} stops`;
   list.innerHTML = rows.map(({ l, s }) => {
     const me = h.id === l.id && h.i === s.i;
     return `<button data-l="${l.id}" data-i="${s.i}" class="tp9s${me ? ' me' : ''}" style="--c:${COLORS[l.id]}">${x ? chip(l.id, true) : ''}<span class="n">${esc(s.name)}</span>`
       + `<span class="t">${me ? '📍' : x ? '' : s.transfers.filter(t => t !== l.id).map(t => chip(t, true)).join('')}</span></button>`;   // zoeken: geen badges, naam krijgt de ruimte
-  }).join('') || '<small style="padding:6px;color:#aaa">Geen halte gevonden</small>';
+  }).join('') || '<small style="padding:6px;color:#aaa">No stop found</small>';
   list.querySelectorAll('button[data-l]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); document.querySelector('#gp3')?.classList.remove('on'); teleport(b.dataset.l, Number(b.dataset.i)); }; });
   status.renders++;
 }
@@ -115,7 +115,7 @@ function install() {
   const box = document.createElement('div'); box.id = 'tp9';
   box.innerHTML = '<span class="tp9h">🚇 Teleport</span>';
   panel.insertBefore(box, tabs);
-  q.placeholder = 'Zoek een halte op alle lijnen…';
+  q.placeholder = 'Search a stop on all lines…';
   box.append(tabs, q, count, list);
   const head = document.createElement('div'); head.className = 'tp9tools'; head.textContent = '🛠 Tools';
   box.after(head);

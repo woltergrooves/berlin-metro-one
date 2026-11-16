@@ -6,11 +6,11 @@ import { Tick } from '../state/Tick.js';
   const SQUARE_ID = "stadtmitte:gendarmen";
   const WALL_ID = "bernauer-strasse:wall";
   const ITEMS = [
-    {id:"wasser",name:"Mineralwasser",price:150,emoji:"💧",note:"+8 energie",effect:8,container:false},
-    {id:"mate",name:"Club-Mate",price:260,emoji:"🧉",note:"+14 energie · fles met Pfand",effect:14,container:true},
-    {id:"boerek",name:"Börek",price:320,emoji:"🥐",note:"+22 energie",effect:22,container:false}
+    {id:"wasser",name:"Mineralwasser",price:150,emoji:"💧",note:"+8 energy",effect:8,container:false},
+    {id:"mate",name:"Club-Mate",price:260,emoji:"🧉",note:"+14 energy · bottle with Pfand",effect:14,container:true},
+    {id:"boerek",name:"Börek",price:320,emoji:"🥐",note:"+22 energy",effect:22,container:false}
   ];
-  const money=c=>`€${(Number(c||0)/100).toFixed(2).replace(".",",")}`;
+  const money=c=>`€${(Number(c||0)/100).toFixed(2)}`;
   const st=()=>window.BerlinLife?.state;
   const econ=()=>window.BerlinLife?.economy||window.BerlinLife?.game?.economy;
   const disc=()=>window.BerlinPhase34?.discovery;
@@ -48,7 +48,7 @@ import { Tick } from '../state/Tick.js';
     j.stamps=j.stamps||[];j.entries=j.entries||[];
     if(!j.stamps.includes(id))j.stamps.push(id);
     if(knowledge&&first)j.knowledge=(j.knowledge||0)+1;
-    j.entries.unshift({id,name,kind:"phase7",station:station()?.id||"alexanderplatz",text:knowledge?name+"-opdracht voltooid.":"Späti-interieur bezocht.",day:s.clock?.day??0,minute:Math.round(s.clock?.minute||0)});
+    j.entries.unshift({id,name,kind:"phase7",station:station()?.id||"alexanderplatz",text:knowledge?name+"job completed.":"Späti interior visited.",day:s.clock?.day??0,minute:Math.round(s.clock?.minute||0)});
     j.entries=j.entries.slice(0,80);
     store();
   }
@@ -95,7 +95,7 @@ import { Tick } from '../state/Tick.js';
     if(root)return;
     const css=document.createElement("style");css.id="berlin-phase7-style";css.textContent=styles;document.head.appendChild(css);
     root=document.createElement("div");root.id="berlin-phase7";
-    root.innerHTML='<section class="p7-shell" role="dialog" aria-modal="true" aria-label="Activiteit"><header class="p7-bar"><div><strong id="p7-title">Activiteit</strong><small id="p7-sub">Berlin Life · Fase 7</small></div><button class="p7-x" type="button" data-p7="close" aria-label="Sluit activiteit">✕</button></header><div class="p7-scroll"></div></section>';
+    root.innerHTML='<section class="p7-shell" role="dialog" aria-modal="true" aria-label="Activity"><header class="p7-bar"><div><strong id="p7-title">Activity</strong><small id="p7-sub">Berlin Life · Phase 7</small></div><button class="p7-x" type="button" data-p7="close" aria-label="Close activity">✕</button></header><div class="p7-scroll"></div></section>';
     document.body.appendChild(root);card=root.querySelector(".p7-scroll");
     root.addEventListener("click",e=>{if(e.target===root){close();return}const b=e.target.closest("button[data-p7]");if(!b)return;const action=b.dataset.p7;
       if(action==="close")close();
@@ -130,26 +130,26 @@ import { Tick } from '../state/Tick.js';
   function buy(id){
     const p=ensure(),item=purchase(id),economy=econ();
     if(!p||!item)return;
-    if(!economy?.spend){message("De economie is nog niet geladen.");return}
+    if(!economy?.spend){message("The economy isn't loaded yet.");return}
     const result=economy.spend(item.price,"Späti · "+item.name);
-    if(result?.success===false){message("Je hebt niet genoeg geld voor "+item.name+".");return}
+    if(result?.success===false){message("You don't have enough money for "+item.name+".");return}
     p.inventory[item.id]=(p.inventory[item.id]||0)+1;
     p.spent=(p.spent||0)+item.price;store();
-    message("Gekocht: "+item.name+". Het staat nu in je voorraad.");
+    message("Bought: "+item.name+". It's in your supplies now.");
   }
   function consume(id){
     const p=ensure(),item=purchase(id);if(!p||!item)return;
-    if(!(p.inventory[item.id]>0)){message("Je hebt dit product niet in je voorraad.");return}
+    if(!(p.inventory[item.id]>0)){message("You don't have this product in your supplies.");return}
     p.inventory[item.id]--;
     p.energy=Math.min(100,Math.max(0,p.energy||0)+item.effect);
     if(item.container)p.emptyBottles=(p.emptyBottles||0)+1;
-    store();message(item.name+" gebruikt. Energie +"+item.effect+(item.container?" · Je hebt een lege Pfandfles.":"")+".");
+    store();message(item.name+" used. Energy +"+item.effect+(item.container?" · You have an empty Pfand bottle.":"")+".");
   }
   function returnBottle(){
     const p=ensure(),e=econ();if(!p||!e?.earn)return;
-    if(!(p.emptyBottles>0)){message("Je hebt geen lege Pfandflessen.");return}
+    if(!(p.emptyBottles>0)){message("You don't have any empty Pfand bottles.");return}
     p.emptyBottles--;e.earn(25,"Pfand · Späti");
-    p.returns=(p.returns||0)+1;store();message("Pfand ingeleverd: +€0,25 op je rekening.");
+    p.returns=(p.returns||0)+1;store();message("Pfand returned: +€0.25 to your account.");
   }
 
   // City decisions deliberately avoid obvious wrong answers and a fixed B-key.
@@ -157,81 +157,81 @@ import { Tick } from '../state/Tick.js';
   // and the preserved Bernauer Straße border installations.
   const CHALLENGES={
     clock:[
-      {prompt:"De Weltzeituhr werd op 30 september 1969 onthuld. In welke politieke en stedenbouwkundige context past die datum?",
-       options:["Als onderdeel van de herinrichting rond het twintigjarig DDR-jubileum.","Voor de Europese cultuurhoofdstadcampagne na de hereniging.","Ter gelegenheid van de eerste doorgaande S-Bahn-verbinding naar West-Berlijn."],correct:0,
-       hint:"Denk aan de politieke betekenis van Alexanderplatz eind jaren zestig.",explain:"De klok werd op 30 september 1969 onthuld tijdens de herinrichting van Alexanderplatz rond het twintigjarige bestaan van de DDR."},
-      {prompt:"Welke beschrijving van het mechanisme van de Weltzeituhr is het nauwkeurigst?",
-       options:["De buitenste ring draait eenmaal per dag en verplaatst de stadsnamen.","Een centrale tijdschaal draait langs de stadsnamen en tijdzones.","De klok toont alleen het uur van Berlijn; de andere tijden zijn vast."],correct:1,
-       hint:"Let op welk onderdeel tijd laat verstrijken en welk onderdeel plaatsnamen bevat.",explain:"Een draaiende tijdschaal in het midden laat de lokale tijden bij de plaatsen en tijdzones aflezen."},
-      {prompt:"Wat verbeeldt het planetenmodel boven op de Weltzeituhr in de eerste plaats?",
-       options:["Het heelal als referentie voor de meting en indeling van tijd.","De historische planetenkaart van de Berlijnse sterrenwacht.","De banen van satellieten waarmee de klok radiotijd ontvangt."],correct:0,
-       hint:"Het gaat om de gedachte achter tijdmeting, niet om de stroomvoorziening.",explain:"Het roterende planetenmodel verwijst symbolisch naar de beweging van hemellichamen als basis van tijdmeting."}
+      {prompt:"The Weltzeituhr was unveiled on 30 September 1969. Which political and urban planning context does that date fit?",
+       options:["As part of the redesign around the GDR's twentieth anniversary.","For the European Capital of Culture campaign after reunification.","To mark the first through S-Bahn connection to West Berlin."],correct:0,
+       hint:"Think about the political meaning of Alexanderplatz in the late sixties.",explain:"The clock was unveiled on 30 September 1969 during the redesign of Alexanderplatz around the twentieth anniversary of the GDR."},
+      {prompt:"Which description of the Weltzeituhr's mechanism is the most accurate?",
+       options:["The outer ring turns once a day and moves the city names.","A central time scale turns past the city names and time zones.","The clock only shows the Berlin hour; the other times are fixed."],correct:1,
+       hint:"Pay attention to which part lets time pass and which part holds the place names.",explain:"A rotating time scale in the middle lets you read the local times at the places and time zones."},
+      {prompt:"What does the planetary model on top of the Weltzeituhr primarily represent?",
+       options:["The universe as a reference for measuring and dividing time.","The historic planetary map of the Berlin observatory.","The orbits of satellites the clock receives radio time from."],correct:0,
+       hint:"It's about the idea behind timekeeping, not the power supply.",explain:"The rotating planetary model symbolically refers to the movement of celestial bodies as the basis of timekeeping."}
     ],
     square:[
-      {prompt:"Bij de twee 'Dome' aan de Gendarmenmarkt zit een architectonische valkuil. Welke uitleg klopt?",
-       options:["Het zijn oorspronkelijk koninklijke paleiskapellen die tot kathedralen zijn omgebouwd.","De namen slaan op imposante koepeltorens bij afzonderlijke kerkgebouwen.","Beide gebouwen waren vanaf het begin nationale musea zonder religieuze functie."],correct:1,
-       hint:"De naam 'Dom' verwijst hier niet simpelweg naar de functie van de hele constructie.",explain:"De Deutscher Dom en Französischer Dom ontlenen hun naam aan de koepeltorens, naast de oorspronkelijke kerkgebouwen."},
-      {prompt:"Het Konzerthaus was ooit een Schauspielhaus. Wie ontwierp de herbouw na de brand van 1817?",
-       options:["Carl Gotthard Langhans, bekend van de Brandenburger Tor.","Karl Friedrich Schinkel, die het theater in 1818–1821 vormgaf.","Peter Joseph Lenné, die vooral het plein en zijn tuinen ontwierp."],correct:1,
-       hint:"De architect werd een bepalende figuur van het Pruisische classicisme.",explain:"Karl Friedrich Schinkel ontwierp het Schauspielhaus, gebouwd tussen 1818 en 1821."},
-      {prompt:"De naam 'Gendarmenmarkt' is niet bedacht voor een kerstmarkt. Waar komt hij vandaan?",
-       options:["Van het Pruisische kurassiersregiment Gens d'armes dat hier stallingen had.","Van de gendarmeriepost die na 1871 tussen beide kerken werd gebouwd.","Van de Franse ambassade, die het plein bij de deling van de stad beheerde."],correct:0,
-       hint:"Het historische spoor leidt naar een regiment, niet naar een latere evenementenlocatie.",explain:"De naam verwijst naar de Gens d'armes, een kurassiersregiment dat hier zijn stallen had."}
+      {prompt:"There's an architectural trap with the two 'Dome' on the Gendarmenmarkt. Which explanation is correct?",
+       options:["They were originally royal palace chapels that were converted into cathedrals.","The names refer to imposing domed towers next to separate church buildings.","Both buildings were national museums with no religious function from the start."],correct:1,
+       hint:"The name 'Dom' here doesn't simply refer to the function of the whole structure.",explain:"The Deutscher Dom and Französischer Dom take their names from the domed towers, next to the original church buildings."},
+      {prompt:"The Konzerthaus was once a Schauspielhaus. Who designed the rebuild after the fire of 1817?",
+       options:["Carl Gotthard Langhans, known for the Brandenburger Tor.","Karl Friedrich Schinkel, who designed the theatre in 1818–1821.","Peter Joseph Lenné, who mainly designed the square and its gardens."],correct:1,
+       hint:"The architect became a defining figure of Prussian classicism.",explain:"Karl Friedrich Schinkel designed the Schauspielhaus, built between 1818 and 1821."},
+      {prompt:"The name 'Gendarmenmarkt' wasn't invented for a Christmas market. Where does it come from?",
+       options:["From the Prussian cuirassier regiment Gens d'armes that had stables here.","From the gendarmerie post built between the two churches after 1871.","From the French embassy, which managed the square when the city was divided."],correct:0,
+       hint:"The historical trail leads to a regiment, not to a later event venue.",explain:"The name refers to the Gens d'armes, a cuirassier regiment that had its stables here."}
     ],
     wall:[
-      {prompt:"Waarom waren ontsnappingen vanuit huizen aan de Bernauer Straße in augustus 1961 mogelijk?",
-       options:["Hun achtertuinen vormden een gemeenschappelijk toegangspad zonder grenswachten.","De huizen stonden in Oost-Berlijn, maar het trottoir ervoor lag al in West-Berlijn.","Het nabijgelegen metrostation was toen nog een vrij toegankelijke grensovergang."],correct:1,
-       hint:"Kijk naar de grens tussen gevel en stoep, niet naar het spoor.",explain:"De huizen lagen in de Sovjetsector, terwijl de stoep ervoor bij de Franse sector hoorde. Mensen sprongen uit ramen naar West-Berlijn."},
-      {prompt:"De Kapelle der Versöhnung staat op een beladen locatie. Wat gebeurde er met de eerdere kerk?",
-       options:["De DDR liet de kerk in 1985 opblazen omdat die in het grensgebied stond.","Het gebouw werd in 1945 verwoest en pas na 1989 archeologisch teruggevonden.","De gemeente verkocht de kerk in 1961 voor de aanleg van een grensstation."],correct:0,
-       hint:"De kerk overleefde de oorlog, maar niet de latere grensbeveiliging.",explain:"De Versöhnungskirche kwam in de grensstrook te liggen en werd in 1985 door de DDR opgeblazen."},
-      {prompt:"Wat maakt de gedenkplaats aan de Bernauer Straße bijzonder als historisch bewijs?",
-       options:["Een teruggeplaatst stuk muur zonder oorspronkelijke grensvoorzieningen.","Een bewaard deel van het grenssysteem met meerdere lagen en de voormalige grensstrook.","De oorspronkelijke Checkpoint Charlie-post en de eerste DDR-grenspoort."],correct:1,
-       hint:"Het terrein toont meer dan één enkele betonnen wand.",explain:"Er zijn delen van de grensinstallaties en de voormalige grensstrook bewaard, waardoor de opbouw zichtbaar is."}
+      {prompt:"Why were escapes from houses on Bernauer Straße possible in August 1961?",
+       options:["Their back gardens formed a shared access path without border guards.","The houses were in East Berlin, but the pavement in front was already in West Berlin.","The nearby metro station was still a freely accessible border crossing back then."],correct:1,
+       hint:"Look at the border between facade and pavement, not at the tracks.",explain:"The houses were in the Soviet sector, while the pavement in front belonged to the French sector. People jumped out of windows into West Berlin."},
+      {prompt:"The Kapelle der Versöhnung stands on a loaded site. What happened to the earlier church?",
+       options:["The GDR had the church blown up in 1985 because it stood in the border area.","The building was destroyed in 1945 and only rediscovered archaeologically after 1989.","The city sold the church in 1961 to build a border station."],correct:0,
+       hint:"The church survived the war, but not the later border security.",explain:"The Versöhnungskirche ended up in the border strip and was blown up by the GDR in 1985."},
+      {prompt:"What makes the memorial on Bernauer Straße special as historical evidence?",
+       options:["A re-erected piece of wall without the original border installations.","A preserved part of the border system with several layers and the former border strip.","The original Checkpoint Charlie post and the first GDR border gate."],correct:1,
+       hint:"The site shows more than a single concrete wall.",explain:"Parts of the border installations and the former border strip have been preserved, so the structure is visible."}
     ],
     courier:[
-      {prompt:"Je staat op het juiste huisnummer. De naam op de bel ontbreekt en de klant neemt niet op. In de instructies staat 'persoonlijk afgeven'. Wat doe je?",
-       options:["Vraag via de bezorgapp om bevestiging en volg anders de procedure voor mislukte bezorging.","Vraag de conciërge het pakket in ontvangst te nemen en noteer zijn naam, ook zonder machtiging.","Maak een afleverfoto van de afgesloten pakketkast en meld het als bezorgd, hoewel daarvoor geen toestemming is."],correct:0,
-       hint:"Het juiste gebouw is nog niet hetzelfde als een bevestigde ontvanger.",explain:"Bij persoonlijke aflevering moet de identiteit of ontvangst bevestigd zijn. Zonder dat volg je de mislukte-bezorgprocedure."},
-      {prompt:"Een bewoner vraagt je een pakket voor nr. 18 af te geven bij nr. 18A, 'want dat is hetzelfde gebouw'. Wat is het beste?",
-       options:["Bel eerst het nummer dat de bewoner geeft en lever op 18A af wanneer die persoon de wijziging bevestigt.","Controleer eerst adres en ontvanger in de opdracht en vraag zo nodig een bevestigde wijziging.","Vraag de bewoner zijn naam op de bon te zetten; dat lijkt een voldoende adreswijziging."],correct:1,
-       hint:"Een mondelinge wijziging van iemand anders is geen geverifieerde afleverinstructie.",explain:"Je houdt het geregistreerde adres en de ontvanger aan totdat een adreswijziging betrouwbaar is bevestigd."},
-      {prompt:"Je hebt twee pakketten voor dezelfde straat, maar verschillende huisnummers. De scan voor het eerste lukt niet. Welke handeling voorkomt een fout?",
-       options:["Leg de twee bezorgingen samen vast met één handmatige routebevestiging en aparte foto’s.","Noteer beide pakketnummers met één routecode en werk de scans pas achteraf bij.","Controleer pakketlabel en afleverpunt apart en registreer geen aflevering die je niet hebt uitgevoerd."],correct:2,
-       hint:"Een scan bevestigt één zending, geen straat of route.",explain:"Elke zending heeft een afzonderlijke afleverregistratie; je mag niet de scan van een ander pakket gebruiken."}
+      {prompt:"You're at the right house number. The name on the doorbell is missing and the customer doesn't answer. The instructions say 'hand over in person'. What do you do?",
+       options:["Ask for confirmation via the delivery app and otherwise follow the failed delivery procedure.","Ask the caretaker to take the parcel and write down his name, even without authorisation.","Take a delivery photo of the locked parcel box and report it as delivered, even though there's no permission for that."],correct:0,
+       hint:"The right building isn't the same as a confirmed recipient.",explain:"With in-person delivery, the identity or receipt has to be confirmed. Without that you follow the failed delivery procedure."},
+      {prompt:"A resident asks you to drop a parcel for no. 18 at no. 18A, 'because it's the same building'. What's best?",
+       options:["First call the number the resident gives and deliver at 18A once that person confirms the change.","First check the address and recipient in the job and ask for a confirmed change if needed.","Ask the resident to put his name on the receipt; that seems a sufficient address change."],correct:1,
+       hint:"A verbal change from someone else isn't a verified delivery instruction.",explain:"You stick to the registered address and recipient until an address change has been reliably confirmed."},
+      {prompt:"You have two parcels for the same street, but different house numbers. The scan for the first one fails. Which action prevents a mistake?",
+       options:["Record both deliveries together with one manual route confirmation and separate photos.","Write down both parcel numbers with one route code and only update the scans afterwards.","Check the parcel label and drop-off point separately and don't register a delivery you didn't make."],correct:2,
+       hint:"A scan confirms one shipment, not a street or route.",explain:"Each shipment has its own delivery record; you may not use the scan of another parcel."}
     ],
     social:[
-      {prompt:"Miro zegt: 'We zoeken soms mensen voor de deur, maar de meeste verdwijnen na één nacht.' Hoe reageer je om een echte kans te krijgen?",
-       options:["Vraag op welke uren je kunt invallen, wat de verwachtingen zijn en hoe je betrouwbaarheid kunt aantonen.","Stel voor dat je eerst één drukke dienst meeloopt zonder over vaste beschikbaarheid te praten.","Vraag direct om een vaste dienst en bespreek pas daarna hoe flexibel je kunt zijn."],correct:0,
-       hint:"Zijn opmerking gaat vooral over vertrouwen en aanwezigheid.",explain:"Een gerichte vraag naar verwachtingen en inzet bouwt een werkrelatie op zonder direct iets te eisen."},
-      {prompt:"Deniz kent iemand die muziekavonden organiseert, maar wil geen loze beloften doen. Wat is de slimste vervolgvraag?",
-       options:["Of je hem een mix kunt sturen, zonder eerst te vragen wat voor soort avond het wordt.","Of er een concreet probleem is waarbij je eerst klein kunt helpen of ervaring kunt tonen.","Of Deniz je eerst kan introduceren bij de organisatie en je daarna hoort welke hulp nuttig is."],correct:1,
-       hint:"Een nuttige eerste bijdrage werkt beter dan druk zetten op een toezegging.",explain:"Door een concrete bijdrage voor te stellen, wordt een vrijblijvende introductie een geloofwaardige kans."},
-      {prompt:"Een kennis zegt dat er tijdelijk werk is, maar kent alleen een voornaam. Welke reactie bewaart het contact én helpt je verder?",
-       options:["Vraag om een betrouwbaar contactkanaal en een beschrijving van het werk voordat je toezegt.","Vraag naar de werktijden en zeg alvast toe, ook als de precieze werkzaamheden onbekend blijven.","Vraag om een introductie bij zijn contactpersoon, maar stel vragen over het werk pas na de eerste dienst."],correct:0,
-       hint:"Interesse tonen hoeft niet gelijk een verplichting te zijn.",explain:"Je vraagt voldoende informatie om serieus en veilig een volgende stap te zetten."}
+      {prompt:"Miro says: 'We sometimes look for people for the door, but most disappear after one night.' How do you respond to get a real chance?",
+       options:["Ask which hours you can fill in, what the expectations are and how you can show you're reliable.","Suggest you first shadow one busy shift without talking about regular availability.","Ask for a regular shift right away and only then discuss how flexible you can be."],correct:0,
+       hint:"His remark is mainly about trust and showing up.",explain:"A focused question about expectations and commitment builds a working relationship without demanding anything right away."},
+      {prompt:"Deniz knows someone who organises music nights, but doesn't want to make empty promises. What's the smartest follow-up question?",
+       options:["Whether you can send him a mix, without first asking what kind of night it will be.","Whether there's a concrete problem where you can help in a small way first or show experience.","Whether Deniz can introduce you to the organisation first and then hear what help would be useful."],correct:1,
+       hint:"A useful first contribution works better than pushing for a commitment.",explain:"By proposing a concrete contribution, a casual introduction becomes a credible chance."},
+      {prompt:"An acquaintance says there's temporary work, but only knows a first name. Which response keeps the contact and helps you further?",
+       options:["Ask for a reliable contact channel and a description of the work before you commit.","Ask about the working hours and commit already, even if the exact tasks stay unknown.","Ask for an introduction to his contact person, but only ask about the work after the first shift."],correct:0,
+       hint:"Showing interest doesn't have to mean a commitment right away.",explain:"You ask enough information to take a next step seriously and safely."}
     ],
     explore:[
-      {prompt:"Je ziet een vernieuwde gevel tegenover een ouder stationsgebouw. Wat kun je daaruit met de meeste zekerheid afleiden?",
-       options:["Dat de hele wijk na 1990 vrijwel volledig opnieuw is gebouwd.","Dat verschillende bouw- en renovatieperioden naast elkaar zichtbaar kunnen zijn.","Dat het oudere gebouw vanzelf uit de negentiende eeuw moet stammen."],correct:1,
-       hint:"Een zichtbaar verschil bewijst een verschil, niet meteen een exacte datum.",explain:"Verschillende bouwlagen bestaan naast elkaar; voor precieze datering moet je aanvullende aanwijzingen zoeken."},
-      {prompt:"Op een informatiebord wordt een vroegere straatnaam genoemd. Welke conclusie is het beste onderbouwd?",
-       options:["De naamsverandering kan iets zeggen over machtswisselingen, herinnering of stadsontwikkeling.","De vroegere naam bewijst dat de straat tijdens de DDR afgesloten was.","De huidige naam wordt altijd gekozen om het vroegere straatverloop te verhullen."],correct:0,
-       hint:"Straatnamen zijn bronnen over beeldvorming, maar vertellen niet zelfstandig het hele verhaal.",explain:"Naamsveranderingen kunnen politiek of cultureel betekenisvol zijn, zonder dat je er automatisch verkeers- of grensgeschiedenis uit kunt afleiden."},
-      {prompt:"Twee historische foto's laten hetzelfde plein vanuit verschillende hoeken zien. Hoe vergelijk je ze zorgvuldig?",
-       options:["Let uitsluitend op het centrale monument; fotografisch perspectief is onbelangrijk.","Behandel elk verschil in breedte als bewijs dat het plein is vergroot.","Zoek vaste herkenningspunten en controleer perspectief en opnamedatum voordat je veranderingen aanwijst."],correct:2,
-       hint:"Afstand en hoek veranderen de schijnbare afmetingen.",explain:"Je voorkomt verkeerde conclusies door perspectief en dateringen naast vaste herkenningspunten te leggen."}
+      {prompt:"You see a renovated facade opposite an older station building. What can you conclude from that with the most certainty?",
+       options:["That the whole district was almost completely rebuilt after 1990.","That different construction and renovation periods can be visible side by side.","That the older building must automatically date from the nineteenth century."],correct:1,
+       hint:"A visible difference proves a difference, not an exact date right away.",explain:"Different building layers exist side by side; for precise dating you need to look for additional clues."},
+      {prompt:"An information board mentions a former street name. Which conclusion is best supported?",
+       options:["The name change can say something about shifts in power, remembrance or urban development.","The former name proves that the street was closed during the GDR.","The current name is always chosen to hide the former street layout."],correct:0,
+       hint:"Street names are sources about how places are seen, but don't tell the whole story on their own.",explain:"Name changes can be politically or culturally meaningful, without you automatically deriving traffic or border history from them."},
+      {prompt:"Two historical photos show the same square from different angles. How do you compare them carefully?",
+       options:["Look only at the central monument; photographic perspective doesn't matter.","Treat every difference in width as proof that the square was enlarged.","Look for fixed landmarks and check the perspective and date taken before you point out changes."],correct:2,
+       hint:"Distance and angle change the apparent size.",explain:"You avoid wrong conclusions by setting perspective and dates against fixed landmarks."}
     ],
     sight:[
-      {prompt:"Een monument draagt een oudere bouwdatum en een moderne restauratieplaquette. Welke lezing is het meest zorgvuldig?",
-       options:["De restauratiedatum vervangt de historische bouwdatum.","Beide dateringen kunnen kloppen: ze verwijzen naar verschillende fasen van hetzelfde bouwwerk.","De oorspronkelijke datering is waarschijnlijk verzonnen voor toeristen."],correct:1,
-       hint:"Bouw, schade en herstel zijn afzonderlijke fasen.",explain:"Een monument kan oud zijn en later ingrijpend zijn hersteld."},
-      {prompt:"Op de plek zie je een monument en een uitleg over wat vroeger op dezelfde plaats stond. Welke interpretatie houdt stand?",
-       options:["De huidige inrichting vertelt niet automatisch het complete historische verhaal van de locatie.","Het oudste gebouw is altijd het belangrijkste voor de betekenis van de plek.","Een nieuw monument bewijst dat er voordien geen ander gebruik was."],correct:0,
-       hint:"Een plek heeft vaak meerdere historische lagen.",explain:"Je combineert zichtbare elementen met historische informatie om de betekenis van de locatie te begrijpen."},
-      {prompt:"Een historisch gebouw is veranderd van functie. Wat is de sterkste aanwijzing om die ontwikkeling te begrijpen?",
-       options:["Alleen de huidige naam op de gevel.","De populariteit van de locatie onder bezoekers.","Een combinatie van oorspronkelijke functie, verbouwingen en het huidige gebruik."],correct:2,
-       hint:"Bij herbestemming zijn veranderingen door de tijd essentieel.",explain:"De historische en huidige functies én de tussenliggende verbouwingen verklaren de ontwikkeling van het gebouw."}
+      {prompt:"A monument carries an older construction date and a modern restoration plaque. Which reading is the most careful?",
+       options:["The restoration date replaces the historical construction date.","Both dates can be right: they refer to different phases of the same structure.","The original date was probably made up for tourists."],correct:1,
+       hint:"Construction, damage and restoration are separate phases.",explain:"A monument can be old and later heavily restored."},
+      {prompt:"At the site you see a monument and an explanation of what used to stand in the same place. Which interpretation holds up?",
+       options:["The current layout doesn't automatically tell the complete historical story of the location.","The oldest building is always the most important for the meaning of the place.","A new monument proves there was no other use before."],correct:0,
+       hint:"A place often has several historical layers.",explain:"You combine visible elements with historical information to understand the meaning of the location."},
+      {prompt:"A historic building has changed function. What's the strongest clue to understand that development?",
+       options:["Only the current name on the facade.","The popularity of the location among visitors.","A combination of the original function, alterations and the current use."],correct:2,
+       hint:"With conversions, changes over time are essential.",explain:"The historical and current functions and the alterations in between explain the building's development."}
     ]
   };
   const questSeed=s=>{let h=2166136261;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
@@ -259,7 +259,7 @@ import { Tick } from '../state/Tick.js';
   function incorrect(kind){
     const q=activeChallenge;
     store();
-    message((kind==='courier'?'De afleverprocedure is nog niet juist. ':'Niet helemaal. ')+(q?.hint||'Herlees de situatie en probeer opnieuw.'));
+    message((kind==='courier'?'The delivery procedure isn\'t right yet. ':'Not quite. ')+(q?.hint||'Reread the situation and try again.'));
   }
 
   function answer(n){
@@ -269,8 +269,8 @@ import { Tick } from '../state/Tick.js';
     if(!p.quizSolved){
       p.quizSolved=true;
       stamp(CLOCK_ID,"Weltzeituhr",{knowledge:true});
-      message("Goed onderzocht. "+activeChallenge.explain+" +1 Berlin Knowledge en een City Stamp.");
-    }else{store();message("Goed beargumenteerd. "+activeChallenge.explain+" De beloning heb je eerder al ontvangen.")}
+      message("Well researched. "+activeChallenge.explain+" +1 Berlin Knowledge and a City Stamp.");
+    }else{store();message("Well argued. "+activeChallenge.explain+" You've already received the reward earlier.")}
   }
   function answerHistoric(n){
     if(mode!=="square"&&mode!=="wall")return;
@@ -281,8 +281,8 @@ import { Tick } from '../state/Tick.js';
     if(!data.historicSolved[id]){
       data.historicSolved[id]=true;
       stamp(id,mode==="square"?"Gendarmenmarkt":"Gedenkstätte Berliner Mauer",{knowledge:true});
-      message("Goed onderzocht. "+activeChallenge.explain+" +1 Berlin Knowledge en een City Stamp.");
-    }else{store();message("Goed onderzocht. "+activeChallenge.explain+" De beloning is eenmalig.")}
+      message("Well researched. "+activeChallenge.explain+" +1 Berlin Knowledge and a City Stamp.");
+    }else{store();message("Well researched. "+activeChallenge.explain+" The reward is one-time only.")}
   }
   function cityChoice(choice){
     if(!["explore","social","courier","sight"].includes(mode))return;
@@ -296,29 +296,29 @@ import { Tick } from '../state/Tick.js';
       const minutes=Number(st()?.clock?.totalMinutes||0);
       const dayKey=Math.floor(minutes/1440);
       const key=stn.id+":"+dayKey;
-      if(s.courierShifts[key]){store();message("Deze koeriersdienst is vandaag al betaald. Morgen kan je weer aan de slag.");return}
-      const economy=econ();if(typeof economy?.earn!=="function"){message("De economie is nog niet beschikbaar.");return}
+      if(s.courierShifts[key]){store();message("This courier shift has already been paid today. You can get back to work tomorrow.");return}
+      const economy=econ();if(typeof economy?.earn!=="function"){message("The economy isn't available yet.");return}
       const payment=850;
       s.courierShifts[key]=true;
-      economy.earn(payment,"Koerierdienst · "+stn.name);
-      stamp(id,"Koeriersklus bij "+stn.name);
-      message("Opdracht voltooid. "+note+" +"+money(payment)+" verdiend. Morgen weer een dienst.");
+      economy.earn(payment,"Courier service · "+stn.name);
+      stamp(id,"Courier job at "+stn.name);
+      message("Job completed. "+note+" +"+money(payment)+" earned. Another shift tomorrow.");
       return;
     }
     if(isSocial){
       const contact=stn.id==="alexanderplatz"?"Miro":"Deniz";
-      if(s.socialContacts[contact]){store();message("Je hebt "+contact+" al in je contacten. "+note);return}
+      if(s.socialContacts[contact]){store();message("You already have "+contact+" in your contacts. "+note);return}
       s.socialContacts[contact]=true;
-      stamp(id,"Gesprek met "+contact);
+      stamp(id,"Conversation with "+contact);
       const j=st()?.berlinJournal;
       if(j){j.contacts=j.contacts||{};j.contacts[contact]=true;j.leads=j.leads||{};j.leads[contact.toLowerCase()+"-lead"]=true}
-      store();message(note+" "+contact+" is toegevoegd aan je contacten. Je hebt een nieuwe werk-lead.");
+      store();message(note+" "+contact+" has been added to your contacts. You have a new work lead.");
       return;
     }
-    if(s.activitySolved[id]){store();message("Deze plek heb je eerder onderzocht. "+note+" De beloning is eenmalig.");return}
+    if(s.activitySolved[id]){store();message("You've already investigated this place. "+note+" The reward is one-time only.");return}
     s.activitySolved[id]=true;
-    stamp(id,mode==="sight"?"Bezoek aan "+(city()?.activities?.()?.find(a=>a.id===id)?.name||stn.name):"Buurtverkenning "+stn.name,{knowledge:true});
-    message(note+" +1 Berlin Knowledge en een nieuwe City Stamp.");
+    stamp(id,mode==="sight"?"Visit to "+(city()?.activities?.()?.find(a=>a.id===id)?.name||stn.name):"Neighbourhood walk "+stn.name,{knowledge:true});
+    message(note+" +1 Berlin Knowledge and a new City Stamp.");
   }
 
   function balance(){
@@ -330,55 +330,55 @@ import { Tick } from '../state/Tick.js';
     if(!p)return;
     if(mode==="shop"){
       root.querySelector("#p7-title").textContent="🥤 Späti · "+(station()?.name||"Berlin");
-      root.querySelector("#p7-sub").textContent=(station()?.name||"Berlin")+" · interactieve 2D-winkel";
+      root.querySelector("#p7-sub").textContent=(station()?.name||"Berlin")+" · interactive 2D shop";
       card.innerHTML=`
-        <div class="p7-scene" aria-label="2D Späti met schappen en toonbank"><div class="p7-store-sign">SPÄTI · BERLIN</div><div class="p7-shelf"><span>🥤</span><span>🥨</span><span>🧃</span><span>🍫</span></div><div class="p7-person">🧑‍💼</div><div class="p7-counter"></div></div>
-        <p class="p7-intro">“Na, wat soll's sein?” Kies iets uit het schap. Je betaalt met hetzelfde geld als in de rest van Berlin Life.</p>
-        <div class="p7-grid"><div class="p7-stat"><b>${total==null?"—":money(total)}</b><small>Beschikbaar</small></div><div class="p7-stat"><b>${p.energy||0}/100</b><small>Energie</small></div><div class="p7-stat"><b>${money(p.spent)}</b><small>Uitgegeven hier</small></div></div>
-        <div class="p7-section">IN DE WINKEL</div>
-        ${ITEMS.map(i=>`<div class="p7-row"><span class="p7-icon">${i.emoji}</span><div class="p7-desc"><strong>${i.name}</strong><small>${i.note}</small><span class="p7-cost">${money(i.price)}</span></div><button class="p7-action" data-p7="buy" data-item="${i.id}" ${total==null||total<i.price?"disabled":""}>KOOP</button></div>`).join("")}
-        <div class="p7-section">JOUW VOORRAAD</div>
-        ${ITEMS.map(i=>`<div class="p7-row"><span class="p7-icon">${i.emoji}</span><div class="p7-desc"><strong>${i.name}</strong><small>In bezit: ${p.inventory[i.id]||0}</small></div><button class="p7-action" data-p7="consume" data-item="${i.id}" ${(p.inventory[i.id]||0)<1?"disabled":""}>${i.id==="boerek"?"EET":"DRINK"}</button></div>`).join("")}
-        <div class="p7-row"><span class="p7-icon">♻️</span><div class="p7-desc"><strong>Pfand inleveren</strong><small>${p.emptyBottles||0} lege flessen · €0,25 per fles</small></div><button class="p7-action" data-p7="return" ${(p.emptyBottles||0)<1?"disabled":""}>LEVER IN</button></div>
+        <div class="p7-scene" aria-label="2D Späti with shelves and counter"><div class="p7-store-sign">SPÄTI · BERLIN</div><div class="p7-shelf"><span>🥤</span><span>🥨</span><span>🧃</span><span>🍫</span></div><div class="p7-person">🧑‍💼</div><div class="p7-counter"></div></div>
+        <p class="p7-intro">“Na, wat soll's sein?” Pick something from the shelf. You pay with the same money as in the rest of Berlin Life.</p>
+        <div class="p7-grid"><div class="p7-stat"><b>${total==null?"—":money(total)}</b><small>Available</small></div><div class="p7-stat"><b>${p.energy||0}/100</b><small>Energy</small></div><div class="p7-stat"><b>${money(p.spent)}</b><small>Spent here</small></div></div>
+        <div class="p7-section">IN THE SHOP</div>
+        ${ITEMS.map(i=>`<div class="p7-row"><span class="p7-icon">${i.emoji}</span><div class="p7-desc"><strong>${i.name}</strong><small>${i.note}</small><span class="p7-cost">${money(i.price)}</span></div><button class="p7-action" data-p7="buy" data-item="${i.id}" ${total==null||total<i.price?"disabled":""}>BUY</button></div>`).join("")}
+        <div class="p7-section">YOUR SUPPLIES</div>
+        ${ITEMS.map(i=>`<div class="p7-row"><span class="p7-icon">${i.emoji}</span><div class="p7-desc"><strong>${i.name}</strong><small>Owned: ${p.inventory[i.id]||0}</small></div><button class="p7-action" data-p7="consume" data-item="${i.id}" ${(p.inventory[i.id]||0)<1?"disabled":""}>${i.id==="boerek"?"EAT":"DRINK"}</button></div>`).join("")}
+        <div class="p7-row"><span class="p7-icon">♻️</span><div class="p7-desc"><strong>Return Pfand</strong><small>${p.emptyBottles||0} empty bottles · €0.25 per bottle</small></div><button class="p7-action" data-p7="return" ${(p.emptyBottles||0)<1?"disabled":""}>LEVER IN</button></div>
         ${msg?`<div class="p7-alert" role="status">${msg}</div>`:""}
-        <button class="p7-finish" data-p7="close">VERLAAT DE SPÄTI</button>`;
+        <button class="p7-finish" data-p7="close">LEAVE THE SPÄTI</button>`;
     }else if(mode==="clock"){
       root.querySelector("#p7-title").textContent="🕒 Weltzeituhr";
-      root.querySelector("#p7-sub").textContent="Alexanderplatz · interactieve ontdekking";
+      root.querySelector("#p7-sub").textContent="Alexanderplatz · interactive discovery";
       card.innerHTML=`
-        <div class="p7-clock-scene" aria-label="Wereldklok bij Alexanderplatz"><span class="p7-clock-icon">🌐</span></div>
-        <p class="p7-intro">Je staat bij de Weltzeituhr. Bekijk de plaats en leg de historische en technische details uit; een verkeerde gok levert geen beloning op.</p>
+        <div class="p7-clock-scene" aria-label="World clock at Alexanderplatz"><span class="p7-clock-icon">🌐</span></div>
+        <p class="p7-intro">You're at the Weltzeituhr. Look at the place and explain the historical and technical details; a wrong guess gives no reward.</p>
         ${questionUI("answer")}
-        <div class="p7-grid"><div class="p7-stat"><b>${p.quizSolved?"✓":"—"}</b><small>Puzzel opgelost</small></div><div class="p7-stat"><b>${p.quizSolved?"+1":"0"}</b><small>Berlin Knowledge</small></div><div class="p7-stat"><b>${p.quizAttempts||0}</b><small>Antwoorden</small></div></div>
+        <div class="p7-grid"><div class="p7-stat"><b>${p.quizSolved?"✓":"—"}</b><small>Puzzle solved</small></div><div class="p7-stat"><b>${p.quizSolved?"+1":"0"}</b><small>Berlin Knowledge</small></div><div class="p7-stat"><b>${p.quizAttempts||0}</b><small>Answers</small></div></div>
         ${msg?`<div class="p7-alert" role="status">${msg}</div>`:""}
-        <button class="p7-finish" data-p7="close">TERUG NAAR ALEXANDERPLATZ</button>`;
+        <button class="p7-finish" data-p7="close">BACK TO ALEXANDERPLATZ</button>`;
     }else if(mode==="square"||mode==="wall"){
       const square=mode==="square",id=square?SQUARE_ID:WALL_ID,solved=!!p.historicSolved[id],attempts=p.historicAttempts[id]||0;
       root.querySelector("#p7-title").textContent=square?"🏛️ Gendarmenmarkt":"🧱 Gedenkstätte Berliner Mauer";
-      root.querySelector("#p7-sub").textContent=(square?"Stadtmitte":"Bernauer Straße")+" · stadsontdekking";
+      root.querySelector("#p7-sub").textContent=(square?"Stadtmitte":"Bernauer Straße")+" · city discovery";
       card.innerHTML=`
-        <div class="p7-clock-scene" aria-label="${square?"Monumentaal plein met kathedralen":"Gedenkstätte Berliner Mauer"}"><span class="p7-clock-icon">${square?"🏛️":"🧱"}</span></div>
-        <p class="p7-intro">${square?"Je staat aan het Gendarmenmarkt, een van de bekendste pleinen van Berlijn.":"Je staat bij de herdenkingsplek aan de Bernauer Straße, waar de Berlijnse Muur ooit door de stad liep."}</p>
+        <div class="p7-clock-scene" aria-label="${square?"Monumental square with cathedrals":"Gedenkstätte Berliner Mauer"}"><span class="p7-clock-icon">${square?"🏛️":"🧱"}</span></div>
+        <p class="p7-intro">${square?"You're at the Gendarmenmarkt, one of the best-known squares in Berlin.":"You're at the memorial on Bernauer Straße, where the Berlin Wall once ran through the city."}</p>
         ${questionUI("answer-historic")}
-        <div class="p7-grid"><div class="p7-stat"><b>${solved?"✓":"—"}</b><small>Onderzocht</small></div><div class="p7-stat"><b>${solved?"+1":"0"}</b><small>Berlin Knowledge</small></div><div class="p7-stat"><b>${attempts}</b><small>Pogingen</small></div></div>
+        <div class="p7-grid"><div class="p7-stat"><b>${solved?"✓":"—"}</b><small>Investigated</small></div><div class="p7-stat"><b>${solved?"+1":"0"}</b><small>Berlin Knowledge</small></div><div class="p7-stat"><b>${attempts}</b><small>Attempts</small></div></div>
         ${msg?`<div class="p7-alert" role="status">${msg}</div>`:""}
-        <button class="p7-finish" data-p7="close">TERUG NAAR STREET VIEW</button>`;
+        <button class="p7-finish" data-p7="close">BACK TO STREET VIEW</button>`;
     }else if(["explore","sight","social","courier"].includes(mode)){
       const stn=station(),id=activeActivity||"city:"+stn.id;
       const solved=!!p.activitySolved[id],dayKey=stn.id+":"+Math.floor(Number(st()?.clock?.totalMinutes||0)/1440);
       const paid=!!p.courierShifts[dayKey];
       const person=stn.id==="alexanderplatz"?"Miro":"Deniz";
-      const title=mode==="social"?"💬 Gesprek met "+person:mode==="courier"?"🚲 Koeriersklus":mode==="sight"?"📍 Bestemming bezoeken":"🧭 Buurtverkenning";
+      const title=mode==="social"?"💬 Conversation with "+person:mode==="courier"?"🚲 Courier job":mode==="sight"?"📍 Visit destination":"🧭 Neighbourhood walk";
       root.querySelector("#p7-title").textContent=title;
-      root.querySelector("#p7-sub").textContent=stn.name+" · Berlijn";
-      const intro=mode==="social"?person+" vertelt je iets over werk. Hoe reageer je?":mode==="courier"?"Een koeriersdienst geeft je een situatie die je zorgvuldig moet oplossen.":mode==="sight"?"Onderzoek deze plek en de verschillende historische lagen.":"Je verkent de buurt bij "+stn.name+". Kies de best onderbouwde interpretatie.";
+      root.querySelector("#p7-sub").textContent=stn.name+" · Berlin";
+      const intro=mode==="social"?person+" tells you something about work. How do you respond?":mode==="courier"?"A courier service gives you a situation you need to solve carefully.":mode==="sight"?"Investigate this place and its different historical layers.":"You explore the neighbourhood at "+stn.name+". Choose the best-supported interpretation.";
       card.innerHTML=`
        <div class="p7-clock-scene"><span class="p7-clock-icon">${mode==="courier"?"🚲":mode==="social"?"💬":mode==="sight"?"🏛️":"🧭"}</span></div>
-       <p class="p7-intro">${intro}</p><div class="p7-section">${mode==="courier"?"BEZORGOPDRACHT":mode==="social"?"GESPREKSKEUZE":"ONTDEK DE PLEK"}</div>
+       <p class="p7-intro">${intro}</p><div class="p7-section">${mode==="courier"?"DELIVERY JOB":mode==="social"?"CONVERSATION CHOICE":"DISCOVER THE PLACE"}</div>
        ${questionUI("city-choice")}
-       <div class="p7-grid"><div class="p7-stat"><b>${mode==="courier"?(paid?"✓":"€8,50"):(solved?"✓":"—")}</b><small>${mode==="courier"?"Dienst vandaag":"Ontdekt"}</small></div><div class="p7-stat"><b>${p.activityAttempts[id]||0}</b><small>Keuzes</small></div></div>
+       <div class="p7-grid"><div class="p7-stat"><b>${mode==="courier"?(paid?"✓":"€8.50"):(solved?"✓":"—")}</b><small>${mode==="courier"?"Shift today":"Discovered"}</small></div><div class="p7-stat"><b>${p.activityAttempts[id]||0}</b><small>Choices</small></div></div>
        ${msg?`<div class="p7-alert" role="status">${msg}</div>`:""}
-       <button class="p7-finish" data-p7="close">TERUG NAAR STREET VIEW</button>`;
+       <button class="p7-finish" data-p7="close">BACK TO STREET VIEW</button>`;
     }
   }
   function isOpen(){return !!root?.classList.contains("open")}
@@ -395,13 +395,13 @@ import { Tick } from '../state/Tick.js';
     const registry=window.BerlinDiscoveryV2?.data;
     for(const [sid,title] of [["alexanderplatz","Späti am Alex"],["kottbusser-tor","Späti am Kotti"],["hermannplatz","Späti am Hermannplatz"]]){
       const list=registry?.[sid],id=sid+":spaeti";
-      if(Array.isArray(list)&&!list.some(a=>a.id===id))list.unshift({id,station:sid,icon:"🥤",name:title,dist:70,detail:"Interieur · snacks, drinken en Pfand",obvious:true});
+      if(Array.isArray(list)&&!list.some(a=>a.id===id))list.unshift({id,station:sid,icon:"🥤",name:title,dist:70,detail:"Interior · snacks, drinks and Pfand",obvious:true});
     }
     const panel=document.querySelector("#sv-discovery-modal .svd-panel");
     if(!panel)return;
     for(const b of panel.querySelectorAll(`button.svd-go[data-p7-entry="shop"],button.svd-go[data-open$=":spaeti"],button.svd-go[data-berlin-nav$=":spaeti"]`)){
       b.removeAttribute("data-open");b.removeAttribute("data-berlin-nav");
-      b.dataset.p7Entry="shop";b.textContent="BINNEN";
+      b.dataset.p7Entry="shop";b.textContent="INSIDE";
     }
     const detail=identifyDetail();
     if(!detail)return;
@@ -409,14 +409,14 @@ import { Tick } from '../state/Tick.js';
     const action=panel.querySelector("button[data-action='perform']");
     if(action){
       action.dataset.p7Entry=detail;
-      action.textContent=detail==="shop"?"BETREED DE SPÄTI":"SPEEL WELTZEITUHR";
+      action.textContent=detail==="shop"?"ENTER THE SPÄTI":"PLAY WELTZEITUHR";
       action.disabled=false;
     }
     if(!panel.querySelector("button[data-p7-entry]")&&detail){
       const back=panel.querySelector("button[data-action='back']");
       if(back){
         const b=document.createElement("button");b.className="svd-wide";b.type="button";b.dataset.p7Entry=detail;
-        b.textContent=detail==="shop"?"BETREED DE SPÄTI":"SPEEL WELTZEITUHR";back.before(b);
+        b.textContent=detail==="shop"?"ENTER THE SPÄTI":"PLAY WELTZEITUHR";back.before(b);
       }
     }
   }
@@ -431,10 +431,10 @@ import { Tick } from '../state/Tick.js';
     decorateDiscovery();
     if(!wired&&window.BerlinCityDiscovery&&window.BerlinDiscoveryV2?.data){
       wired=true;
-      console.info("[Berlin Life] Fase 7 activity registry connected");
+      console.info("[Berlin Life] Phase 7 activity registry connected");
     }
   });
   window.BerlinPhase7={version:6,openCityActivity:(type,id)=>open(type,id),openShop:()=>open("shop"),openWeltzeituhr:()=>open("clock"),openGendarmenmarkt:()=>open("square"),openBerlinerMauer:()=>open("wall"),close,
     snapshot:()=>{const p=ensure();return p?JSON.parse(JSON.stringify(p)):null},isOpen,shopItemIds:ITEMS.map(x=>x.id),get discovered(){return !!window.BerlinDiscoveryV2?.data?.alexanderplatz?.some(a=>a.id===SHOP_ID)}};
-  console.info("[Berlin Life] Fase 7 V6 – scenario questions, variable keys and reasoned answers ready");
+  console.info("[Berlin Life] Phase 7 V6 – scenario questions, variable keys and reasoned answers ready");
 })();

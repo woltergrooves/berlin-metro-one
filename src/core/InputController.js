@@ -63,7 +63,7 @@ export class InputController {
     if (matchMedia?.('(hover: hover) and (pointer: fine)').matches) {
       document.body.classList.add('bl-desktop');
       const label = this.rightZone.querySelector('.look-label');
-      if (label) label.textContent = 'KLIK = MUIS KIJKEN';
+      if (label) label.textContent = 'CLICK = MOUSE LOOK';
     }
   }
 

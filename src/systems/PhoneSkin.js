@@ -6,12 +6,12 @@
 import { Tick } from '../state/Tick.js';
 
 const APPS = [
-  { tab: 'home', name: 'Thuis', icon: '🏠', bg: 'linear-gradient(160deg,#ffb347,#ff7a2f)' },
+  { tab: 'home', name: 'Home', icon: '🏠', bg: 'linear-gradient(160deg,#ffb347,#ff7a2f)' },
   { tab: 'jobs', name: 'Jobs', icon: '📦', bg: 'linear-gradient(160deg,#ffd75e,#e9a400)' },
   { tab: 'map', name: 'BVG', icon: '🚇', bg: 'linear-gradient(160deg,#f5d000,#e3b700)', text: '#1a1a1a' },
   { tab: 'contacts', name: 'Chats', icon: '💬', bg: 'linear-gradient(160deg,#5ef08a,#21b85a)', badge: true },
-  { tab: 'places', name: 'Plekken', icon: '📍', bg: 'linear-gradient(160deg,#ff6b6b,#d63031)' },
-  { tab: 'city', name: 'Stad', icon: '🌙', bg: 'linear-gradient(160deg,#6c7cff,#3a3fbf)', city: true },
+  { tab: 'places', name: 'Places', icon: '📍', bg: 'linear-gradient(160deg,#ff6b6b,#d63031)' },
+  { tab: 'city', name: 'City', icon: '🌙', bg: 'linear-gradient(160deg,#6c7cff,#3a3fbf)', city: true },
 ];
 const DOCK = ['contacts', 'map', 'jobs'];   // dock onderin; de rest staat op het beginscherm
 
@@ -74,7 +74,7 @@ const svg = {
   signal: '<svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>',
   wifi: '<svg viewBox="0 0 16 12"><path d="M8 2.2c2.4 0 4.6.9 6.3 2.5l1.2-1.3A10.6 10.6 0 0 0 8 .4C5.2.4 2.5 1.5.5 3.4l1.2 1.3A9 9 0 0 1 8 2.2zm0 3.4c1.5 0 2.9.6 3.9 1.5l1.2-1.3A7.4 7.4 0 0 0 8 3.8 7.4 7.4 0 0 0 2.9 5.8l1.2 1.3C5.1 6.2 6.5 5.6 8 5.6zM8 9a2 2 0 0 0-1.5.6L8 11.4l1.5-1.8A2 2 0 0 0 8 9z"/></svg>',
 };
-const euro = c => `€${((c || 0) / 100).toFixed(2).replace('.', ',')}`;
+const euro = c => `€${((c || 0) / 100).toFixed(2)}`;
 const clockNow = g => {
   const c = globalThis.BerlinState?.clock;
   if (c?.hhmm) return { hhmm: c.hhmm, day: c.weekdayName || '' };
@@ -93,12 +93,12 @@ function install(game) {
   const screen = document.createElement('div'); screen.className = 'bl-screen';
   screen.innerHTML = `<div class="bl-island"></div>
     <div class="bl-home"><div class="bl-status"><span class="t">--:--</span><span class="r">${svg.signal}<span style="font-size:.8em;font-weight:700">5G</span><span class="bl-batt"><i><b></b></i></span></span></div>
-      <div class="bl-widgets"><div class="bl-w"><small class="wd">Berlijn</small><div class="big t">--:--</div><div class="sub w2"></div></div>
-        <div class="bl-w"><small>Portemonnee</small><div class="mid money">€0,00</div><div class="sub tk"></div></div></div>
+      <div class="bl-widgets"><div class="bl-w"><small class="wd">Berlin</small><div class="big t">--:--</div><div class="sub w2"></div></div>
+        <div class="bl-w"><small>Wallet</small><div class="mid money">€0.00</div><div class="sub tk"></div></div></div>
       <div class="bl-grid"></div><div class="bl-dots"><i></i><i></i></div><div class="bl-dock"></div></div>
     <div class="bl-app" style="display:none"><div class="bl-status"><span class="t">--:--</span><span class="r">${svg.signal}<span style="font-size:.8em;font-weight:700">5G</span><span class="bl-batt"><i><b></b></i></span></span></div>
       <div class="bl-head"><button class="bl-back">‹ Apps</button></div><div class="bl-title" style="padding:0 16px 8px;font:700 30px -apple-system,system-ui,Arial;letter-spacing:-.02em;color:#fff"></div></div>
-    <div class="bl-homebar"></div><button class="bl-homehit" aria-label="Beginscherm"></button>`;
+    <div class="bl-homebar"></div><button class="bl-homehit" aria-label="Home screen"></button>`;
   shell.appendChild(screen);
   for (const [side, top, h] of [['left', 17, 5], ['left', 25, 9], ['left', 36, 9], ['right', 28, 14]]) {
     const b = document.createElement('i'); b.className = 'bl-side'; b.style.cssText = `${side}:-6px;top:${top}%;height:${h}%`; shell.appendChild(b);
@@ -137,11 +137,11 @@ function install(game) {
     drawIcons();
     const t = clockNow(game), s = game.metroEconomy || {};
     screen.querySelectorAll('.t').forEach(el => { el.textContent = t.hhmm; });
-    screen.querySelector('.wd').textContent = t.day || 'Berlijn';
+    screen.querySelector('.wd').textContent = t.day || 'Berlin';
     const job = s.activeDelivery?.status === 'active' ? s.activeDelivery : null;
-    screen.querySelector('.w2').textContent = job ? `📦 naar ${job.to}` : (s.home?.day ? `Dag ${s.home.day}` : '');
+    screen.querySelector('.w2').textContent = job ? `📦 to ${job.to}` : (s.home?.day ? `Day ${s.home.day}` : '');
     screen.querySelector('.money').textContent = euro(s.balanceCents);
-    screen.querySelector('.tk').textContent = !s.ticket ? '🎫 geen ticket' : s.ticket.type === 'AB' ? `🎫 AB · ${Math.max(0, Math.ceil(s.ticket.remainingMinutes || 0))} min` : `🎫 Kurzstrecke · ${Math.max(0, s.ticket.remainingStops || 0)}`;
+    screen.querySelector('.tk').textContent = !s.ticket ? '🎫 no ticket' : s.ticket.type === 'AB' ? `🎫 AB · ${Math.max(0, Math.ceil(s.ticket.remainingMinutes || 0))} min` : `🎫 Kurzstrecke · ${Math.max(0, s.ticket.remainingStops || 0)}`;
     const batt = Math.max(12, 100 - Math.floor(((Date.now() - (game.__blPhoneSince ||= Date.now())) / 60000) % 88));   // loopt langzaam leeg
     screen.querySelectorAll('.bl-batt b').forEach(el => { el.style.width = batt + '%'; el.style.background = batt < 20 ? '#ff3b30' : '#fff'; });
     const unread = document.querySelector('#phoneBadgeV2'), n = unread?.style.display !== 'none' ? unread?.textContent : '';

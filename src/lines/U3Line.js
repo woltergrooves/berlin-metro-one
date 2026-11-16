@@ -15,6 +15,6 @@ const zones = [
   { id: 'U3', stations: U3_STATIONS, origin: U3_LINE.origin, to: U3_SPLIT_X, viewMax: 360 },
   { id: 'U1', stations: U1_STATIONS, origin: U1_LINE.origin, from: U3_SPLIT_X, viewMin: 236 },
 ];
-export const U3 = createLine({ line: U3_LINE, stations: U3_STATIONS, godStations: U3_BRANCH, route: U3_ROUTE, zones, withTrains: true, transfers: false, surroundings: false, label: 'Nieuw: U3 met treinen (Krumme Lanke ⇄ Warschauer Straße)' });
+export const U3 = createLine({ line: U3_LINE, stations: U3_STATIONS, godStations: U3_BRANCH, route: U3_ROUTE, zones, withTrains: true, transfers: false, surroundings: false, label: 'New: U3 with trains (Krumme Lanke ⇄ Warschauer Straße)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U3 };
 U3.install();

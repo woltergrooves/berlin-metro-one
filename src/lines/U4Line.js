@@ -3,6 +3,6 @@
 import { U4_LINE, U4_STATIONS } from '../data/u4.js';
 import { createLine } from './LineRuntime.js';
 
-export const U4 = createLine({ line: U4_LINE, stations: U4_STATIONS, withTrains: true, transfers: false, surroundings: false, label: 'Nieuw: U4 (Nollendorfplatz ⇄ Innsbrucker Platz)' });
+export const U4 = createLine({ line: U4_LINE, stations: U4_STATIONS, withTrains: true, transfers: false, surroundings: false, label: 'New: U4 (Nollendorfplatz ⇄ Innsbrucker Platz)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U4 };
 U4.install();

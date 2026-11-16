@@ -21,15 +21,15 @@ export class EconomySystem {
 
   buyTicket() {
     if (this.hasTicket) {
-      return { ...this.snapshot(), success: false, message: 'Je hebt al een ticket.' };
+      return { ...this.snapshot(), success: false, message: 'You already have a ticket.' };
     }
     if (this.balanceCents < this.ticketCents) {
       const missing = this.ticketCents - this.balanceCents;
-      return { ...this.snapshot(), success: false, message: `Nog €${(missing / 100).toFixed(2).replace('.', ',')} nodig.` };
+      return { ...this.snapshot(), success: false, message: `Still need €${(missing / 100).toFixed(2)}.` };
     }
     this.balanceCents -= this.ticketCents;
     this.hasTicket = true;
-    return { ...this.snapshot(), success: true, message: 'U2 testticket gekocht ✓' };
+    return { ...this.snapshot(), success: true, message: 'U2 test ticket bought ✓' };
   }
 
   snapshot() {

@@ -5,7 +5,7 @@ import {cityMissionSummary} from './CityMissionModel.js';
 export function nightRoute(job){
   if(job?.kind!=='night')return null;
   const direction=job.to==='Rosa-Luxemburg-Platz'?'Pankow':'Ruhleben';
-  return `Kottbusser Tor → U8 richting Wittenau → overstappen op Alexanderplatz → U2 richting ${direction} → ${job.to}`;
+  return `Kottbusser Tor → U8 towards Wittenau → transfer at Alexanderplatz → U2 towards ${direction} → ${job.to}`;
 }
 
 export function attachCityPhone({document,getGame,sync}){
@@ -16,7 +16,7 @@ export function attachCityPhone({document,getGame,sync}){
     if(!body || !nav)return false;
     if(!document.querySelector('#phoneCityV3')){
       panel=document.createElement('div');panel.id='phoneCityV3';panel.style.cssText='display:none;flex:1;overflow:auto;padding:13px';body.after(panel);
-      button=document.createElement('button');button.id='phoneCityTabV3';button.textContent='🌙 Stad';
+      button=document.createElement('button');button.id='phoneCityTabV3';button.textContent='🌙 City';
       button.style.cssText='border:0;background:#1d2937;color:#fff;padding:8px 2px;font:700 10px Arial';
       nav.appendChild(button);nav.style.gridTemplateColumns='repeat(6,1fr)';
     }
@@ -32,16 +32,16 @@ export function attachCityPhone({document,getGame,sync}){
       const content=document.createElement('p');content.style.cssText='font-size:13px;line-height:1.5;white-space:pre-line;color:#c3cad1';content.textContent=text;
       section.append(heading,content);panel.appendChild(section);
     }
-    const event=dailyEvent(s);card(`${event.emoji} Dag ${event.day} · ${event.title}`,event.text);
-    card('📋 Stadsopdrachten',cityMissionSummary(s));
-    const missions=document.createElement('button');missions.textContent='Opdrachten bekijken';missions.style.cssText='width:100%;padding:12px;margin-bottom:12px;border:0;border-radius:10px;background:#d8b62e;font-weight:800';missions.onclick=()=>document.dispatchEvent(new CustomEvent('metro-missions-open'));panel.appendChild(missions);
+    const event=dailyEvent(s);card(`${event.emoji} Day ${event.day} · ${event.title}`,event.text);
+    card('📋 City jobs',cityMissionSummary(s));
+    const missions=document.createElement('button');missions.textContent='View jobs';missions.style.cssText='width:100%;padding:12px;margin-bottom:12px;border:0;border-radius:10px;background:#d8b62e;font-weight:800';missions.onclick=()=>document.dispatchEvent(new CustomEvent('metro-missions-open'));panel.appendChild(missions);
     const job=s.activeDelivery?.status==='active'?s.activeDelivery:null;
     if(job){
-      const deadline=new Date(job.expiresAt).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-      card('📦 Lopende bezorging',`${job.from} → ${job.to}\n${nightRoute(job)||job.line}\nAfleveren vóór ${deadline}\n€${(job.basePay/100).toFixed(2).replace('.',',')}${job.maxTip?' + fooi':''}\nLever buiten bij de bestemming af.`);
+      const deadline=new Date(job.expiresAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+      card('📦 Delivery in progress',`${job.from} → ${job.to}\n${nightRoute(job)||job.line}\nDeliver before ${deadline}\n€${(job.basePay/100).toFixed(2)}${job.maxTip?' + tip':''}\nDeliver outside at the destination.`);
     }
     const availability=nightWorkAvailability(s,game.phase12State?.minutes??495);
-    card('🌙 Nachtwerk bij Deniz',availability.ready?`Haal de doos bij Deniz op Kottbusser Tor op.\nBestemming: ${availability.offer.to}\n€${(availability.offer.basePay/100).toFixed(2).replace('.',',')}`:availability.reason);
+    card('🌙 Night work with Deniz',availability.ready?`Pick up the box from Deniz at Kottbusser Tor.\nDestination: ${availability.offer.to}\n€${(availability.offer.basePay/100).toFixed(2)}`:availability.reason);
     document.querySelector('#phoneBodyV2').style.display='none';panel.style.display='block';
   }
   function click(event){

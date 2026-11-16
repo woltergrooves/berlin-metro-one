@@ -50,7 +50,7 @@ function installMovement(game,trains,line){
     if(!handled)return base.call(this,delta);
   };
 }
-const etaText=seconds=>!Number.isFinite(seconds)?'—':seconds<1?'nu':`${Math.floor(Math.ceil(seconds)/60)}:${String(Math.ceil(seconds)%60).padStart(2,'0')}`;
+const etaText=seconds=>!Number.isFinite(seconds)?'—':seconds<1?'now':`${Math.floor(Math.ceil(seconds)/60)}:${String(Math.ceil(seconds)%60).padStart(2,'0')}`;
 function installHud(game,hud,trains){
   const base=hud.updatePlayer.bind(hud);
   hud.updatePlayer=function(player,...args){
@@ -66,12 +66,12 @@ function installHud(game,hud,trains){
       this.routeProgressFill.style.width=this.routeProgressDot.style.left=`${pct}%`;
       this.routeStartLabel.textContent=t.originName;this.routeEndLabel.textContent=t.isTerminal?'Endstation':t.destinationName;
       this.stationName.textContent=t.state==='cruising'?'Unterwegs':t.originName;
-      this.trainStatus.textContent=`U8 richting ${t.terminusName}`;
-      this.hint.textContent=t.isTerminal?`${t.originName} · eindpunt. Stap uit om de treinloop door te laten gaan.`:t.state==='boarding'?`Deuren open · volgende halte ${t.destinationName}.`:`Volgende halte ${t.destinationName}.`;
+      this.trainStatus.textContent=`U8 towards ${t.terminusName}`;
+      this.hint.textContent=t.isTerminal?`${t.originName} · terminus. Get off to let the train continue.`:t.state==='boarding'?`Doors open · next stop ${t.destinationName}.`:`Next stop ${t.destinationName}.`;
     }else{
       this.stationName.textContent=U8_STOPS[index].name;
       this.trainStatus.textContent=trains.filter(t=>index+t.userData.u8.direction>=0 && index+t.userData.u8.direction<U8_STOPS.length).map(t=>`${t.userData.u8.service.timeline.terminusName} ${etaText(t.userData.u8.service.etaToStation(index))}`).join(' · ');
-      this.hint.textContent='Kies richting Wittenau of Hermannstraße. Stap in bij een open deur.';
+      this.hint.textContent='Choose towards Wittenau or Hermannstraße. Get on at an open door.';
     }
   };
 }
@@ -81,7 +81,7 @@ function ticketMachine(game,line){
   const screen=new THREE.Mesh(new THREE.BoxGeometry(.54,.5,.06),dark);screen.position.set(0,1.3,.31);group.add(screen);
   const slot=new THREE.Mesh(new THREE.BoxGeometry(.4,.12,.07),dark);slot.position.set(0,.6,.32);group.add(slot);
   group.name='U8TicketMachine';game.scene.add(group);group.visible=false;
-  group.userData.interaction={kind:'ticket-machine',label:'BVG-ticket kopen',action:()=>{
+  group.userData.interaction={kind:'ticket-machine',label:'Buy BVG ticket',action:()=>{
     const source=[...game.world.chunks.values()].find(c=>c.gameplay?.ticketMachine)?.gameplay.ticketMachine;
     source?.userData.interaction?.action?.();
   }};

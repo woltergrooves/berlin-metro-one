@@ -14,8 +14,8 @@ export class TrainTimeline {
     this.initialDelay = Math.max(0, spec.initialDelaySeconds || 0);
     this.resetToApproachAt(spec.startStationIndex, this.initialDelay);
     this.setStatus(this.initialDelay > 0
-      ? `${spec.line} richting ${this.terminusName} volgt`
-      : `${spec.line} richting ${this.terminusName} nadert ${this.originName}`);
+      ? `${spec.line} towards ${this.terminusName} coming`
+      : `${spec.line} towards ${this.terminusName} approaching ${this.originName}`);
   }
 
   get line() { return this.spec.line; }
@@ -46,7 +46,7 @@ export class TrainTimeline {
     const hasDeparture = index + this.direction >= 0 && index + this.direction < this.route.length;
     if (!hasDeparture) return false;
     this.resetToApproachAt(index, delaySeconds);
-    this.setStatus(`${this.line} richting ${this.terminusName} volgt`);
+    this.setStatus(`${this.line} towards ${this.terminusName} coming`);
     return true;
   }
 
@@ -167,7 +167,7 @@ export class TrainTimeline {
       if (this.stateTime >= this.waitSeconds) {
         this.state = 'approaching';
         this.stateTime = 0;
-        this.setStatus(`${this.line} richting ${this.terminusName} nadert ${this.originName}`);
+        this.setStatus(`${this.line} towards ${this.terminusName} approaching ${this.originName}`);
       }
       return;
     }
@@ -177,7 +177,7 @@ export class TrainTimeline {
         this.z = this.originStation.z;
         this.state = 'opening-first';
         this.stateTime = 0;
-        this.setStatus(`${this.originName} · deuren openen`);
+        this.setStatus(`${this.originName} · doors opening`);
       }
       return;
     }
@@ -186,7 +186,7 @@ export class TrainTimeline {
       this.doorsOpen = true;
       this.state = 'boarding';
       this.stateTime = 0;
-      this.setStatus(`${this.originName} · ${this.line} richting ${this.terminusName}`);
+      this.setStatus(`${this.originName} · ${this.line} towards ${this.terminusName}`);
       return;
     }
 
@@ -200,7 +200,7 @@ export class TrainTimeline {
           this.doorsOpen = false;
           this.state = 'recycling';
           this.stateTime = 0;
-          this.setStatus(`Volgende ${this.line} richting ${this.terminusName} volgt`);
+          this.setStatus(`Next ${this.line} towards ${this.terminusName} coming`);
         }
         return;
       }
@@ -211,7 +211,7 @@ export class TrainTimeline {
         this.stateTime = 0;
         this.segmentOriginIndex = this.currentStationIndex;
         this.segmentDestinationIndex = this.destinationIndex;
-        this.setStatus(`Deuren dicht · volgende: ${this.destinationName}`);
+        this.setStatus(`Doors closed · next: ${this.destinationName}`);
       }
       return;
     }
@@ -234,7 +234,7 @@ export class TrainTimeline {
         this.currentStationIndex = targetIndex;
         this.state = 'opening-arrival';
         this.stateTime = 0;
-        this.setStatus(`${this.originName} · deuren openen`);
+        this.setStatus(`${this.originName} · doors opening`);
       }
       return;
     }
@@ -242,7 +242,7 @@ export class TrainTimeline {
     if (this.state === 'recycling' && this.stateTime >= CONFIG.train.recycleDelaySeconds) {
       const startIndex = this.direction > 0 ? 0 : this.route.length - 1;
       this.resetToApproachAt(startIndex, 0);
-      this.setStatus(`${this.line} richting ${this.terminusName} nadert ${this.originName}`);
+      this.setStatus(`${this.line} towards ${this.terminusName} approaching ${this.originName}`);
     }
   }
 }
@@ -279,7 +279,7 @@ export class RingTimeline extends TrainTimeline {
   }
   recenterNear(stationIndex, delaySeconds = CONFIG.train.localLoopDelaySeconds) {
     this.resetToApproachAt(Math.max(0, Math.min(this.route.length - 1, stationIndex)), delaySeconds);
-    this.setStatus(`${this.line} richting ${this.terminusName} volgt`);
+    this.setStatus(`${this.line} towards ${this.terminusName} coming`);
     return true;
   }
   etaToStation(target) {
@@ -307,7 +307,7 @@ export class RingTimeline extends TrainTimeline {
       this.currentStationIndex = target;
       this.state = 'opening-arrival';
       this.stateTime = 0;
-      this.setStatus(`${this.originName} · deuren openen`);
+      this.setStatus(`${this.originName} · doors opening`);
     } else this.wrap();
   }
 }

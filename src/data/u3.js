@@ -81,4 +81,4 @@ export const U3_ROUTE = [...branch, ...U1_STATIONS.slice(U1_STATIONS.indexOf(joi
 /** U3b: lijnpositie waar U3-treinen van het U3-spoor op het U1-spoor overgaan (tunnel Augsburger Str. → Wittenbergplatz). */
 export const U3_SPLIT_X = 262;
 
-if (joinCopy.x !== join.x) console.warn('[Metro] U3: Wittenbergplatz ligt niet op dezelfde x als op de U1');
+if (joinCopy.x !== join.x) console.warn('[Metro] U3: Wittenbergplatz is not at the same x as on the U1');

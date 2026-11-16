@@ -37,7 +37,7 @@ export const U4_TRANSFERS = {
     line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }, { line: 'U2', color: '#da421e' }],
     towards: 'Warschauer Str. · Krumme Lanke · Pankow', station: 'nollendorfplatz', label: 'U1 · U3 · U2',
     options: [
-      { line: 'U1', station: 'nollendorfplatz', name: 'U1 · U3 perron', sub: 'Warschauer Str. · Uhlandstr. · Krumme Lanke', color: '#55a822' },
+      { line: 'U1', station: 'nollendorfplatz', name: 'U1 · U3 platform', sub: 'Warschauer Str. · Uhlandstr. · Krumme Lanke', color: '#55a822' },
       { line: 'U2', station: 'nollendorfplatz', name: 'U2', sub: 'Pankow · Ruhleben', color: '#da421e' },
     ],
   },

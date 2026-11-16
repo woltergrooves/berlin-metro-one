@@ -21,5 +21,5 @@ export function writeSection(name, value) {
   s.schema = 2;
   s[name] = value;
   s.updatedAt = Date.now();
-  try { localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch (e) { console.warn('[Berlin Life] Opslaan mislukt', STATE_KEY, e?.name || e); }
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch (e) { console.warn('[Berlin Life] Saving failed', STATE_KEY, e?.name || e); }
 }

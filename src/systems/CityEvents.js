@@ -16,7 +16,7 @@ export function attachCityEvents({document,getGame,persist}) {
     }
     if(settleContactWork(s)){
       s.messages??=[];
-      s.messages.unshift({id:`night-done:${s.activeDelivery.id}`,from:'deniz',text:'Netjes afgeleverd. Kom morgen na 20:00 terug voor een nieuwe ronde.',read:false,day:event.day,at:Date.now()});
+      s.messages.unshift({id:`night-done:${s.activeDelivery.id}`,from:'deniz',text:'Nicely delivered. Come back tomorrow after 20:00 for a new round.',read:false,day:event.day,at:Date.now()});
       s.messages=s.messages.slice(0,40);changed=true;
     }
     if(changed)persist(s,game);

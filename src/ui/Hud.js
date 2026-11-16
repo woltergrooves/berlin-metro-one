@@ -1,10 +1,10 @@
 function euro(cents) {
-  return `€${(cents / 100).toFixed(2).replace('.', ',')}`;
+  return `€${(cents / 100).toFixed(2)}`;
 }
 
 function eta(seconds) {
   if (!Number.isFinite(seconds)) return '--';
-  if (seconds <= 0.9) return 'nu';
+  if (seconds <= 0.9) return 'now';
   const whole = Math.max(0, Math.ceil(seconds));
   const mins = Math.floor(whole / 60);
   return `${mins}:${String(whole % 60).padStart(2, '0')}`;
@@ -40,7 +40,7 @@ export class Hud {
 
   updateEconomy(state) {
     this.balance.textContent = euro(state.balanceCents);
-    this.ticketState.textContent = state.hasTicket ? 'Ticket ✓' : 'Geen ticket';
+    this.ticketState.textContent = state.hasTicket ? 'Ticket ✓' : 'No ticket';
   }
 
   onInteractionFocus(interaction) {
@@ -48,7 +48,7 @@ export class Hud {
       this.interactButton.classList.add('hidden');
       return;
     }
-    this.interactButton.textContent = interaction.kind === 'pfand' ? 'PAK OP · +€0,25' : 'GEBRUIK AUTOMAAT';
+    this.interactButton.textContent = interaction.kind === 'pfand' ? 'PICK UP · +€0.25' : 'USE MACHINE';
     this.interactButton.classList.remove('hidden');
   }
 
@@ -71,15 +71,15 @@ export class Hud {
       this.routeProgressDot.style.left = `${percent}%`;
       this.routeStartLabel.textContent = activeTrain.originName;
       this.routeEndLabel.textContent = isTerminal ? 'Endstation' : activeTrain.destinationName;
-      this.routeProgress.setAttribute('aria-label', `${activeTrain.originName} naar ${isTerminal ? 'endstation' : activeTrain.destinationName}`);
+      this.routeProgress.setAttribute('aria-label', `${activeTrain.originName} to ${isTerminal ? 'endstation' : activeTrain.destinationName}`);
 
       this.stationName.textContent = activeTrain.state === 'cruising' ? 'Unterwegs' : activeTrain.originName;
-      this.trainStatus.textContent = this.trainStatuses.get(activeTrain.id) || `${activeTrain.line} richting ${activeTrain.terminusName}`;
+      this.trainStatus.textContent = this.trainStatuses.get(activeTrain.id) || `${activeTrain.line} towards ${activeTrain.terminusName}`;
       this.hint.textContent = isTerminal
-        ? `${activeTrain.originName} · eindpunt. Stap uit om de treinloop door te laten gaan.`
+        ? `${activeTrain.originName} · terminus. Get off to let the train continue.`
         : activeTrain.state === 'boarding'
-          ? `Deuren open · volgende halte ${activeTrain.destinationName}.`
-          : `${activeTrain.line} richting ${activeTrain.terminusName} · volgende halte ${activeTrain.destinationName}.`;
+          ? `Doors open · next stop ${activeTrain.destinationName}.`
+          : `${activeTrain.line} towards ${activeTrain.terminusName} · next stop ${activeTrain.destinationName}.`;
       return;
     }
 
@@ -94,13 +94,13 @@ export class Hud {
 
     if (!available.length) {
       this.trainStatus.textContent = 'U2';
-      this.hint.textContent = 'Kijk naar Pfand of de automaat om ermee te interacteren.';
+      this.hint.textContent = 'Look at Pfand or the machine to interact with it.';
       return;
     }
 
     this.trainStatus.textContent = available
       .map(({ train, eta: seconds }) => `${train.terminusName} ${eta(seconds)}`)
       .join(' · ');
-    this.hint.textContent = 'Beide U2-richtingen rijden door de hele lijn. Kijk naar Pfand of de automaat voor interactie.';
+    this.hint.textContent = 'Both U2 directions run along the whole line. Look at Pfand or the machine to interact.';
   }
 }

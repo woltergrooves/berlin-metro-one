@@ -5,7 +5,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const page = await (await browser.newContext({ ...devices['iPad Pro 11 landscape'] })).newPage();
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForSelector('button.saveChoice:visible', { timeout: 300000 });
-await page.locator('button.saveChoice:visible').filter({ hasText: /Nieuwe/ }).first().tap();
+await page.locator('button.saveChoice:visible').filter({ hasText: /new save/i }).first().tap();
 await page.waitForSelector('#startButton:not([disabled])', { timeout: 120000 });
 await page.tap('#startButton');
 await page.waitForTimeout(12000);

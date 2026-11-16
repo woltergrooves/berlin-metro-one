@@ -20,7 +20,7 @@ function perform(id){const a=activities().find(a=>a.id===id);if(!a)return false;
 if(id.endsWith(":spaeti")&&p?.openShop){return p.openShop()!==false}
 if(modes[id]&&p?.openCityActivity){return p.openCityActivity(modes[id],id)===true}
 if(a.cost){const e=window.BerlinLife?.economy||window.BerlinLife?.game?.economy;const paid=e?.spend?.(a.cost,a.name);if(!paid||paid.success===false)return false}
-if(phase){phase.discovered??={};phase.visited??={};phase.discovered[id]=true;phase.visited[id]=(phase.visited[id]||0)+1}save();window.__berlinMetroGame?.ui?.notify?.(a.name+" bezocht");return true}
+if(phase){phase.discovered??={};phase.visited??={};phase.discovered[id]=true;phase.visited[id]=(phase.visited[id]||0)+1}save();window.__berlinMetroGame?.ui?.notify?.(a.name+" visited");return true}
 function context(g){const p=g.player,s=where();if(p.__u8Area&&Number.isInteger(p.__u8FullStation))return{line:"U8",name:s?.name||"Alexanderplatz",returnKind:"u8",index:p.__u8FullStation};if(p.currentStation?.id==="alexanderplatz")return{line:"U2/U8",name:"Alexanderplatz",returnKind:"alex"};return{line:"U2",name:s?.name||p.currentStation?.name||"Berlin",stationId:p.currentStation?.id||s?.id,returnKind:"u2"}}
 let busy=false;
 async function travelTo(a){const pos=geoPoint(a),g=window.__berlinMetroGame,o=g?.__allStreetOverlay;if(!pos||!o||!g.player||g.player.activeTrain||g.player.__u8Active||busy)return false;busy=true;try{

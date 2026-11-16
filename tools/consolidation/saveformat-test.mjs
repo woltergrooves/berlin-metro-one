@@ -6,7 +6,7 @@ const store = { 'berlin-economy-v4@main': JSON.stringify({ cash: 500, bank: 7800
 const get = k => store[k] ?? null;
 const v1 = { schema: 1, active: 'main', slots: {
   main: { id: 'main', label: 'Normale save', updatedAt: 5, data: { 'metro-economy-v2': JSON.stringify({ balanceCents: 8300, home: { day: 3 } }), berlinLifeCoreV1: JSON.stringify({ economy: { balanceCents: 8800 } }) } },
-  test: { id: 'test', label: 'Bewaarde testsave', data: {} },
+  test: { id: 'test', label: 'Kept test save', data: {} },
 } };
 
 const { registry, changed } = F.migrateRegistry(v1, get, 99);

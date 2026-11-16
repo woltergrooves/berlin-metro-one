@@ -21,7 +21,7 @@ import { safeParse } from './SaveFormat.js';
 
 export const MINUTES_PER_SECOND = 1;
 export const NEW_GAME_MINUTE = 8 * 60 + 15;
-const WEEKDAYS = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
+const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const getItem = k => { try { return localStorage.getItem(k); } catch { return null; } };
@@ -129,4 +129,4 @@ export function bindHomeDay(home) {
 
 save();
 globalThis.BerlinClock = clock;
-console.info(`[Berlin Life] Game State 2.0 stap 4: één klok · dag ${t.dayNumber} (${clock.weekdayName}) ${clock.hhmm} · uit ${source}`);
+console.info(`[Berlin Life] Game State 2.0 step 4: one clock · day ${t.dayNumber} (${clock.weekdayName}) ${clock.hhmm} · from ${source}`);

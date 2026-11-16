@@ -9,9 +9,9 @@ const U8_COORDS={
 'Wittenau':[52.596451,13.335524],'Rathaus Reinickendorf':[52.588217,13.325564],'Karl-Bonhoeffer-Nervenklinik':[52.578167,13.332917],'Lindauer Allee':[52.57539,13.339039],'Paracelsus-Bad':[52.574428,13.3473],'Residenzstraße':[52.570841,13.360631],'Franz-Neumann-Platz':[52.563856,13.364281],'Osloer Straße':[52.557105,13.373279],'Pankstraße':[52.552278,13.381441],'Gesundbrunnen':[52.548638,13.388372],'Voltastraße':[52.541932,13.393154],'Bernauer Straße':[52.537994,13.396229],'Rosenthaler Platz':[52.529778,13.401397],'Weinmeisterstraße':[52.525374,13.405308],'Alexanderplatz':[52.521606,13.411768],'Jannowitzbrücke':[52.515503,13.418027],'Heinrich-Heine-Straße':[52.510559,13.416122],'Moritzplatz':[52.503737,13.410944],'Kottbusser Tor':[52.499044,13.417749],'Schönleinstraße':[52.493345,13.421911],'Hermannplatz':[52.486954,13.424724],'Boddinstraße':[52.479744,13.425785],'Leinestraße':[52.472877,13.428401],'Hermannstraße':[52.467546,13.431295]
 };
 const CONTACTS={
-'Alexanderplatz':{id:'miro',emoji:'🧔',name:'Miro',role:'Kiez Späti',intro:'Chef van Kiez Späti en jouw vaste koeriercontact.',lines:['Morgen. Als je wilt rijden, ik heb bestellingen liggen.','Netjes bezorgd. Mensen beginnen je te kennen.','Rustig blijven rijden. Snel is goed, heel aankomen is beter.']},
-'Rosa-Luxemburg-Platz':{id:'lea',emoji:'👩',name:'Lea',role:'Buurvrouw',intro:'Woont in dezelfde Altbau en houdt een oogje op het huis.',lines:['Hey buur. Alles goed?','Als je laat thuiskomt: de voordeur klemt een beetje.','Je kamer begint er zowaar bewoond uit te zien.']},
-'Kottbusser Tor':{id:'deniz',emoji:'🧢',name:'Deniz',role:'Kotti contact',intro:'Kent mensen in Kreuzberg en het nachtleven.',lines:['Kotti slaapt nooit. Kom later nog eens langs.','Je kent de stad inmiddels beter dan sommige chauffeurs.','Na tienen gebeurt er ander werk. Nog niet voor iedereen.']}
+'Alexanderplatz':{id:'miro',emoji:'🧔',name:'Miro',role:'Kiez Späti',intro:'Boss of Kiez Späti and your regular courier contact.',lines:['Morning. If you want to ride, I\'ve got orders waiting.','Nicely delivered. People are starting to know you.','Keep riding steadily. Fast is good, arriving in one piece is better.']},
+'Rosa-Luxemburg-Platz':{id:'lea',emoji:'👩',name:'Lea',role:'Neighbour',intro:'Lives in the same Altbau and keeps an eye on the building.',lines:['Hey neighbour. All good?','If you come home late: the front door sticks a bit.','Your room is actually starting to look lived-in.']},
+'Kottbusser Tor':{id:'deniz',emoji:'🧢',name:'Deniz',role:'Kotti contact',intro:'Knows people in Kreuzberg and the nightlife.',lines:['Kotti never sleeps. Come by again later.','You know the city better than some drivers by now.','After ten a different kind of work happens. Not for everyone yet.']}
 };
 const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9]+/g,'');
 let currentStreet=null,opening=false,lastOpenAt=0;
@@ -30,19 +30,19 @@ function cleanupStreetUI(game){
   for(const el of document.querySelectorAll('#contactTalkV1,#contactTalkV2'))el.remove();
   for(const el of document.querySelectorAll('div')){
     const txt=(el.textContent||'').trim();
-    if(el.style?.position==='fixed'&&txt.includes('PHASE 16 · BOVENGRONDS')){el.dataset.phase16Legacy='1';el.style.setProperty('display','none','important')}
+    if(el.style?.position==='fixed'&&txt.includes('PHASE 16 · ABOVE GROUND')){el.dataset.phase16Legacy='1';el.style.setProperty('display','none','important')}
   }
   const buttons=[...o.root.querySelectorAll('button')];
-  for(const b of buttons){const t=(b.textContent||'').trim();if(/Andere straatpositie|Open in Google/i.test(t)){b.dataset.streetLegacyControl='1';b.style.setProperty('display','none','important')}}
+  for(const b of buttons){const t=(b.textContent||'').trim();if(/Andere straatpositie|Other street position|Open in Google/i.test(t)){b.dataset.streetLegacyControl='1';b.style.setProperty('display','none','important')}}
   const back=buttons.find(b=>/U-Bahn/i.test((b.textContent||''))&&!/Andere/i.test((b.textContent||'')));
-  if(back){back.textContent='↓ TERUG NAAR U-BAHN';back.style.setProperty('display','block','important');back.style.setProperty('left','12px');back.style.setProperty('right','auto');back.style.setProperty('top','auto');back.style.setProperty('bottom','max(12px,env(safe-area-inset-bottom))');back.style.setProperty('z-index','15500');}
+  if(back){back.textContent='↓ BACK TO U-BAHN';back.style.setProperty('display','block','important');back.style.setProperty('left','12px');back.style.setProperty('right','auto');back.style.setProperty('top','auto');back.style.setProperty('bottom','max(12px,env(safe-area-inset-bottom))');back.style.setProperty('z-index','15500');}
 }
 
 function addTalkButton(game){
   const ui=document.querySelector('#stationLifeV5');if(!ui||!currentStreet)return;
   ui.querySelector('#contactInlineV2')?.remove();
   const c=CONTACTS[currentStreet.name];if(!c||!game.player.__streetMode)return;
-  const b=document.createElement('button');b.id='contactInlineV2';b.style.cssText='width:100%;margin-top:7px;border:0;border-radius:9px;padding:10px;background:#20252bea;color:#fff;font:900 12px Arial;box-shadow:0 5px 18px #0007;pointer-events:auto';b.textContent=`${c.emoji} PRAAT MET ${c.name.toUpperCase()}`;
+  const b=document.createElement('button');b.id='contactInlineV2';b.style.cssText='width:100%;margin-top:7px;border:0;border-radius:9px;padding:10px;background:#20252bea;color:#fff;font:900 12px Arial;box-shadow:0 5px 18px #0007;pointer-events:auto';b.textContent=`${c.emoji} TALK TO ${c.name.toUpperCase()}`;
   b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation()});
   b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();talk(game,currentStreet.name)});
   ui.appendChild(b);
@@ -63,6 +63,6 @@ function install(game){if(game.__phase16StabilityV2)return;game.__phase16Stabili
   const style=document.createElement('style');style.id='phase16StabilityV2Css';style.textContent='[data-phase16-legacy="1"],[data-street-legacy-control="1"],#contactTalkV1,#contactTalkV2,#streetReturnOnlyV1{display:none!important}';document.head.appendChild(style);
   document.addEventListener('metro-street-cell',e=>{currentStreet=e.detail?.ctx||null;setTimeout(()=>{cleanupStreetUI(game);addTalkButton(game)},0)});
   Tick.every('phase16.street-stability',90,()=>{cleanupStreetUI(game);failSafeExits(game);if(game.player.__streetMode)addTalkButton(game)});
-  game.phase16StabilityVersion='V2-streetview-all-stations-talk-inline';game.ui?.notify?.('Phase 16 stabiliteit · Street View + praten gefixt');
+  game.phase16StabilityVersion='V2-streetview-all-stations-talk-inline';game.ui?.notify?.('Phase 16 stability · Street View + talking fixed');
 }
 (async()=>{for(let i=0;i<700;i++){const g=globalThis.__berlinMetroGame;if(g?.player&&g?.stations&&g?.__allStreetOverlay){install(g);return}await Tick.sleep(100,'boot.Phase16StabilityV2')}})().catch(e=>console.error('[Metro] Phase16 stability V2 failed',e));

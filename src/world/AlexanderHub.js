@@ -462,7 +462,7 @@ function install(root, st) {
   const group = build(root, st);
   root.add(group);
   Object.assign(state, { built: state.built + 1, root, station: st, group });
-  console.info(`[Metro] AlexanderHub: ${hidden} oude onderdelen verborgen, ${group.children.length} draw calls`);
+  console.info(`[Metro] AlexanderHub: ${hidden} old parts hidden, ${group.children.length} draw calls`);
 }
 // Platformbord van U8AlexanderDetailV1 ("U8 ↓ S-Bahn ↑ AUSGANG →") hangt pal voor de trapvoet: weg.
 function hideDetailSign(game) {
@@ -501,7 +501,7 @@ function cutTunnelRoof(game) {
   }
   const g = k.build('AlexanderHubTunnelCut'); g.position.z = SH; g.userData.alexHub = true; g.userData.g3b = 'alexHub';
   game.scene.add(g); tunnelCut.group = g;
-  console.info(`[Metro] AlexanderHub: ${found.length} tunneldak-delen rond de trap naar de U8 uitgeknipt`);
+  console.info(`[Metro] AlexanderHub: ${found.length} tunnel roof parts around the stairs to the U8 cut out`);
 }
 function tick() {
   const game = globalThis.__berlinMetroGame;

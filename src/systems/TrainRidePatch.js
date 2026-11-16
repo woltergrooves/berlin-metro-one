@@ -17,7 +17,7 @@ function finishArrival(timeline, targetIndex) {
   timeline.stateTime = 0;
   timeline.instantSpeed = 0;
   timeline.__rideKey = null;
-  timeline.setStatus(`${timeline.originName} · trein staat stil · deuren openen`);
+  timeline.setStatus(`${timeline.originName} · train has stopped · doors opening`);
 }
 
 TrainTimeline.prototype.update = function ridePolishedUpdate(delta, options = {}) {
@@ -47,7 +47,7 @@ TrainTimeline.prototype.update = function ridePolishedUpdate(delta, options = {}
       this.__approachKey = null;
       this.state = 'opening-first';
       this.stateTime = 0;
-      this.setStatus(`${this.originName} · trein staat stil · deuren openen`);
+      this.setStatus(`${this.originName} · train has stopped · doors opening`);
     }
     return;
   }

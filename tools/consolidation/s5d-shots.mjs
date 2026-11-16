@@ -11,12 +11,12 @@ await ctx.addInitScript(q => { try { localStorage.setItem('berlinLife.quality', 
 const page = await ctx.newPage();
 const errors = [];
 page.on('pageerror', e => errors.push(String(e.message || e).slice(0, 300)));
-page.on('console', m => { if ((m.type() === 'error' || /overgeslagen|niet geladen/.test(m.text())) && !/CORS|Failed to load resource/.test(m.text())) errors.push('[console] ' + m.text().slice(0, 300)); });
+page.on('console', m => { if ((m.type() === 'error' || /skipped|not loaded/.test(m.text())) && !/CORS|Failed to load resource/.test(m.text())) errors.push('[console] ' + m.text().slice(0, 300)); });
 let pass = 0, fail = 0;
 const check = (name, ok, info = '') => { ok ? pass++ : fail++; console.log(ok ? 'OK  ' : 'FOUT', name, info); };
 await page.goto(url);
-await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /Nieuwe save/.test(b.textContent)), null, { timeout: 300000 });
-await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /Nieuwe save/.test(b.textContent))?.click());
+await page.waitForFunction(() => [...document.querySelectorAll('button')].some(b => /new save/i.test(b.textContent)), null, { timeout: 300000 });
+await page.evaluate(() => [...document.querySelectorAll('button')].find(b => /new save/i.test(b.textContent))?.click());
 await page.waitForFunction(() => window.BerlinCoreReady === true, null, { timeout: 300000 });
 await page.evaluate(() => document.querySelector('#startButton')?.click());
 await page.waitForFunction(() => globalThis.BerlinLines?.S5?.status().installed, null, { timeout: 200000 });

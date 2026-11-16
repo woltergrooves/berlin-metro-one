@@ -96,7 +96,7 @@ function finish(id, task, reason) {
 }
 
 function add(kind, name, ms, fn, { background = false, timeoutMs = null, onTimeout = null } = {}) {
-  if (typeof fn !== 'function') throw new TypeError(`[Berlin Tick] ${name}: geen functie`);
+  if (typeof fn !== 'function') throw new TypeError(`[Berlin Tick] ${name}: not a function`);
   const every = Math.max(1, Number(ms) || 0);
   const id = nextId++;
   const t = now();
@@ -121,8 +121,8 @@ const frameHooks = [];    // in registratievolgorde (= oude installatievolgorde)
 let frameCount = 0, frameDirty = false;
 
 function frame(name, { before = null, after = null } = {}) {
-  if (before !== null && typeof before !== 'function') throw new TypeError(`[Berlin Tick] ${name}: before is geen functie`);
-  if (after !== null && typeof after !== 'function') throw new TypeError(`[Berlin Tick] ${name}: after is geen functie`);
+  if (before !== null && typeof before !== 'function') throw new TypeError(`[Berlin Tick] ${name}: before is not a function`);
+  if (after !== null && typeof after !== 'function') throw new TypeError(`[Berlin Tick] ${name}: after is not a function`);
   const id = nextId++;
   frameHooks.push({ id, name: String(name || 'naamloos'), before, after, dead: false, runs: 0, errors: 0, busyMs: 0 });
   return id;
@@ -157,7 +157,7 @@ function sleep(ms, name = 'slaap') {
 }
 
 export const Tick = {
-  version: 'Tick 3 · fase 1 stap 7 deel 3',
+  version: 'Tick 3 · phase 1 step 7 part 3',
   /** Herhaal fn elke ms (pauzeert bij verborgen tabblad, tenzij background). */
   every: (name, ms, fn, opts = {}) => add('every', name, ms, fn, { background: !!opts.background }),
   /** Roep fn elke ms aan tot die iets waars teruggeeft of timeoutMs verstrijkt. */

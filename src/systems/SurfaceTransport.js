@@ -14,18 +14,18 @@ function button(card,text,action){const b=document.createElement('button');b.tex
 function picker(){
   const g=game();if(!g?.player.__streetMode || !context)return;
   const card=modal('🚌 Bus 200'),text=document.createElement('p');
-  text.textContent=`Halte ${context.name} · kies waar je uitstapt. Een geldig ticket is nodig.`;card.appendChild(text);
+  text.textContent=`Stop ${context.name} · choose where you get off. A valid ticket is needed.`;card.appendChild(text);
   const status=document.createElement('p');status.style.cssText='color:#ffb28e;line-height:1.4';status.setAttribute('role','status');card.appendChild(status);
   for(const stop of busOptions(context.name)){
     const route=busRoute(context.name,stop.name);
-    button(card,`${stop.name} · richting ${route.direction}`,()=>{
+    button(card,`${stop.name} · towards ${route.direction}`,()=>{
       const result=planBusRide(g.metroEconomy,context.name,stop.name);
       if(!result.ok){status.textContent=result.reason;return;}
       save(g.metroEconomy,g);resume();
     });
   }
-  button(card,'Ticket kopen',()=>{close();const source=[...g.world.chunks.values()].find(c=>c.gameplay?.ticketMachine)?.gameplay.ticketMachine;source?.userData.interaction?.action?.();const tickets=document.querySelector('#econModal');if(tickets)tickets.style.zIndex='24000';});
-  button(card,'Terug naar de halte',close);
+  button(card,'Buy ticket',()=>{close();const source=[...g.world.chunks.values()].find(c=>c.gameplay?.ticketMachine)?.gameplay.ticketMachine;source?.userData.interaction?.action?.();const tickets=document.querySelector('#econModal');if(tickets)tickets.style.zIndex='24000';});
+  button(card,'Back to the stop',close);
 }
 async function resume(){
   const g=game(),s=g?.metroEconomy,ride=s?.surfaceTravel;
@@ -33,7 +33,7 @@ async function resume(){
   clearTimeout(timer);
   const now=Date.now();
   if(ride.status==='waiting' && now>=ride.departAt){
-    if(!departBus(s)){save(s,g);close();g.ui?.notify?.('Je ticket is niet meer geldig. Koop eerst een nieuw ticket.');return;}
+    if(!departBus(s)){save(s,g);close();g.ui?.notify?.('Your ticket is no longer valid. Buy a new ticket first.');return;}
     save(s,g);
   }
   if(ride.status==='riding' && now>=ride.arriveAt){
@@ -45,16 +45,16 @@ async function resume(){
       completeBus(s);save(s,g);close();
       g.__allStreetOverlay.root?.animate?.([{opacity:0},{opacity:1}],{duration:400,fill:'forwards'});
       document.dispatchEvent(new CustomEvent('metro-surface-arrived',{detail:{id:ride.id,from:ride.from,to:ride.to,line:'200'}}));
-      g.ui?.notify?.(`🚌 Bus 200 · aangekomen bij ${station.name}`);
-    }catch(error){console.error('[Metro] Bus arrival failed',error);g.ui?.notify?.('Aankomst kon niet laden. Probeer de rit opnieuw te openen.');}
+      g.ui?.notify?.(`🚌 Bus 200 · arrived at ${station.name}`);
+    }catch(error){console.error('[Metro] Bus arrival failed',error);g.ui?.notify?.('Arrival failed to load. Try opening the ride again.');}
     finally{finishing=false;}
     return;
   }
   const waiting=ride.status==='waiting',end=waiting?ride.departAt:ride.arriveAt;
-  const card=modal(waiting?'🚌 Bus 200 nadert':`🚌 Bus 200 → ${ride.to}`);
-  const text=document.createElement('p');text.textContent=waiting?`${ride.from} · richting ${ride.direction}`:`Je rijdt van ${ride.from} naar ${ride.to}. Bij aankomst stap je buiten uit.`;text.style.lineHeight='1.5';card.appendChild(text);
+  const card=modal(waiting?'🚌 Bus 200 approaching':`🚌 Bus 200 → ${ride.to}`);
+  const text=document.createElement('p');text.textContent=waiting?`${ride.from} · towards ${ride.direction}`:`You're riding from ${ride.from} to ${ride.to}. You get out outside on arrival.`;text.style.lineHeight='1.5';card.appendChild(text);
   stopTransition=busTransition(document,card,ride,{waiting,duration:Math.max(1,end-now)});
-  button(card,waiting?'Annuleren':'Uitstappen bij de vertrekhalte',()=>{ride.status='cancelled';save(s,g);close();});
+  button(card,waiting?'Cancel':'Get off at the departure stop',()=>{ride.status='cancelled';save(s,g);close();});
   timer=setTimeout(resume,Math.max(1,end-now));
 }
 document.addEventListener('metro-street-cell',event=>{

@@ -6,9 +6,9 @@ import {
   safeParse, emptyRegistry, migrateRegistry, migrateSlot, capture, describe, exportSlot,
 } from '../state/SaveFormat.js';
 
-const VERSION = 'Save Slots v2.0 (formaat 2)';
+const VERSION = 'Save Slots v2.0 (format 2)';
 const getItem = k => { try { return localStorage.getItem(k); } catch { return null; } };
-const setItem = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { console.warn('[Berlin Life] Opslaan mislukt', k, e?.name || e); return false; } };
+const setItem = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { console.warn('[Berlin Life] Saving failed', k, e?.name || e); return false; } };
 const removeItem = k => { try { localStorage.removeItem(k); } catch {} };
 
 function loadRegistry() {
@@ -20,14 +20,14 @@ function loadRegistry() {
     // Eénmalige reservekopie van het register zoals het was vóór formaat 2.
     if (raw && getItem(BACKUP_KEY) == null) setItem(BACKUP_KEY, raw);
     writeRegistry(registry);
-    console.info('[Berlin Life] Saves omgezet naar formaat', FORMAT, '·', Object.keys(registry.slots).join(', ') || 'geen slots');
+    console.info('[Berlin Life] Saves converted to format', FORMAT, '·', Object.keys(registry.slots).join(', ') || 'no slots');
   }
   return registry;
 }
 function writeRegistry(r) { return setItem(REGISTRY_KEY, JSON.stringify(r)); }
 function clearCanonical() { for (const key of CANONICAL_KEYS) removeItem(key); }
 function restore(id, data) { clearCanonical(); for (const [k, v] of Object.entries(data || {})) setItem(k, v); }
-function euro(c) { return `€${((c || 0) / 100).toFixed(2).replace('.', ',')}`; }
+function euro(c) { return `€${((c || 0) / 100).toFixed(2)}`; }
 
 const registry = loadRegistry();
 
@@ -35,7 +35,7 @@ const registry = loadRegistry();
 const legacy = {};
 for (const k of LEGACY_CANONICAL_KEYS) { const v = getItem(k); if (v != null) legacy[k] = v; }
 if (!registry.slots.test && Object.keys(legacy).length) {
-  registry.slots.test = migrateSlot({ id: 'test', label: 'Bewaarde testsave', createdAt: Date.now(), updatedAt: Date.now(), data: legacy }, 'test', getItem).slot;
+  registry.slots.test = migrateSlot({ id: 'test', label: 'Kept test save', createdAt: Date.now(), updatedAt: Date.now(), data: legacy }, 'test', getItem).slot;
   writeRegistry(registry);
 }
 
@@ -67,13 +67,13 @@ const api = {
 await new Promise(resolve=>{
   makeStyles();
   const root=document.createElement('div');root.id='saveSlotBoot';
-  const box=document.createElement('div');box.className='box';box.innerHTML='<div class="k">BERLIN LIFE · SAVEGAME</div><h1>Kies je save</h1><p>Je testsave wordt apart bewaard. Een nieuwe game overschrijft die testsave niet.</p>';
+  const box=document.createElement('div');box.className='box';box.innerHTML='<div class="k">BERLIN LIFE · SAVEGAME</div><h1>Choose your save</h1><p>Your test save is kept separately. A new game doesn\'t overwrite that test save.</p>';
   const main=registry.slots.main;
-  if(main){const m=describe(main);box.appendChild(button('▶ Doorgaan met normale save',`Dag ${m.day} · ${euro(m.cents)} · ${m.done} koeriersjobs voltooid`,'primary',()=>choose('main')));}
+  if(main){const m=describe(main);box.appendChild(button('▶ Continue with normal save',`Day ${m.day} · ${euro(m.cents)} · ${m.done} courier jobs completed`,'primary',()=>choose('main')));}
   const test=registry.slots.test;
-  if(test){const t=describe(test);box.appendChild(button('🧪 Bewaarde testsave',`Dag ${t.day} · ${euro(t.cents)} · ${t.done} koeriersjobs voltooid · blijft apart van je normale save`,'test',()=>choose('test')));}
-  box.appendChild(button('＋ Nieuwe save starten',main?'Start opnieuw met je normale save. Je testsave blijft veilig bewaard.':'Begin opnieuw vanaf dag 1. Je huidige testsave blijft veilig bewaard.','',()=>newGame()));
-  const foot=document.createElement('div');foot.className='saveFoot';foot.textContent='Saves staan lokaal op dit apparaat/browserprofiel. Wisselen kan door de game opnieuw te openen.';box.appendChild(foot);root.appendChild(box);document.body.appendChild(root);
+  if(test){const t=describe(test);box.appendChild(button('🧪 Kept test save',`Day ${t.day} · ${euro(t.cents)} · ${t.done} courier jobs completed · kept separate from your normal save`,'test',()=>choose('test')));}
+  box.appendChild(button('＋ Start new save',main?'Start again with your normal save. Your test save stays safely kept.':'Start again from day 1. Your current test save stays safely kept.','',()=>newGame()));
+  const foot=document.createElement('div');foot.className='saveFoot';foot.textContent='Saves are stored locally on this device/browser profile. You can switch by reopening the game.';box.appendChild(foot);root.appendChild(box);document.body.appendChild(root);
   function finish(id){registry.active=id;writeRegistry(registry);root.remove();api.active=id;window.BerlinSaveSlots=api;resolve();}
   function choose(id){const slot=registry.slots[id];if(!slot)return;restore(id,slot.data);finish(id);}
   function newGame(){
@@ -81,7 +81,7 @@ await new Promise(resolve=>{
     // normale save (sleutels met '@main') gaan weg. Voorheen bleven die per ongeluk staan.
     clearCanonical();
     for(const k of slotKeys('main'))removeItem(k);
-    registry.slots.main={id:'main',label:'Normale save',format:FORMAT,createdAt:Date.now(),updatedAt:Date.now(),savedAt:Date.now(),data:{}};
+    registry.slots.main={id:'main',label:'Normal save',format:FORMAT,createdAt:Date.now(),updatedAt:Date.now(),savedAt:Date.now(),data:{}};
     writeRegistry(registry);finish('main');
   }
 });

@@ -4,6 +4,6 @@
 import { U6_LINE, U6_STATIONS, U6_SIGN } from '../data/u6.js';
 import { createLine } from './LineRuntime.js';
 
-export const U6 = createLine({ line: U6_LINE, stations: U6_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U6_SIGN, surroundings: false, label: 'Nieuw: U6 (Alt-Mariendorf ⇄ Kurt-Schumacher-Platz)' });
+export const U6 = createLine({ line: U6_LINE, stations: U6_STATIONS, withTrains: true, trainsPerDir: 3, transfers: U6_SIGN, surroundings: false, label: 'New: U6 (Alt-Mariendorf ⇄ Kurt-Schumacher-Platz)' });
 globalThis.BerlinLines = { ...(globalThis.BerlinLines || {}), U6 };
 U6.install();

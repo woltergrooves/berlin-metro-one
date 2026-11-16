@@ -31,7 +31,7 @@ const phoneTab = async tab => { await page.tap('#phoneBtnV2'); await page.tap(`#
 
 const rows = [];
 await page.goto(url, { waitUntil: 'load' });
-await boot(/Nieuwe/);
+await boot(/new save/i);
 rows.push(await state('1 nieuwe save'));
 const tabs = {};
 for (const t of ['home', 'jobs', 'map', 'contacts', 'places']) tabs[t] = await phoneTab(t);

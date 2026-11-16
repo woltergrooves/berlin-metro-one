@@ -1,13 +1,13 @@
 export function leaNode({s,st,part,euro,active,firstMeeting},node='root'){
- if(node==='root') return {say:firstMeeting?'Hoi! Jij bent toch degene die hier net woont? Ik ben Lea, paar deuren verder.':part==='nacht'?'Je bent laat thuis. Alles nog heel?':'Hey buur, hoe bevalt het?',choices:[
-  ...(active?.to==='Rosa-Luxemburg-Platz'?[{t:'Ik heb een pakket voor je.',effect:'deliver',end:true,summary:'een pakket afgeleverd'}]:[]),
-  {t:'Vertel eens over het huis.',n:'home',summary:'het appartement'},
-  {t:'Hoe zit die huur ook alweer?',n:'rent',summary:'de huur'},
-  {t:'Wat is leuk in de buurt?',n:'area',summary:'de buurt'},
-  {t:'Later!',end:true,summary:'even met Lea gepraat'}]};
- if(node==='home') return {say:'Oud gebouw, dunne muren, veel karakter. Maak je kamer gewoon van jezelf. Een lamp, platen, planten — scheelt echt.',choices:[{t:'Kan ik spullen verbeteren?',n:'upgrade',summary:'woning-upgrades'},{t:'Klinkt goed.',end:true,summary:'het appartement'}]};
- if(node==='upgrade') return {say:'Zeker. Begin klein. Goede lamp en opslag zijn nuttiger dan meteen geld verbranden aan iets duurs.',choices:[{t:'Ik ga sparen.',end:true,summary:'woning-upgrades'}]};
- if(node==='rent') return {say:`Volgens je administratie komt de huur op dag ${s.home?.nextRentDay||8}. Openstaand: ${euro(s.home?.rentDebt||0)}.`,choices:[{t:'Duidelijk.',end:true,summary:'de huur'}]};
- if(node==='area') return {say:'Rosa is chill. Voor drukte ben je zo op Alex, en als je iets anders wilt pak je U8 vanaf daar richting Kotti.',choices:[{t:'Ik ga Kotti eens checken.',effect:'kottiLead',end:true,summary:'Kottbusser Tor'}]};
- return {say:'Tot later buur.',choices:[{t:'Later.',end:true,summary:'even gepraat'}]};
+ if(node==='root') return {say:firstMeeting?'Hi! Aren\'t you the one who just moved in here? I\'m Lea, a few doors down.':part==='nacht'?'You\'re home late. Everything still in one piece?':'Hey neighbour, how are you liking it?',choices:[
+  ...(active?.to==='Rosa-Luxemburg-Platz'?[{t:'I have a parcel for you.',effect:'deliver',end:true,summary:'delivered a parcel'}]:[]),
+  {t:'Tell me about the building.',n:'home',summary:'the apartment'},
+  {t:'How does the rent work again?',n:'rent',summary:'the rent'},
+  {t:'What\'s fun in the neighbourhood?',n:'area',summary:'the neighbourhood'},
+  {t:'Later!',end:true,summary:'had a quick chat with Lea'}]};
+ if(node==='home') return {say:'Old building, thin walls, lots of character. Just make your room your own. A lamp, records, plants — it really makes a difference.',choices:[{t:'Can I improve my stuff?',n:'upgrade',summary:'home upgrades'},{t:'Sounds good.',end:true,summary:'the apartment'}]};
+ if(node==='upgrade') return {say:'Sure. Start small. A good lamp and storage are more useful than burning money on something expensive right away.',choices:[{t:'I\'ll save up.',end:true,summary:'home upgrades'}]};
+ if(node==='rent') return {say:`According to your records, rent is due on day ${s.home?.nextRentDay||8}. Outstanding: ${euro(s.home?.rentDebt||0)}.`,choices:[{t:'Got it.',end:true,summary:'the rent'}]};
+ if(node==='area') return {say:'Rosa is chill. For crowds you\'re at Alex in no time, and if you want something else take the U8 from there towards Kotti.',choices:[{t:'I\'ll go check out Kotti.',effect:'kottiLead',end:true,summary:'Kottbusser Tor'}]};
+ return {say:'See you later, neighbour.',choices:[{t:'Later.',end:true,summary:'had a quick chat'}]};
 }

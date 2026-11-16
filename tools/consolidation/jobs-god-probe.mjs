@@ -13,7 +13,7 @@ page.on('console', m => { const t = m.text(); if (/\[Metro\].*(disabled|failed)/
 
 await page.goto(url, { waitUntil: 'load' });
 await page.waitForSelector('button.saveChoice:visible', { timeout: 300000 });
-await page.locator('button.saveChoice:visible').filter({ hasText: /Nieuwe/ }).first().tap();
+await page.locator('button.saveChoice:visible').filter({ hasText: /new save/i }).first().tap();
 await page.waitForSelector('#startButton:not([disabled])', { timeout: 180000 });
 await page.tap('#startButton');
 await page.waitForFunction(() => globalThis.__berlinMetroGame?.metroEconomy?.home && document.querySelector("#god3"), null, { timeout: 400000 });

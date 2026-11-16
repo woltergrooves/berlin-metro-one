@@ -19,9 +19,9 @@ import { clock } from './Clock.js';
 
 const STORE_KEY = 'berlinLife.quality';
 export const PROFILES = {
-  laag:   { label: 'Laag',   pixelRatio: 1.0,  shadows: false, env: false, envIntensity: 0 },
-  midden: { label: 'Midden', pixelRatio: 1.2,  shadows: false, env: true,  envIntensity: 1.0 },
-  hoog:   { label: 'Hoog',   pixelRatio: 1.5,  shadows: true,  env: true,  envIntensity: 1.0, shadowSize: 1024 },
+  laag:   { label: 'Low',   pixelRatio: 1.0,  shadows: false, env: false, envIntensity: 0 },
+  midden: { label: 'Medium', pixelRatio: 1.2,  shadows: false, env: true,  envIntensity: 1.0 },
+  hoog:   { label: 'High',   pixelRatio: 1.5,  shadows: true,  env: true,  envIntensity: 1.0, shadowSize: 1024 },
 };
 
 const isMobile = () => (globalThis.matchMedia?.('(pointer: coarse)').matches) || /iPad|iPhone|iPod/i.test(navigator.userAgent);
@@ -197,14 +197,14 @@ export const RenderBase = {
     d.style.cssText = 'margin:6px 10px;padding:8px 10px;border-radius:10px;background:#ffffff12;border:1px solid #ffffff22;color:#fff;font:700 12px Arial;line-height:1.45;display:block;text-align:left';
     const draw = () => {
       const s = RenderBase.status();
-      d.innerHTML = `<div style="display:block">🎨 Grafische kwaliteit${s.auto ? ' (automatisch)' : ''}</div>` +
+      d.innerHTML = `<div style="display:block">🎨 Graphics quality${s.auto ? ' (automatisch)' : ''}</div>` +
         `<div style="display:flex;gap:6px;margin-top:6px">${Object.entries(PROFILES).map(([k, v]) =>
           `<button data-q="${k}" style="flex:1;min-height:36px;border-radius:8px;border:1px solid #ffffff33;font:700 12px Arial;background:${k === s.quality ? '#ffcf5c' : '#ffffff18'};color:${k === s.quality ? '#111' : '#fff'}">${v.label}</button>`).join('')}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8;margin-top:4px">Pixelratio ${s.pixelRatio?.toFixed(2)} · schaduw ${s.shadows ? 'aan' : 'uit'} · omgeving: ${s.environment}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8">Materialen (G3a): ${s.materials ? `${s.materials.converted} omgezet naar PBR, ${s.materials.tuned} afgesteld${s.quality === 'laag' ? ' · laag: Lambert blijft' : ''}` : '—'}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8">Stationsprofielen (G3b): ${(() => { const p = globalThis.BerlinStationProfiles?.status?.(); return p ? `${p.profiles} stations · ${p.templates} geladen${p.failed ? ` · ${p.failed} overgeslagen` : ''}` : '—'; })()}</div>` +
-        `<div style="display:block;font-weight:400;opacity:.8">Omgeving buitenstations (G4): ${(() => { const g = globalThis.BerlinSurroundings?.status?.(); return g ? `${g.packs} pakketten · geladen: ${g.loaded.join(', ') || 'geen'}${g.failed ? ` · ${g.failed} fouten` : ''} · © OpenStreetMap-bijdragers` : '—'; })()}</div>`;
-      d.querySelectorAll('button[data-q]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); RenderBase.setQuality(b.dataset.q); draw(); game.ui?.notify?.(`Grafische kwaliteit: ${PROFILES[b.dataset.q].label}`); }; });
+        `<div style="display:block;font-weight:400;opacity:.8;margin-top:4px">Pixelratio ${s.pixelRatio?.toFixed(2)} · shadows ${s.shadows ? 'aan' : 'uit'} · surroundings: ${s.environment}</div>` +
+        `<div style="display:block;font-weight:400;opacity:.8">Materials (G3a): ${s.materials ? `${s.materials.converted} converted to PBR, ${s.materials.tuned} tuned${s.quality === 'laag' ? ' · low: Lambert stays' : ''}` : '—'}</div>` +
+        `<div style="display:block;font-weight:400;opacity:.8">Stationsprofielen (G3b): ${(() => { const p = globalThis.BerlinStationProfiles?.status?.(); return p ? `${p.profiles} stations · ${p.templates} geladen${p.failed ? ` · ${p.failed} skipped` : ''}` : '—'; })()}</div>` +
+        `<div style="display:block;font-weight:400;opacity:.8">Open-air station surroundings (G4): ${(() => { const g = globalThis.BerlinSurroundings?.status?.(); return g ? `${g.packs} packs · loaded: ${g.loaded.join(', ') || 'geen'}${g.failed ? ` · ${g.failed} errors` : ''} · © OpenStreetMap contributors` : '—'; })()}</div>`;
+      d.querySelectorAll('button[data-q]').forEach(b => { b.onclick = ev => { ev.stopPropagation(); RenderBase.setQuality(b.dataset.q); draw(); game.ui?.notify?.(`Graphics quality: ${PROFILES[b.dataset.q].label}`); }; });
     };
     tools.parentNode.insertBefore(d, tools);
     draw();

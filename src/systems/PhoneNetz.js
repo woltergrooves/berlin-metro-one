@@ -135,22 +135,22 @@ const CSS = `
 `;
 
 function routeHtml(r, from, to) {
-  if (!r) return `<div class="bnz-res" style="color:#98989f;font-size:13px">Geen route gevonden van ${esc(from)} naar ${esc(to)}.</div>`;
-  if (!r.legs.length) return `<div class="bnz-res" style="color:#98989f;font-size:13px">Je bent er al 🙂</div>`;
+  if (!r) return `<div class="bnz-res" style="color:#98989f;font-size:13px">No route found from ${esc(from)} to ${esc(to)}.</div>`;
+  if (!r.legs.length) return `<div class="bnz-res" style="color:#98989f;font-size:13px">You're already there 🙂</div>`;
   let h = '<div class="bnz-res">';
   r.legs.forEach((g, k) => {
-    if (k) h += `<div class="bnz-xfer">⇄ overstappen in ${esc(g.from)}</div>`;
-    h += `<div class="bnz-leg">${chip(g.chip || g.line)}<div><b>${esc(g.from)} → ${esc(g.to)}</b><small>richting ${esc(g.dir)} · ${g.stops} ${g.stops === 1 ? 'halte' : 'haltes'}</small></div></div>`;
+    if (k) h += `<div class="bnz-xfer">⇄ change at ${esc(g.from)}</div>`;
+    h += `<div class="bnz-leg">${chip(g.chip || g.line)}<div><b>${esc(g.from)} → ${esc(g.to)}</b><small>towards ${esc(g.dir)} · ${g.stops} ${g.stops === 1 ? 'stop' : 'stops'}</small></div></div>`;
   });
   const x = r.legs.length - 1;
-  return h + `<div class="bnz-sum">± ${Math.max(1, r.minutes)} min <span>${x ? `${x} ${x === 1 ? 'overstap' : 'overstappen'}` : 'geen overstap'}</span></div></div>`;
+  return h + `<div class="bnz-sum">± ${Math.max(1, r.minutes)} min <span>${x ? `${x} ${x === 1 ? 'transfer' : 'transfers'}` : 'no transfer'}</span></div></div>`;
 }
 
 /** Korte tekst voor andere apps (Jobs): "U8 richting Hermannstraße → U7 richting Rudow · ±14 min". */
 function summary(to, game = globalThis.__berlinMetroGame) {
   const net = network(game), from = hereName(game), r = from && plan(net, from, to);
   if (!r || !r.legs.length) return null;
-  return r.legs.map(g => `<b style="color:${COLORS[g.chip || g.line]}">${LABEL[g.chip || g.line] || g.chip || g.line}</b> richting <b>${esc(g.dir)}</b>`).join(' → ') + ` · ±${r.minutes} min`;
+  return r.legs.map(g => `<b style="color:${COLORS[g.chip || g.line]}">${LABEL[g.chip || g.line] || g.chip || g.line}</b> towards <b>${esc(g.dir)}</b>`).join(' → ') + ` · ±${r.minutes} min`;
 }
 
 function render(s, body, game) {
@@ -172,14 +172,14 @@ function render(s, body, game) {
   const others = n => (net.byName.get(norm(n)) || []).map(m => m.line).filter((id, k, a) => id !== line.id && a.indexOf(id) === k);
   const r = ui.dest && from ? plan(net, from, ui.dest) : null;
   body.innerHTML = `<div class="bnz">
-    <div class="bnz-card"><h4>🧭 Route plannen</h4>
-      <div class="bnz-from">Van: <b>${esc(from || 'onbekend')}</b> 📍</div>
-      ${ui.dest ? `<div style="display:flex;justify-content:space-between;align-items:center"><div class="bnz-from" style="margin:0">Naar: <b>${esc(ui.dest)}</b>${ui.dest === job ? ' 📦' : ''}</div><button class="bnz-x" data-act="clear">Wijzig</button></div>${routeHtml(r, from, ui.dest)}`
-      : `<input class="bnz-in" placeholder="Naar welke halte?" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" spellcheck="false"><div class="bnz-sug"></div>`}
+    <div class="bnz-card"><h4>🧭 Plan a route</h4>
+      <div class="bnz-from">From: <b>${esc(from || 'unknown')}</b> 📍</div>
+      ${ui.dest ? `<div style="display:flex;justify-content:space-between;align-items:center"><div class="bnz-from" style="margin:0">To: <b>${esc(ui.dest)}</b>${ui.dest === job ? ' 📦' : ''}</div><button class="bnz-x" data-act="clear">Change</button></div>${routeHtml(r, from, ui.dest)}`
+      : `<input class="bnz-in" placeholder="To which stop?" value="${esc(ui.q)}" autocomplete="off" autocorrect="off" spellcheck="false"><div class="bnz-sug"></div>`}
     </div>
     <div class="bnz-chips">${net.lines.map(l => `<button data-line="${l.id}" class="${l.id === ui.sel ? 'on' : ''}">${chip(l.id)}</button>`).join('')}</div>
     <div class="bnz-card" style="--c:${COLORS[line.id]}">
-      <div class="bnz-head">${chip(line.id)}<span>${line.ring ? 'Rondlijn' : `${esc(line.names[0])} ⇄ ${esc(line.names[line.names.length - 1])}`}${SUB[line.id] ? ' · ' + SUB[line.id] : ''} · ${line.names.length} haltes${line.ride ? '' : ' · treinen volgen binnenkort'}</span></div>
+      <div class="bnz-head">${chip(line.id)}<span>${line.ring ? 'Ring line' : `${esc(line.names[0])} ⇄ ${esc(line.names[line.names.length - 1])}`}${SUB[line.id] ? ' · ' + SUB[line.id] : ''} · ${line.names.length} stops${line.ride ? '' : ' · trains coming soon'}</span></div>
       <div class="bnz-stops">${line.names.map(n => {
         const o = others(n), isHere = from && norm(n) === norm(from), isDest = ui.dest && norm(n) === norm(ui.dest);
         return `<button class="bnz-stop${o.length ? ' x' : ''}${isHere ? ' here' : ''}${isDest ? ' dest' : ''}" data-stop="${esc(n)}"><span class="n">${esc(n)}${isHere ? ' 📍' : ''}${norm(n) === norm(HOME) ? ' 🏠' : ''}${job && norm(n) === norm(job) ? ' 📦' : ''}</span><span class="b">${o.map(id => chip(id, true)).join('')}</span></button>`;
@@ -198,7 +198,7 @@ function render(s, body, game) {
       ui.q = inp.value; const q = norm(inp.value);
       if (!q) { sug.innerHTML = ''; return; }
       const hits = all.filter(x => norm(x.n).includes(q)).sort((a, b) => norm(a.n).indexOf(q) - norm(b.n).indexOf(q)).slice(0, 6);
-      sug.innerHTML = hits.map(x => `<button data-pick="${esc(x.n)}">${x.lines.map(id => chip(id, true)).join('')} ${esc(x.n)}</button>`).join('') || '<div style="color:#98989f;font-size:13px;padding:6px 2px">Geen halte gevonden</div>';
+      sug.innerHTML = hits.map(x => `<button data-pick="${esc(x.n)}">${x.lines.map(id => chip(id, true)).join('')} ${esc(x.n)}</button>`).join('') || '<div style="color:#98989f;font-size:13px;padding:6px 2px">No stop found</div>';
       sug.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => { ui.dest = b.dataset.pick; ui.q = ''; inp.blur(); nr.__sig = ''; render(s, body, game); });
     };
     inp.oninput = show; if (ui.q) show();

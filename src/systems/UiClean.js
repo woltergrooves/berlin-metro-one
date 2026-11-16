@@ -29,20 +29,20 @@ const css=document.createElement("style");css.textContent=[
 #street-clean-menu .cs-episodes-back{width:100%;display:block;background:#415167;color:white;border:0;border-radius:11px;padding:12px;margin:10px 0;touch-action:manipulation}
 `;document.head.appendChild(css);
 const root=document.createElement("div");root.id="street-clean-ui";
-root.innerHTML='<div class="top"><div class="label"></div><div class="actions"><button class="play">▶ SPEEL</button><button class="activity">ACTIVITEITEN</button></div></div><button class="back">← TERUG NAAR U-BAHN</button>';
+root.innerHTML='<div class="top"><div class="label"></div><div class="actions"><button class="play">▶ PLAY</button><button class="activity">ACTIVITIES</button></div></div><button class="back">← BACK TO U-BAHN</button>';
 document.body.append(root);
-const modal=document.createElement("div");modal.id="street-clean-menu";modal.innerHTML='<section role="dialog" aria-modal="true" aria-label="Activiteiten"><header><b>Activiteiten</b><button class="close">✕</button></header><div class="items"></div></section>';document.body.append(modal);
+const modal=document.createElement("div");modal.id="street-clean-menu";modal.innerHTML='<section role="dialog" aria-modal="true" aria-label="Activities"><header><b>Activities</b><button class="close">✕</button></header><div class="items"></div></section>';document.body.append(modal);
 const play=root.querySelector(".play");let activeEpisode=null;
 function closeActivities(){activeEpisode=null;modal.classList.remove("open")}
 function showEpisode(id,screen){
  activeEpisode=id;
  const box=modal.querySelector(".items"),ep=window.BerlinCityEpisodes;
  const v=screen||ep?.view?.(id);if(!v)return;
- modal.querySelector("header b").textContent=v.title||"Stadsleven";
+ modal.querySelector("header b").textContent=v.title||"City life";
  box.replaceChildren();
  const scene=document.createElement("article");scene.className="cs-story";
  const text=document.createElement("p");text.textContent=v.text||"";scene.append(text);
- for(const detail of v.extras||[]){if(!detail)continue;const p=document.createElement("small");p.textContent=detail;if(detail.startsWith("Tijd over:"))p.className="cs-episode-timer";scene.append(p)}
+ for(const detail of v.extras||[]){if(!detail)continue;const p=document.createElement("small");p.textContent=detail;if(detail.startsWith("Time left:"))p.className="cs-episode-timer";scene.append(p)}
  for(const option of v.actions||[]){
   const button=document.createElement("button");button.type="button";button.className="cs-choice";
   button.textContent=option.label;
@@ -51,18 +51,18 @@ function showEpisode(id,screen){
   scene.append(button);
  }
  box.append(scene);
- const back=document.createElement("button");back.type="button";back.className="cs-episodes-back";back.textContent="← TERUG NAAR ACTIVITEITEN";back.onclick=openActivities;box.append(back);
+ const back=document.createElement("button");back.type="button";back.className="cs-episodes-back";back.textContent="← BACK TO ACTIVITIES";back.onclick=openActivities;box.append(back);
  modal.classList.add("open");
 }
-function openActivities(){activeEpisode=null;const api=window.BerlinCityDiscovery,l=api?.activities?.()||[],box=modal.querySelector(".items");modal.querySelector("header b").textContent=(api?.where?.()?.name||"Berlijn")+" · activiteiten";box.replaceChildren();
-if(!l.length){const p=document.createElement("p");p.textContent="Geen activiteiten bij deze halte.";box.append(p)}
-for(const a of l){const card=document.createElement("article"),b=document.createElement("strong"),desc=document.createElement("small");b.textContent=(a.icon||"📍")+" "+a.name;desc.textContent=a.detail||"Bezoek deze plek";card.append(b,desc);
-if(api.geoPoint(a)){const go=document.createElement("button");go.textContent="GA ERHEEN";go.onclick=async()=>{closeActivities();if(!await api.travelTo(a))window.__berlinMetroGame?.ui?.notify?.("Buitenlocatie niet beschikbaar")};card.append(go)}
+function openActivities(){activeEpisode=null;const api=window.BerlinCityDiscovery,l=api?.activities?.()||[],box=modal.querySelector(".items");modal.querySelector("header b").textContent=(api?.where?.()?.name||"Berlin")+" · activities";box.replaceChildren();
+if(!l.length){const p=document.createElement("p");p.textContent="No activities at this stop.";box.append(p)}
+for(const a of l){const card=document.createElement("article"),b=document.createElement("strong"),desc=document.createElement("small");b.textContent=(a.icon||"📍")+" "+a.name;desc.textContent=a.detail||"Visit this place";card.append(b,desc);
+if(api.geoPoint(a)){const go=document.createElement("button");go.textContent="GO THERE";go.onclick=async()=>{closeActivities();if(!await api.travelTo(a))window.__berlinMetroGame?.ui?.notify?.("Outdoor location not available")};card.append(go)}
 if(window.BerlinCityEpisodes?.has?.(a.id)){
- const episode=document.createElement("button");episode.type="button";episode.textContent=a.episodeLabel|| (a.id.endsWith(":vacatures")?"BEKIJK KLUS":a.id.endsWith(":delivery")?"AFLEVEREN":a.id.endsWith(":architecture")?"ADVIES GEVEN":"PRAAT");
+ const episode=document.createElement("button");episode.type="button";episode.textContent=a.episodeLabel|| (a.id.endsWith(":vacatures")?"VIEW JOB":a.id.endsWith(":delivery")?"DELIVER":a.id.endsWith(":architecture")?"GIVE ADVICE":"TALK");
  episode.onclick=()=>showEpisode(a.id);card.append(episode);
 }else if(!api.geoPoint(a)||api.readyActivity()?.id===a.id){
- const doIt=document.createElement("button");doIt.textContent=a.id.endsWith(":spaeti")?"BETREED SPÄTI":"SPEEL / BEZOEK";
+ const doIt=document.createElement("button");doIt.textContent=a.id.endsWith(":spaeti")?"ENTER SPÄTI":"PLAY / VISIT";
  doIt.onclick=()=>{closeActivities();api.perform(a.id)};card.append(doIt);
 }
 box.append(card)}
@@ -81,15 +81,15 @@ function tick(){
    const ms=Number.isFinite(remaining)?remaining:(["alexanderplatz:vacatures","hermannplatz:delivery"].includes(activeEpisode)?ep?.remaining?.():null);
    if(Number.isFinite(ms)){
     const sec=Math.ceil(Math.max(0,ms)/1000);
-    clk.textContent="Tijd over: "+Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+    clk.textContent="Time left: "+Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
     if(ms<=0&&modal.classList.contains("open"))showEpisode(activeEpisode);
    }
   }
  }
  for(const id of oldIds)document.getElementById(id)?.remove();const g=window.__berlinMetroGame,o=g?.__allStreetOverlay;const active=!!g?.player?.__streetMode&&!!o?.root&&o.root.style.display!=="none";
 document.documentElement.classList.toggle("street-clean-active",active);root.classList.toggle("open",active);if(!active){closeActivities();return}
-const name=window.BerlinCityDiscovery?.where?.()?.name||o.context?.name||"Berlijn";if(name!==prev){root.querySelector(".label").textContent=name;prev=name}
-const a=window.BerlinCityDiscovery?.readyActivity?.(),id=a?.id||"";if(id!==prevAct){play.style.display=a?"inline-block":"none";play.title=a?"Speel bij "+a.name:"";prevAct=id}}
+const name=window.BerlinCityDiscovery?.where?.()?.name||o.context?.name||"Berlin";if(name!==prev){root.querySelector(".label").textContent=name;prev=name}
+const a=window.BerlinCityDiscovery?.readyActivity?.(),id=a?.id||"";if(id!==prevAct){play.style.display=a?"inline-block":"none";play.title=a?"Play at "+a.name:"";prevAct=id}}
 window.BerlinCleanStreet={version:1,openActivities,closeActivities,inspect:()=>({active:root.classList.contains("open"),oldPresent:oldIds.filter(id=>document.getElementById(id))})};
 Tick.every('ui.clean',500,tick);tick();
 })();

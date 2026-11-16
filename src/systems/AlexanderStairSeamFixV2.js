@@ -39,7 +39,7 @@ function install(game){
     return base(delta);
   };
   game.stairReturnFixVersion='AlexanderStairSeamFixV2';
-  game.ui?.notify?.('Alexanderplatz trap-overgang V2 actief');
+  game.ui?.notify?.('Alexanderplatz stair transition V2 active');
   console.info('[Metro] Alexander stair seam V2 installed after U8 + Street View');
 }
 
