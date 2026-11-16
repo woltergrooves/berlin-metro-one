@@ -10,11 +10,11 @@
 import { U8_STOPS } from './U8FullLineVisual.js';
 import { U3_ROUTE } from '../data/u3.js';
 
-const ORDER = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9', 'S5', 'S41'];
-const COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#ffd900', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405', S41: '#ad5937', S42: '#cb6418' };
+const ORDER = ['U1', 'U2', 'U3', 'U4', 'U5', 'U6', 'U7', 'U8', 'U9', 'S5', 'S41', 'S2'];
+const COLORS = { U1: '#55a822', U2: '#da421e', U3: '#16683d', U4: '#ffd900', U5: '#7e5330', U6: '#8c6dab', U7: '#528dba', U8: '#224f86', U9: '#f3791d', S5: '#eb7405', S41: '#ad5937', S2: '#007734', S42: '#cb6418' };
 const TEXT = { U4: '#1a1a1a' };
 const LABEL = { S5: 'S' };   // de Stadtbahnwereld: S3 · S5 · S7 · S9
-const SUB = { S5: 'S3 · S5 · S7 · S9', S41: 'Ring · S41 ↻ · S42 ↺' };
+const SUB = { S5: 'S3 · S5 · S7 · S9', S41: 'Ring · S41 ↻ · S42 ↺', S2: 'Nord-Süd · S2 · S25 · S26' };
 const RING = { S41: { cw: 'S41', ccw: 'S42' } };   // rondlopende lijnen: buren lopen rond, richting = met/tegen de klok
 const HOME = 'Rosa-Luxemburg-Platz';
 const MIN_STOP = 2, MIN_TRANSFER = 5;

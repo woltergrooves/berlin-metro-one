@@ -306,6 +306,8 @@ function installHud() {
       : !withTrains ? `${ID} trains coming soon · take the stairs outside (Ausgang).`
       : st.embank ? `Above-ground station · wait for the ${ID} or take the stairs outside (Ausgang).`
       : line.ring ? `Ringbahn · wait for the S41 ↻ or S42 ↺ or take the stairs ${st.kind === 'cutting' ? 'up' : 'down'} (Ausgang).`
+      : line.sbahn && st.kind === 'tunnel' ? `Nord-Süd tunnel · wait for the S-Bahn or take the stairs up (Ausgang).`
+      : line.sbahn && st.kind === 'cutting' ? `S-Bahn in an open cutting · wait for the S-Bahn or take the stairs up to the street (Ausgang).`
       : line.sbahn ? `S-Bahn on the Stadtbahn viaduct · wait for the S-Bahn or take the stairs down (Ausgang).`
       : st.kind === 'viaduct' ? `Hochbahn above the street · wait for the ${ID} or take the stairs outside (Ausgang).`
       : st.kind === 'cutting' ? `Open cutting · wait for the ${ID} or take the stairs up to the street (Ausgang).`

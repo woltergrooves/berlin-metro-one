@@ -63,18 +63,20 @@ const RAW = [
 // Overstappen (deel c, 9 nov 2026): open, behalve naar de Nord-Süd-Bahn (Südkreuz S2/S25/S26, Schöneberg S1) — die
 // komt later in het spel. Terug: op U2 (Schönhauser Allee) en U8 (Gesundbrunnen, Hermannstraße) een groen S-bord aan het
 // perroneinde (S41_SIGN); op de nieuwe lijnen en de Stadtbahn het eigen trapgat (`to: 'S41'`).
-const NOTE = 'Nord-Süd-Bahn comes later in the game';
+const NOTE = 'the S1 branch comes later in the game';
 const T = (line, color, towards, extra = {}) => ({ line, color, towards, ...extra });
 const S_GREEN = '#008d4f';
 const S41_TRANSFERS = {
-  gesundbrunnen: T('U8', '#224f86', 'Wittenau · Hermannstraße', { station: 9 }),
+  gesundbrunnen: T('U8', '#224f86', 'Wittenau · Hermannstraße · Nord-Süd', { station: 9, also: [{ line: 'S', color: S_GREEN }], label: 'U8 · S2 S25',
+    options: [{ line: 'U8', station: 9, name: 'U8', sub: 'Wittenau · Hermannstraße', color: '#224f86' },
+      { line: 'S', to: 'S2', station: 'gesundbrunnen', name: 'Nord-Süd-Bahn', sub: 'S2 S25 S26 · Potsdamer Platz · Südkreuz', color: S_GREEN }] }),
   'schoenhauser-allee': T('U2', '#da421e', 'Pankow · Ruhleben', { station: 'schoenhauser-allee' }),
   'frankfurter-allee': T('U5', '#7e5330', 'Hauptbahnhof · Hönow', { station: 'frankfurter-allee' }),
   ostkreuz: T('S', S_GREEN, 'Stadtbahn · Westkreuz · Erkner', { label: 'S3 S5 S7 S9', to: 'S5', station: 'ostkreuz' }),
   neukoelln: T('U7', '#528dba', 'Rudow · Rathaus Spandau', { station: 'neukoelln' }),
   hermannstrasse: T('U8', '#224f86', 'Wittenau · Hermannstraße', { station: 23 }),
   tempelhof: T('U6', '#8c6dab', 'Kurt-Schumacher-Pl. · Alt-Mariendorf', { station: 'tempelhof' }),
-  suedkreuz: T('S', S_GREEN, 'Nord-Süd · Blankenfelde · Teltow', { label: 'S2 S25 S26', closed: true, note: NOTE }),
+  suedkreuz: T('S', S_GREEN, 'Nord-Süd · Gesundbrunnen · Blankenfelde · Teltow', { label: 'S2 S25 S26', to: 'S2', station: 'suedkreuz' }),
   schoeneberg: T('S', S_GREEN, 'Wannsee · Oranienburg', { label: 'S1', closed: true, note: NOTE }),
   'innsbrucker-platz': T('U4', '#ffd900', 'Nollendorfplatz', { station: 'innsbrucker-platz', text: '#1a1a1a' }),
   bundesplatz: T('U9', '#f3791d', 'Osloer Str. · Rathaus Steglitz', { station: 'bundesplatz' }),

@@ -84,7 +84,7 @@ export const U7_TRANSFERS = {
   mehringdamm: { line: 'U6', color: '#8c6dab', station: 'mehringdamm', towards: 'Kurt-Schumacher-Pl. · Alt-Mariendorf' },
   moeckernbruecke: { line: 'U1', color: '#55a822', also: [{ line: 'U3', color: '#16683d' }], station: 'moeckernbruecke', label: 'U1 · U3', towards: 'Warschauer Str. · Uhlandstr. · Krumme Lanke' },
   // U7b: U4, U3 en U2 open; U9 open sinds 8 nov (U9); S-Bahn en regionaal verkeer nog dicht.
-  yorckstrasse: { line: 'S', label: 'S1 S2 S25 S26', color: '#008d4f', towards: 'Nord-Süd-Bahn · S1 S2 S25 S26', closed: true },
+  yorckstrasse: { line: 'S', to: 'S2', station: 'yorckstrasse', label: 'S1 S2 S25 S26', color: '#008d4f', towards: 'Nord-Süd-Bahn · Gesundbrunnen · Südkreuz' },
   'bayerischer-platz': { line: 'U4', color: '#ffd900', text: '#1a1a1a', station: 'bayerischer-platz', towards: 'Nollendorfplatz · Innsbrucker Platz' },
   'berliner-strasse': { line: 'U9', color: '#f3791d', station: 'berliner-strasse', towards: 'Osloer Straße · Rathaus Steglitz' },
   'fehrbelliner-platz': { line: 'U3', color: '#16683d', station: 'fehrbelliner-platz', towards: 'Warschauer Str. · Krumme Lanke' },

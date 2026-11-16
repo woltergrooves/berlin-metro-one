@@ -596,6 +596,7 @@ function plattenTex(v) {
   }));
 }
 function plattenbau(kit, m, x, z, seed, alongX = true) {
+  seed = ((seed % 12) + 12) % 12;   // negative seed (station at x ≈ 0, e.g. Gesundbrunnen) gave floors = undefined → NaN
   const floors = [5, 6, 11, 6][seed % 4], hgt = floors * 2.8, len = 24 + (seed % 3) * 12, dep = 12;
   const f = std('Line_Platte_' + (seed % 4), '#ffffff', { map: plattenTex(seed % 4), roughness: 0.85 });
   const b = kit.box(f, alongX ? len : dep, hgt, alongX ? dep : len, x, CUT_TOP + hgt / 2, z);
