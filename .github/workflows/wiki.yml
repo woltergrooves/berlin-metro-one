@@ -1,6 +1,6 @@
-# Publiceert docs/wiki/ naar de GitHub-wiki van deze repo (16 nov 2026).
-# Voorwaarde: de wiki bestaat al (eenmalig de eerste pagina via de website aangemaakt).
-name: Wiki bijwerken
+# Publishes docs/wiki/ to this repo's GitHub wiki (16 Nov 2026).
+# Requires the wiki to exist (first page created once via the website).
+name: Update wiki
 on:
   push:
     branches: [fase-1, main]
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Pagina's naar de wiki
+      - name: Copy pages to the wiki
         env:
           TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -25,6 +25,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then echo "Wiki al actueel"; exit 0; fi
-          git commit -m "Wiki bijgewerkt vanuit docs/wiki (${GITHUB_SHA::7})"
+          if git diff --cached --quiet; then echo "Wiki already up to date"; exit 0; fi
+          git commit -m "Update wiki from docs/wiki (${GITHUB_SHA::7})"
           git push

@@ -1,9 +1,9 @@
 **Berlin Life**
 
 - [[Home]]
-- [[Spelen en bediening|Spelen-en-bediening]]
-- [[Netwerk]]
+- [[Playing and controls|Playing-and-controls]]
+- [[Network]]
 - [[Roadmap]]
-- [[Ontwikkeling]]
+- [[Development]]
 
-[▶ Spelen](https://berlin-metro-one.vercel.app)
+[▶ Play](https://berlin-metro-one.vercel.app)

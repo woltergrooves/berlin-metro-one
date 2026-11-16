@@ -1,24 +1,24 @@
 # 🚇 Berlin Life
 
-**Spelen:** https://berlin-metro-one.vercel.app
+**Play:** https://berlin-metro-one.vercel.app
 
-Berlin Life is een first-person 3D-browsergame van Berlijn. Je reist met de U-Bahn en S-Bahn door de stad. Bij elke halte stap je via Google Street View uit in de echte straat. Daarnaast verdien je geld, koop je dingen bij de Späti, verzamel je Pfand en stempels en bouw je een leven op in de stad.
+Berlin Life is a first-person 3D browser game set in Berlin. You travel through the city by U-Bahn and S-Bahn, and at every stop you can step out into the real street via Google Street View. Along the way you earn money, shop at the Späti, collect Pfand and stamps, and build a life in the city.
 
-De game draait in de browser op iPhone, iPad en Mac. Er is niets te installeren.
+The game runs in the browser on iPhone, iPad and Mac. There is nothing to install.
 
-## Stand (november 2026)
+## Status (November 2026)
 
-- **Alle U-Bahnlijnen U1–U9 zijn speelbaar**: treinen in beide richtingen, overstappen, uitgangen en Street View. De U6 rijdt nog zonder het noordstuk, omdat dat in werkelijkheid in renovatie is.
-- **S-Bahn:** de Stadtbahn (S3/S5/S7/S9, Westkreuz ⇄ Ostkreuz) en de Ringbahn (S41 ↻ / S42 ↺, 27 stations) zijn volledig speelbaar.
-- **In-game telefoon** met BVG-app, routeplanner, jobs, chats en plekken. Als je een bestemming kiest, verschijnt de route bovenin het scherm.
-- **Volgende stap:** de Nord-Süd-tunnel S1/S2/S25 met de spookstations.
+- **All U-Bahn lines U1–U9 are playable**, with trains in both directions, transfers, exits and Street View. The U6 runs without its northern section for now, because that part is closed for renovation in real life.
+- **S-Bahn:** the Stadtbahn (S3/S5/S7/S9, Westkreuz ⇄ Ostkreuz) and the Ringbahn (S41 ↻ / S42 ↺, 27 stations) are fully playable.
+- **In-game phone** with a BVG app, journey planner, jobs, chats and places. When you pick a destination, the route appears at the top of the screen.
+- **Next up:** the North–South tunnel S1/S2/S25, with the ghost stations.
 
-## Pagina's
+## Pages
 
-- [[Spelen en bediening|Spelen-en-bediening]]: aanraken, toetsenbord en muis, telefoon, saves
-- [[Netwerk]]: alle lijnen en overstappen
-- [[Roadmap]]: wat er af is en wat er komt
-- [[Ontwikkeling]]: code, testen en deployen
+- [[Playing and controls|Playing-and-controls]]: touch, keyboard and mouse, phone, saves
+- [[Network]]: every line and transfer
+- [[Roadmap]]: what's done and what's coming
+- [[Development]]: code, testing and deployment
 
 ---
-*Deze wiki wordt automatisch bijgewerkt vanuit [`docs/wiki/`](https://github.com/woltergrooves/berlin-metro-one/tree/fase-1/docs/wiki) in de repo. Pas de pagina's daar aan, niet hier.*
+*This wiki is updated automatically from [`docs/wiki/`](https://github.com/woltergrooves/berlin-metro-one/tree/fase-1/docs/wiki) in the repo. Edit the pages there, not here.*
